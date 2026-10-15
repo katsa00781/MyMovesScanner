@@ -18,7 +18,7 @@
 - [ ] Push GitHub-ra
 
 ### Backend (familyBudget Supabase, `mms` séma) — minden sor külön commit
-- [ ] Migráció: `mms` séma + `mms.tmdb_cache` tábla + index `expires_at`-ra
+- [x] Migráció: `mms` séma + `mms.tmdb_cache` tábla + index `expires_at`-ra
 - [ ] Edge Function `mms-tmdb`: whitelist, cache olvasás/írás TTL-lel, TMDB hívás secretből
 - [ ] `TMDB_API_KEY` secret beállítása, függvény deploy, curl teszt
 - [ ] `lib/supabase.ts`, `lib/api.ts`, `lib/tmdbImage.ts`, `types/tmdb.ts`
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Migráció: mms séma és tmdb_cache (backend)
+
+**Mit:** Megírtam a migrációt: `mms` séma, `mms.tmdb_cache (key, payload, expires_at)`, index az `expires_at`-ra, RLS bekapcsolva policy nélkül, jogok elvéve `public/anon/authenticated`-től, `service_role`-nak megadva. Csak `if not exists`, nincs drop.
+**Fájlok:** supabase/migrations/202610150930_mms_schema_and_tmdb_cache.sql
+**Tesztelve:** nem futtattam, az éles (familyBudget) adatbázisra NEM lett alkalmazva.
+**Nyitva maradt:** Alkalmazás (kifejezett kérésedre, pl. `supabase db push` vagy MCP `apply_migration`). A `mms` sémát nem szabad felvenni a Supabase "Exposed schemas" listába. Lejárt sorok takarítása még nincs (később cron vagy a függvényben).
+**Commit:** `db: mms séma és tmdb_cache migrációja`
 
 ## 2026-10-15 – app.json: iPad és orientációk (setup)
 
