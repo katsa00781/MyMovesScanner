@@ -48,7 +48,7 @@
 - [ ] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
 - [ ] Lint + typecheck hibák nélkül
 - [ ] CodeRabbit code review az AI által írt feature-ökhöz
-- [ ] Dev utilities eltávolítása (test gombok, console.log-ok, mock data)
+- [ ] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
 - [ ] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
 - [ ] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
 - [ ] EAS Build + TestFlight a családi eszközökre
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Dev reset gomb (chore)
+
+**Mit:** A felhasználó kérésére egy `__DEV__`-hez kötött „DEV · RESET” gomb: a jobb felső sarokban (a biztonsági sáv alatt) minden képernyőn látszik, megnyomva törli az AsyncStorage-t és újratölti az appot (`DevSettings.reload()`), így az onboarding Expo Go-ban újratelepítés nélkül újra kipróbálható. Release buildben nem renderelődik. Nincs megerősítő kérdés: fejlesztői eszköz.
+**Fájlok:** components/DevResetButton.tsx, app/_layout.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Expo Go-ban NEM futott: a gomb helye, az érinthetősége és az, hogy a `DevSettings.reload()` újratöltés után az onboarding jön-e fel, eszközön ellenőrizendő.
+**Nyitva maradt:** (1) A gomb a Főoldal jobb felső beállítások ikonjának helyére esik majd, amikor az elkészül; akkor át kell tenni. (2) `AsyncStorage.clear()` mindent töröl: Expo Go-ban projektenként elkülönített a tár, de dev buildben is csak az app adata van benne. (3) Ship előtt eltávolítandó (a „Ship előtt” sor frissítve).
+**Commit:** `chore: dev reset gomb az onboarding teszteléséhez`
 
 ## 2026-10-15 – Onboarding 2. lépés: Kids korhatár (feature)
 
@@ -496,5 +504,12 @@ Sablon:
 **Miért:** (1) a CLAUDE.md szerint a design „STEP 1 OF 2” 2. lépése nem tisztázott, a Kids korhatár az ideiglenes tartalom; új UI-t nem találunk ki, a design chipjét használjuk. (2) A felhasználó a „Kész” előtt kilépve ne kerüljön a főoldalra korhatár nélkül, és a D-023 is ezt írta elő. (3) A korhatárnak alapérték kell, hogy a „Kihagyom” is érvényes állapotot adjon, és a design ezt mutatja. (4) A legkisebb működő verzió; az ismeretlen mezőket nem előre építjük. (5) A design nem ad rá mintát, és a szolgáltatók úgyis szerkeszthetők a Beállításokból.
 **Alternatíva:** (2) az 1. „Tovább” zárja le az onboardingot és a 2. lépés opcionális marad – egyszerűbb, de a korhatár-választás kimaradhatna; (4) a teljes store-alak most – használaton kívüli mezők; (5) „Vissza” szöveggomb – új, a designban nem szereplő elem.
 **Visszavonható?** igen, egy képernyő és egy store.
+
+## D-029 – Dev reset: globális `__DEV__` gomb, teljes AsyncStorage-törlés + újratöltés
+**Dátum:** 2026-10-15
+**Döntés:** a fejlesztői visszaállítás egy lebegő gomb a gyökér layoutban (`{__DEV__ ? <DevResetButton /> : null}`), nem a képernyők része. Megnyomásra `AsyncStorage.clear()` és `DevSettings.reload()`; a store-ok így az újraindításkor üresen töltődnek vissza.
+**Miért:** Expo Go-ban nincs projektenkénti adattörlés, az onboarding tesztelése újratelepítést kért volna. A gyökér layoutba tett overlay nem érinti a képernyők kódját, és egy fájl + egy sor törlésével eltávolítható. A `clear()` + újratöltés a későbbi store-oknál (watchlist, keresés) sem igényel karbantartást, és nem kell a futó képernyők helyi állapotát (pl. az onboarding `step`-jét) külön nullázni.
+**Alternatíva:** store-onként `persist.clearStorage()` / `setState` újratöltés nélkül – minden új store-ot fel kell venni, és az onboarding képernyő helyi állapota megmaradna; gomb a Beállításokban – a képernyő még nem kész, és az onboarding alatt nem érhető el; `DevSettings.addMenuItem` (a rázásos menüben) – Expo Go saját menüjében nem biztos, hogy megjelenik.
+**Visszavonható?** igen, `components/DevResetButton.tsx` és a sora az `app/_layout.tsx`-ben.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

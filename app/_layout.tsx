@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { DevResetButton } from '@/components/DevResetButton';
 import { colors } from '@/constants/theme';
 import { useProvidersStore } from '@/store/useProvidersStore';
 
@@ -32,6 +33,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="settings" />
       </Stack>
+      {__DEV__ ? <DevResetButton /> : null}
     </ThemeProvider>
   );
 }
