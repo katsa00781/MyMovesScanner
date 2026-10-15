@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
-import { ActionSheetIOS, ScrollView, Switch, Text, useWindowDimensions, View } from 'react-native';
+import { ActionSheetIOS, ScrollView, Switch, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AboutCard } from '@/components/AboutCard';
 import { MyServicesCard } from '@/components/MyServicesCard';
+import { ScreenTitle } from '@/components/ScreenTitle';
 import { SettingsBackLink } from '@/components/SettingsBackLink';
 import { SettingsRow, SettingsSeparator } from '@/components/SettingsRow';
 import { SettingsSection } from '@/components/SettingsSection';
@@ -99,10 +100,7 @@ export default function SettingsScreen() {
           <View
             className="justify-center"
             style={{ height: layout.titleHeight, marginTop: layout.titleGap, paddingLeft: layout.titleOffset }}>
-            <Text
-              className={`font-extrabold text-textPrimary ${isTablet ? 'text-titleTablet' : 'text-title'}`}>
-              {strings.settings.title}
-            </Text>
+            <ScreenTitle>{strings.settings.title}</ScreenTitle>
           </View>
           <View style={{ marginTop: layout.firstSectionGap }}>
             {isTablet ? (

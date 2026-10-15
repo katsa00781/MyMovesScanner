@@ -7,7 +7,8 @@ import { formatFullDate } from '@/lib/format';
 import type { DiscRelease } from '@/types/app';
 
 // „Lemezen” kártya (06, 14 design): formátum, „Megjelenés Magyarországon · dátum” (DE adatnál
-// „Német megjelenés”), és az „Emlékeztess” gomb, ami a címet a watchlistre teszi (D-013).
+// „Német megjelenés”), és az „Emlékeztess” gomb, ami a címet a watchlistre teszi (D-013). Keskeny
+// helyen (álló iPad Adatlap oszlopa) a gomb a szöveg alá törik.
 export function DiscCard({
   disc,
   watchlisted,
@@ -19,11 +20,11 @@ export function DiscCard({
 }) {
   const where = disc.region === 'HU' ? strings.title.releaseInHungary : strings.home.germanRelease;
   return (
-    <View className="min-h-[86px] flex-row items-center gap-[15px] rounded-cardLarge bg-surface px-4 py-4">
+    <View className="min-h-[86px] flex-row flex-wrap items-center gap-x-[15px] gap-y-3 rounded-cardLarge bg-surface px-4 py-4">
       <View className="h-[50px] w-[50px] items-center justify-center rounded-[12px] bg-disc">
         <SymbolView name="opticaldisc" size={26} tintColor={colors.textPrimary} />
       </View>
-      <View className="min-w-0 flex-1">
+      <View className="min-w-[110px] flex-1">
         <Text className="font-semibold text-[17px] leading-[21px] text-textPrimary">
           {disc.formats}
         </Text>

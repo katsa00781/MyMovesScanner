@@ -41,7 +41,7 @@
 - [x] Gyerek sarok: korhatár chipek, Mature titles hidden, téma chipek (keywordök), Big adventures — design: 04, 12
 - [x] Keresés: debounce, Recent searches (`useSearchStore`), All/Films/Series/People, találati sor Stream/Rent/Buy chipekkel — design: 05, 13
 - [x] Beállítások: My services + Edit, Region & language, Kids corner, About (Notifications rejtve — D-013) — design: 08, 16
-- [ ] iPad finomhangolás: rács oszlopszámok, kétoszlopos adatlap, portrait/landscape ellenőrzés a designnal összevetve
+- [x] iPad finomhangolás: rács oszlopszámok, kétoszlopos adatlap, portrait/landscape ellenőrzés a designnal összevetve
 
 ### Ship előtt
 - [ ] Teljes flow tesztelése iPhone-on és iPaden
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – iPad finomhangolás: címméretek, álló iPad oszlopok és fejlécek (feature)
+
+**Mit:** A 11–16 iPad design PNG-ket a webes előnézettel (fekvő 1244 és álló 834 px) pixelre összevetve. (1) **Címek:** a designban az iPad címek nagyobbak, mint a telefonon (Böngészés, Keresés, Watchlist, Beállítások ~1,17×, azaz 40 pt; Gyerek sarok ~1,24×, azaz 47 pt); új `ScreenTitle` komponens (telefonon 34, iPaden 40 pt, a kalibrált fejléc-sormagassággal és 2,5 px-es lejjebb tolással), új tokenek `fontSize.titleTablet` (40), `fontSize.kidsTitleTablet` (47). A betűk magassága a designhoz ±0,5 px, a függőleges helyük ±0,5 px (Gyerek sarok: 0 px). A Beállítások iPad cím és az első szekció közti köz ehhez igazítva. (2) **Álló iPad:** új `isWideContent` / `TABLET_WIDE_CONTENT_MIN` (860 px az oldalsáv melletti területen). Szűk (álló) iPaden a poszter rács 4 oszlop (Gyerek sarok: 3), a Böngészés találatszám + rendezés és a Watchlist szegmens-vezérlő a cím alatti sorba kerül (mint telefonon), mert a 40 pt-os cím mellett nem fér el. Fekvő iPaden (11": 924 px) és szélesebben a design elrendezése változatlan. (3) **Adatlap Lemezen kártya:** keskeny oszlopban a „Emlékeztess” gomb a szöveg alá törik (a „Blu-ray” szó nem törik két sorba).
+**Fájlok:** components/{ScreenTitle,PosterGrid,DiscCard}.tsx, app/(tabs)/{browse,kids,search,watchlist}.tsx, app/settings.tsx, constants/{theme.json,theme.ts}, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Weben (headless Chrome CDP-vel, valós TMDB-adat, `web.output` átmenetileg `single`, visszaállítva, nem commitolva) iPad fekvő (1244) és álló (834) szélességben a Főoldal, Böngészés, Gyerek sarok, Keresés, Watchlist, Adatlap, Beállítások: a címek mérete és helye a designhoz mérve (fenti számok); a Gyerek sarok rács (kártya x/y ±1–2 px), a Böngészés / Watchlist / Gyerek álló nézete képernyőn nézve. A web NEM mutatta: az SF Symbols ikonokat (oldalsáv), az iOS-es betűmetrikát (a webes rendszerfont szélesebb), valós iPad-et / szimulátort (a 1194 × 834 és 1024 × 1366 méret nincs külön nézve; a küszöb számítással: 11" fekvő 924 px, 12,9" álló 754 px).
+**Nyitva maradt:** (1) **A Böngészés design iPad szolgáltató- és műfaj-sora hibás** (a PNG-n összenyomott / levágott, lásd a Böngészés bejegyzését), ezért az iPaden a telefon méreteit használja; változatlan. (2) A Főoldal, Keresés és Watchlist fekvő iPad elrendezését az előző feladatok már mérték, itt a címeken kívül nem változott. (3) **Nincs oldalsáv az Adatlapon és a Beállításokon** (D-038, D-049). (4) A 860 px-es küszöb becslés (cél: kártya ≥ ~120 px): ha eszközön más oszlopszám tetszik, egy szám a `constants/theme.ts`-ben. (5) A Gyerek sarok iPad címe a designban lekerekített betűtípus (a többi képernyő SF-szerű, D-027); itt is a rendszerfont, csak a méret követi a designt. (6) Az `isTablet` számítás továbbra is sok helyen ismétlődik (`useIsTablet` hook külön `chore:` commitban).
+**Commit:** `feat: ipad finomhangolás címméretek és álló elrendezés` (D-050)
 
 ## 2026-10-15 – Beállítások: Szolgáltatóim, Régió és nyelv, Gyerek sarok, Névjegy (feature)
 
@@ -779,5 +787,12 @@ Sablon:
 **Miért:** (1) a CLAUDE.md mappastruktúrája és a headless tabs (csak a felsorolt triggerek) ezt adja, az oldalsáv eltűnése már ismert korlát. (2) a kapcsoló hatás nélkül félrevezető; a korhatár-chip szűrés nélkül értelmetlen. (3) egy olyan store-mező, amit senki sem tud átírni, holt állapot; a CLAUDE.md `region` / `language` mezői akkor kerülnek be, ha lesz választás. (4) iOS-only app, nincs új könyvtár. (5) a CLAUDE.md a TMDB logót kötelezővé teszi, a kép viszont két logót tartalmaz. (6) a designból mért.
 **Alternatíva:** (1) a Beállítások a `(tabs)` alá, rejtett tabként: a design szerinti oldalsáv, de eltér a mappastruktúrától; (2) a kapcsoló csak a badge-et rejtse; (3) a teljes store-alak most, nyíllal ellátott, hatás nélküli sorokkal; (4) saját modális választó; (5) a teljes kép megjelenítése – a Mymoviescanner logó és sok fekete.
 **Visszavonható?** igen.
+
+## D-050 – iPad: cím 40 / 47 pt, álló iPaden kevesebb oszlop és a vezérlők a cím alatt
+**Dátum:** 2026-10-15
+**Döntés:** (1) Az iPad címek a designból mért 40 pt (Kids: 47 pt), a telefoné marad 34 / 38. (2) Az iPad elrendezése két módú: „széles” (az oldalsáv melletti terület ≥ 860 px, fekvő iPad) a design szerinti, „szűk” (álló iPad) esetén 4 (Kids: 3) oszlop, és a Böngészés / Watchlist vezérlői a cím alatt. (3) A cím lejjebb tolása és a fix sormagasság `ScreenTitle`-ben él, nem a képernyőkön.
+**Miért:** (1) a design iPad PNG-in mért betűmagasság (28 px a telefon 24 px-éhez, Kids 33–36 a 29-hez). (2) a design csak fekvő iPadet mutat; álló nézetben a 6 oszlop ~70 px-es poszter, a 4 oszlop Kids 106 px-es kártya csonkolt címekkel, a 40 pt-os cím + vezérlő pedig nem fér egy sorba. (3) négy képernyő használja, ismétlés.
+**Alternatíva:** (2) a 6 / 4 oszlop megtartása és kisebb kártya – olvashatatlan poszterek; a telefon elrendezése álló iPaden – a design iPad-érzete elvész; (1) 34 pt marad – a designtól eltér.
+**Visszavonható?** igen, tokenek és egy küszöb.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

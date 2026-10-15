@@ -8,6 +8,7 @@ import { ErrorState } from '@/components/ErrorState';
 import { RecentChips, RecentList } from '@/components/RecentSearches';
 import { SearchCategoryChips } from '@/components/SearchCategoryChips';
 import { SearchField } from '@/components/SearchField';
+import { ScreenTitle } from '@/components/ScreenTitle';
 import { SearchFilterChips } from '@/components/SearchFilterChips';
 import { SearchResultRow, SearchResultSkeleton } from '@/components/SearchResultRow';
 import { strings } from '@/constants/strings';
@@ -99,7 +100,7 @@ export default function SearchScreen() {
         keyboardDismissMode="on-drag">
         <View style={{ paddingHorizontal: spec.inset, paddingTop: bar.barTop }}>
           <View className="justify-center" style={{ minHeight: bar.barHeight }}>
-            <Text className="font-extrabold text-title text-textPrimary">{strings.search.title}</Text>
+            <ScreenTitle>{strings.search.title}</ScreenTitle>
           </View>
         </View>
 

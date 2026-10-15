@@ -158,14 +158,26 @@ export const settingsLayout = {
     maxWidth: undefined,
   },
   tablet: {
-    inset: 43, backOffset: 0, titleOffset: 0, backTop: 2, titleGap: 2, titleHeight: 48, firstSectionGap: 26,
+    inset: 43, backOffset: 0, titleOffset: 0, backTop: 2, titleGap: 0, titleHeight: 48, firstSectionGap: 28,
     maxWidth: 974, columnGap: 30,
   },
   sectionGap: 27,
 } as const;
 
-/** Poszter rács oszlopszámok. */
+/** Poszter rács oszlopszámok; `tabletNarrow`: álló iPad (az oldalsáv melletti terület keskeny). */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },
   tablet: { default: 6, kids: 4 },
+  tabletNarrow: { default: 4, kids: 3 },
 } as const;
+
+/**
+ * Az oldalsáv melletti terület minimális szélessége, amitől az iPad a design (fekvő) elrendezését
+ * kapja: 6 / 4 oszlop, a Böngészés és a Watchlist vezérlői a címsorban. Álló iPaden (11": 564 px)
+ * kevesebb oszlop és a vezérlők a cím alatt, mert a kártyák (< 90 px) és a fejléc nem férnének el.
+ */
+export const TABLET_WIDE_CONTENT_MIN = 860;
+
+export function isWideContent(windowWidth: number): boolean {
+  return windowWidth - layout.sidebarWidth >= TABLET_WIDE_CONTENT_MIN;
+}

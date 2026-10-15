@@ -111,7 +111,10 @@ export default function KidsScreen() {
           <View className="flex-row justify-between">
             <View className={isTablet ? undefined : 'flex-1'}>
               <View className="justify-center" style={{ minHeight: layout.barHeight }}>
-                <Text className="font-extrabold text-kidsTitle leading-[44px] text-textPrimary">
+                <Text
+                  className={`font-extrabold leading-[44px] text-textPrimary ${
+                    isTablet ? 'text-kidsTitleTablet' : 'text-kidsTitle'
+                  }`}>
                   {strings.kids.title}
                 </Text>
               </View>

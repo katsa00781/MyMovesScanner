@@ -19,8 +19,9 @@ import { GenreChips } from '@/components/GenreChips';
 import { PosterCard } from '@/components/PosterCard';
 import { PosterGrid } from '@/components/PosterGrid';
 import { ProviderFilter } from '@/components/ProviderFilter';
+import { ScreenTitle } from '@/components/ScreenTitle';
 import { strings } from '@/constants/strings';
-import { browseLayout, colors, gridLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
+import { browseLayout, colors, gridLayout, isWideContent, TABLET_MIN_WIDTH } from '@/constants/theme';
 import { browseGenres, type GenreKey } from '@/data/browseGenres';
 import { browseSorts, type BrowseSort } from '@/data/browseSorts';
 import { useBrowseTitles } from '@/hooks/useBrowseTitles';
@@ -34,6 +35,7 @@ export default function BrowseScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isTablet = width >= TABLET_MIN_WIDTH;
+  const wide = isWideContent(width);
   const layout = browseLayout[isTablet ? 'tablet' : 'phone'];
   const { inset } = gridLayout[isTablet ? 'tablet' : 'phone'];
 
@@ -138,8 +140,8 @@ export default function BrowseScreen() {
         scrollEventThrottle={100}>
         <View style={{ paddingHorizontal: inset, paddingTop: layout.barTop }}>
           <View className="flex-row items-center justify-between" style={{ minHeight: layout.barHeight }}>
-            <Text className="font-extrabold text-title text-textPrimary">{strings.browse.title}</Text>
-            {isTablet && hasServices ? (
+            <ScreenTitle>{strings.browse.title}</ScreenTitle>
+            {wide && hasServices ? (
               <View className="flex-row items-center gap-[14px]">
                 {countText}
                 <Pressable
@@ -169,10 +171,14 @@ export default function BrowseScreen() {
             <View style={{ marginTop: layout.genresGap }}>
               <GenreChips value={genreKey} onChange={setGenreKey} inset={inset} />
             </View>
-            {isTablet ? null : (
+            {wide ? null : (
               <View
                 className="flex-row items-center justify-between"
-                style={{ marginTop: layout.countGap, height: layout.countHeight, paddingHorizontal: inset }}>
+                style={{
+                  marginTop: browseLayout.phone.countGap,
+                  height: browseLayout.phone.countHeight,
+                  paddingHorizontal: inset,
+                }}>
                 <View>{countText}</View>
                 <Pressable
                   onPress={pickSort}
