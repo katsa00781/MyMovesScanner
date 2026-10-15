@@ -1,19 +1,22 @@
 import { useRouter } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Keyboard, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { RecentChips, RecentList } from '@/components/RecentSearches';
+import { SearchCategoryChips } from '@/components/SearchCategoryChips';
 import { SearchField } from '@/components/SearchField';
 import { SearchFilterChips } from '@/components/SearchFilterChips';
 import { SearchResultRow, SearchResultSkeleton } from '@/components/SearchResultRow';
 import { strings } from '@/constants/strings';
 import { browseLayout, layout, searchLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
+import type { SearchCategory } from '@/data/searchCategories';
 import type { SearchFilter } from '@/data/searchFilters';
 import { useSearch } from '@/hooks/useSearch';
 import { titleHref } from '@/lib/routes';
+import { matchCategories } from '@/lib/searchCategories';
 import { useSearchStore } from '@/store/useSearchStore';
 import type { SearchResult } from '@/types/app';
 
@@ -31,15 +34,28 @@ export default function SearchScreen() {
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SearchFilter>('all');
-  const search = useSearch(query, filter);
+  // A begépelt szóra illeszkedő kategóriák (D-048) és a kiválasztott; a Személyek szűrőnél nincs kategória.
+  const [category, setCategory] = useState<SearchCategory>();
+  const matches = useMemo(() => (filter === 'people' ? [] : matchCategories(query)), [query, filter]);
+  const activeCategory = filter === 'people' ? undefined : category;
+  const search = useSearch(query, filter, activeCategory);
   const { recentSearches, add, remove, clear } = useSearchStore();
 
-  const pickRecent = (text: string) => {
+  // A szöveg módosítása (törlés is) kikapcsolja a kategóriát: újra a szöveges keresés érvényes.
+  const changeQuery = (text: string) => {
     setQuery(text);
+    setCategory(undefined);
+  };
+  const pickCategory = (picked: SearchCategory | undefined) => {
+    setCategory(picked);
+    if (picked) add(query);
+  };
+  const pickRecent = (text: string) => {
+    changeQuery(text);
     add(text);
   };
   const cancel = () => {
-    setQuery('');
+    changeQuery('');
     setFilter('all');
     Keyboard.dismiss();
   };
@@ -90,7 +106,7 @@ export default function SearchScreen() {
         <View style={{ marginTop: spec.fieldGap, paddingHorizontal: spec.inset }}>
           <SearchField
             value={query}
-            onChangeText={setQuery}
+            onChangeText={changeQuery}
             onSubmit={() => add(query)}
             onCancel={cancel}
             isTablet={isTablet}
@@ -119,18 +135,42 @@ export default function SearchScreen() {
                   <Text
                     numberOfLines={1}
                     className="max-w-full shrink font-bold text-section text-textPrimary">
-                    {strings.search.resultsFor(search.term)}
+                    {strings.search.resultsFor(
+                      activeCategory
+                        ? strings.search.categories[activeCategory.key as keyof typeof strings.search.categories]
+                        : search.term,
+                    )}
                   </Text>
                 ) : null}
                 <View className="ml-auto">
                   <SearchFilterChips value={filter} onChange={setFilter} isTablet={isTablet} />
                 </View>
               </View>
+              {matches.length > 0 ? (
+                <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>
+                  <SearchCategoryChips
+                    categories={matches}
+                    selectedKey={activeCategory?.key}
+                    onSelect={pickCategory}
+                    inset={0}
+                  />
+                </View>
+              ) : null}
               <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>{results}</View>
             </View>
           </View>
         ) : (
           <>
+            {matches.length > 0 ? (
+              <View style={{ marginTop: spec.recentGap }}>
+                <SearchCategoryChips
+                  categories={matches}
+                  selectedKey={activeCategory?.key}
+                  onSelect={pickCategory}
+                  inset={spec.inset}
+                />
+              </View>
+            ) : null}
             {hasRecent ? (
               <View style={{ marginTop: spec.recentGap }}>
                 <RecentChips

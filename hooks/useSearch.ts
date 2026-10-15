@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { SearchCategory } from '@/data/searchCategories';
 import { searchFilters, type SearchFilter } from '@/data/searchFilters';
-import { getDetails, REGION, search } from '@/lib/api';
+import { discover, getDetails, REGION, search } from '@/lib/api';
+import { categoryParams } from '@/lib/searchCategories';
 import { isOnMyServices, pickSearchChips, toSearchResults } from '@/lib/searchResults';
 import { pickRegionOffers } from '@/lib/titleInfo';
 import { useProvidersStore } from '@/store/useProvidersStore';
 import type { SearchResult, SearchRow } from '@/types/app';
-import type { WatchProviderRegion } from '@/types/tmdb';
+import type { MediaType, TitleSummary, WatchProviderRegion } from '@/types/tmdb';
 
 /** Ennyi karaktertől keres; az egy betű túl sok, hasznavehetetlen találatot adna. */
 const MIN_LENGTH = 2;
@@ -25,6 +27,26 @@ type SearchState = {
 
 const NO_RESULTS: SearchResult[] = [];
 
+// A kategória találatai: film és/vagy sorozat `discover` (a szűrő szerint), népszerűség szerint
+// egyesítve. Ha az egyik elbukik, a másik eredménye megmarad; ha mind, a hiba tovább megy.
+async function fetchCategory(category: SearchCategory, filter: SearchFilter): Promise<SearchResult[]> {
+  const types: MediaType[] = filter === 'films' ? ['movie'] : filter === 'series' ? ['tv'] : ['movie', 'tv'];
+  const requests = types.flatMap((type) => {
+    const params = categoryParams(category, type);
+    return params ? [discover(type, params).then((page) => ({ type, hits: page.results }))] : [];
+  });
+  const settled = await Promise.allSettled(requests);
+  if (requests.length > 0 && settled.every((item) => item.status === 'rejected')) {
+    throw new Error('A kategória lekérdezése nem sikerült.');
+  }
+  const tagged: { type: MediaType; hit: TitleSummary }[] = settled.flatMap((item) =>
+    item.status === 'fulfilled' ? item.value.hits.map((hit) => ({ type: item.value.type, hit })) : [],
+  );
+  return tagged
+    .sort((a, b) => b.hit.popularity - a.hit.popularity)
+    .flatMap(({ type, hit }) => toSearchResults([hit], type === 'movie' ? 'films' : 'series'));
+}
+
 function useDebounced(value: string): string {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -38,11 +60,14 @@ function useDebounced(value: string): string {
 // végponton, oldalanként az első oldal. A műfajhoz és a „hol nézhető” chipekhez címenként egy
 // `getDetails` kell (az Edge Function 7 napra cache-eli): a sorok ezek előtt is látszanak, a
 // részletek a képernyő élete alatt megmaradnak. A `null` a sikertelen lekérést jelzi.
-export function useSearch(query: string, filter: SearchFilter) {
+// A kiválasztott kategória (D-048) a szöveges keresést helyettesíti: `discover` találatok.
+export function useSearch(query: string, filter: SearchFilter, category?: SearchCategory) {
   const selectedProviderIds = useProvidersStore((state) => state.selectedProviderIds);
   const typed = query.trim();
   const term = useDebounced(typed);
-  const active = typed.length >= MIN_LENGTH;
+  // A találatok kulcsa: a kategória, vagy a keresett szöveg; ezzel dől el, hogy az érkezett lista a mostanihoz tartozik-e.
+  const requestKey = category ? `category:${category.key}` : typed;
+  const active = category !== undefined || typed.length >= MIN_LENGTH;
 
   const [state, setState] = useState<SearchState>({ filter, term: '', results: [], error: false });
   const [attempt, setAttempt] = useState(0);
@@ -50,26 +75,28 @@ export function useSearch(query: string, filter: SearchFilter) {
   const requested = useRef(new Set<string>());
 
   useEffect(() => {
-    if (term.length < MIN_LENGTH) return;
+    if (!category && term.length < MIN_LENGTH) return;
     const endpoint = searchFilters.find((item) => item.key === filter)?.endpoint ?? 'multi';
+    const key = category ? `category:${category.key}` : term;
     let cancelled = false;
-    search(endpoint, term)
-      .then((page) => {
-        if (!cancelled) {
-          setState({ filter, term, results: toSearchResults(page.results, filter), error: false });
-        }
+    const request = category
+      ? fetchCategory(category, filter)
+      : search(endpoint, term).then((page) => toSearchResults(page.results, filter));
+    request
+      .then((results) => {
+        if (!cancelled) setState({ filter, term: key, results, error: false });
       })
       .catch(() => {
-        if (!cancelled) setState({ filter, term, results: [], error: true });
+        if (!cancelled) setState({ filter, term: key, results: [], error: true });
       });
     return () => {
       cancelled = true;
     };
-  }, [term, filter, attempt]);
+  }, [term, filter, category, attempt]);
 
   // A szűrőváltás előtti találatok nem látszanak; a gépelés közbeniek igen, az új találatokig.
   const results = state.filter === filter ? state.results : NO_RESULTS;
-  const settled = state.filter === filter && state.term === typed;
+  const settled = state.filter === filter && state.term === requestKey;
 
   useEffect(() => {
     results.forEach(({ key, id, type }) => {
