@@ -11,7 +11,7 @@
 - [x] NativeWind telepítése és konfigurálása
 - [x] Függőségek: zustand, @react-native-async-storage/async-storage, expo-image, @supabase/supabase-js
 - [x] `docs/design/` mappa elhelyezése a projektben (PDF + 16 PNG)
-- [ ] Assets elhelyezése (`assets/images/`: logo, tmdb-logo) + `constants/images.ts`
+- [x] Assets elhelyezése (`assets/images/`: logo, tmdb-logo) + `constants/images.ts`
 - [x] `npm run lint` és `npm run typecheck` scriptek
 - [x] `app.json`: iPad támogatás (`supportsTablet: true`), minden orientáció
 - [x] CLAUDE.md és docs/ elhelyezése a projekt gyökerében
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Assets és constants/images.ts (setup)
+
+**Mit:** A felhasználó által elhelyezett `assets/images/logo.png` és `tmdb-logo.png` (mindkettő 1254×1254) bekerült a repóba; új `constants/images.ts` a centralizált `images = { logo, tmdbLogo }` objektummal a CLAUDE.md szerint, és `types/images.d.ts`, mert az Expo SDK 57 típusai nem deklarálják a `*.png` importot.
+**Fájlok:** assets/images/logo.png, assets/images/tmdb-logo.png, constants/images.ts, types/images.d.ts
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Képernyőn még nem használt.
+**Nyitva maradt:** A `logo.png` négyzetes, sötét háttérrel (szójel + felirat benne); az oldalsáv/onboarding fejlécében használt méretezés vagy a splash/app ikon cseréje külön döntés (az `app.json` ikonjai még a template-éi). A `tmdb-logo.png` a TMDB hivatalos arculati szabályait követi-e, a Beállítások/Névjegy feladatnál ellenőrizni.
+**Commit:** `setup: assets és constants/images.ts`
 
 ## 2026-10-15 – Navigációs váz (feature)
 
