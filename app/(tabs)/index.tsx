@@ -6,14 +6,16 @@ import { HeroCarousel } from '@/components/HeroCarousel';
 import { PosterCard } from '@/components/PosterCard';
 import { PosterRail } from '@/components/PosterRail';
 import { strings } from '@/constants/strings';
+import { useBlurayReleases } from '@/hooks/useBlurayReleases';
 import { useHeroItems } from '@/hooks/useHeroItems';
 import { useNewOnMyServices } from '@/hooks/useNewOnMyServices';
-import { formatRelativeDate } from '@/lib/format';
+import { formatRelativeDate, formatShortDate } from '@/lib/format';
 import { useWatchlistStore } from '@/store/useWatchlistStore';
 
 export default function HomeScreen() {
   const router = useRouter();
   const newOn = useNewOnMyServices();
+  const bluray = useBlurayReleases();
   const heroItems = useHeroItems(newOn.titles);
   const toggleWatchlist = useWatchlistStore((state) => state.toggle);
 
@@ -59,6 +61,24 @@ export default function HomeScreen() {
         ) : (
           <EmptyState message={strings.home.noServices} />
         )}
+        <PosterRail
+          title={strings.home.newBluray}
+          note={bluray.region === 'DE' && bluray.titles.length > 0 ? strings.home.germanRelease : undefined}
+          data={bluray.titles}
+          loading={bluray.loading}
+          error={bluray.error}
+          onRetry={bluray.retry}
+          keyExtractor={(title) => title.key}
+          renderCard={(title, width) => (
+            <PosterCard
+              title={title.title}
+              posterPath={title.posterPath}
+              width={width}
+              formatLabel={title.format}
+              subtitle={`${formatShortDate(title.releaseDate)} · ${strings.watchlist.bluray}`}
+            />
+          )}
+        />
       </View>
     </ScrollView>
   );

@@ -32,3 +32,15 @@ export type HeroItem = {
   trailerKey?: string;
   watchlisted: boolean;
 };
+
+/** Új Blu-ray megjelenés (Főoldal rail); csak film. */
+export type BlurayTitle = {
+  key: string;
+  id: number;
+  title: string;
+  posterPath: string | null;
+  /** A fizikai megjelenés napja, ÉÉÉÉ-HH-NN. */
+  releaseDate: string;
+  /** „4K UHD”, „Steelbook” vagy „Blu-ray” (D-014). */
+  format: string;
+};

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { FlatList, useWindowDimensions, View } from 'react-native';
+import { FlatList, Text, useWindowDimensions, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
@@ -14,6 +14,7 @@ const SKELETON_COUNT = 6;
 // Teljes szélességű: a margót (telefon 21, iPad 35) a rail maga tartja.
 export function PosterRail<T>({
   title,
+  note,
   data,
   loading,
   error,
@@ -23,6 +24,8 @@ export function PosterRail<T>({
   renderCard,
 }: {
   title: string;
+  /** Kis szürke sor a cím alatt (pl. „Német megjelenés”). */
+  note?: string;
   data: T[];
   loading: boolean;
   error: boolean;
@@ -72,6 +75,7 @@ export function PosterRail<T>({
     <View>
       <View className="mb-[23px]" style={{ paddingHorizontal: inset }}>
         <SectionHeader title={title} onSeeAll={onSeeAll} />
+        {note ? <Text className="mt-1 text-[13px] text-textSecondary">{note}</Text> : null}
       </View>
       {body}
     </View>

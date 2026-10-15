@@ -32,7 +32,7 @@
 - [x] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
 - [x] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
 - [x] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
-- [ ] Főoldal: „New Blu-ray releases” rail (HU → DE fallback, formátum badge — D-006, D-014)
+- [x] Főoldal: „New Blu-ray releases” rail (HU → DE fallback, formátum badge — D-006, D-014)
 - [ ] Főoldal: „Trending in Hungary” sorszámos rail (D-015) + „Kids' picks” fekvő kártyák + forrásmegjelölés lábléc
 - [ ] Adatlap: hero, meta, korhatár, TMDB értékelés, Trailer, Watchlist gomb, leírás — design: 06, 14
 - [ ] Adatlap: Where to watch (All/Stream/Rent/Buy, ár nélkül — D-012), On disc kártya (D-013), Cast & crew, iPad About oszlop
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Főoldal: Új Blu-ray megjelenések rail (feature)
+
+**Mit:** `useBlurayReleases`: `discover/movie` `with_release_type=5`, `region=HU`, `release_date` ±60 nap; ha üres, ugyanez `region=DE`-vel (D-006), és ilyenkor a rail címe alatt a „Német megjelenés” sor látszik (új `note` prop a `PosterRail`-en). A fizikai megjelenés dátuma és formátuma csak a `release_dates`-ben van, ezért a legnépszerűbb 12 jelöltre `getDetails` fut (az Edge Function 7 napra cache-eli), a kártya alcíme „okt. 9. · Blu-ray”, a badge a `note`-ból: „4K UHD” (4K/UHD), „Steelbook”, különben „Blu-ray” (D-014). Sorrend: az elmúlt hét óta a mostani és közelgő megjelenések növekvő dátummal elöl, utánuk a régebbiek csökkenőben. Új: `formatShortDate`, `BlurayTitle`.
+**Fájlok:** hooks/useBlurayReleases.ts, app/(tabs)/index.tsx, components/PosterRail.tsx, lib/format.ts, types/app.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Az éles függvényen curl-lel: HU a ±60 napos ablakban 0 találat, DE 54; egy DE cím `release_dates` bejegyzése: típus 5, 2026-08-27, `4K Ultra HD Steelbook / Blu-ray / DVD`. A hook és a rail képernyőn / eszközön NEM futott (ezt a lépést vizuálisan nem néztem a webes előnézettel).
+**Nyitva maradt:** (1) A mai adat szerint a HU üres, tehát a rail jelenleg DE adattal és „Német megjelenés” jelzéssel jelenik meg. (2) A „Összes” hivatkozás nincs: a Blu-ray listának nincs célképernyője (a Böngészés műfaj/szolgáltató szerint szűr). (3) A „Német megjelenés” sor a designban nincs; a CLAUDE.md előírja a jelzést, ezért a cím alatti kis szürke sor lett, ha más helyen kéred, szólj. (4) Egy cím több fizikai kiadása közül (4K, Steelbook) a badge az első, ablakba eső bejegyzés `note`-ja szerint egy formátumot mutat. (5) A kártyák itt sem navigálnak az Adatlapra.
+**Commit:** `feat: főoldal Blu-ray megjelenések rail` (D-034)
 
 ## 2026-10-15 – Főoldal: hero carousel + „Újdonságok a szolgáltatóidon” rail (feature)
 
@@ -554,6 +562,13 @@ Sablon:
 **Döntés:** (1) A `useWatchlistStore` (`items`, `toggle`) a CLAUDE.md alakjával már most elkészült, mert a hero „+” gombja ezt váltja; a Watchlist feladat erre építi a képernyőt. (2) A gomb a listán lévő címnél pipát (akcentszínű) mutat „+” helyett: a design csak az alapállapotot mutatja. (3) A hero kép feletti sötétítés RN `experimental_backgroundImage` lineáris átmenet (alul: feketébe, iPaden balról is), nem `expo-linear-gradient`. (4) A felső sáv ikon-margója iPaden 35 px (a rail margója), nem a hero szövegének 43 px-e: a design szerint.
 **Miért:** (1) holt „+” gomb helyett működő; a store alakja már rögzített, nincs kockázat. (2) az állapotjelzés nélküli gomb nem mutatná, hogy a címet felvettük. (3) új könyvtárat nem adunk hozzá engedély nélkül, és a D-024 már bevált eszközön ezen az API-n.
 **Alternatíva:** (1) a „+” gomb később kötve – addig dead UI; (3) `expo-linear-gradient` – stabil API, de új függőség.
+**Visszavonható?** igen.
+
+## D-034 – Blu-ray rail: dátum és formátum címenkénti adatlapból, „Német megjelenés” a cím alatt, „Összes” nélkül
+**Dátum:** 2026-10-15
+**Döntés:** (1) A `discover` (`with_release_type=5`, `region`, `release_date` ±60 nap) csak a címlistát adja, a legnépszerűbb 12 jelölttel; a fizikai megjelenés napja és a formátum címenként a `getDetails` `release_dates` bejegyzéséből jön (az ablakba eső típus-5 bejegyzés). (2) A HU → DE váltás a `discover` üres eredményén múlik. (3) A „Német megjelenés” jelzés a rail címe alatti kis szürke sor, csak DE adatnál. (4) A Blu-ray railnek nincs „Összes” hivatkozása.
+**Miért:** (1) a `discover` a mozis dátumot adja, nem a lemezét, és a `note` sincs benne; 12 címnél a hívások 7 napra cache-eltek. (3) a CLAUDE.md jelzést kér, a design nem mutat helyet; a cím alatti sor nem módosítja a kártyák elrendezését. (4) nincs célképernyő.
+**Alternatíva:** (1) a mozis dátum kiírása – hamis „megjelenés” dátum; (3) a jelzés a kártya alcímében („okt. 9. · Blu-ray · DE”) – zsúfolt, az alcím a designban rövid; (4) „Összes” a Böngészésre – ott a Blu-ray nem szűrhető.
 **Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
