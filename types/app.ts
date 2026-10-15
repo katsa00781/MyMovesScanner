@@ -33,6 +33,25 @@ export type HeroItem = {
   watchlisted: boolean;
 };
 
+/** Népszerű cím (Főoldal „Népszerű Magyarországon” rail); film vagy sorozat. */
+export type TrendingTitle = {
+  key: string;
+  id: number;
+  type: MediaType;
+  title: string;
+  posterPath: string | null;
+};
+
+/** Gyerek ajánló (Főoldal „Gyerekeknek” rail); csak film (a sorozatra nincs korhatár-szűrő). */
+export type KidsPick = {
+  key: string;
+  id: number;
+  title: string;
+  backdropPath: string | null;
+  /** „0+ éveseknek · Animáció”; üres, ha a részletek nem érkeztek meg. */
+  caption: string;
+};
+
 /** Új Blu-ray megjelenés (Főoldal rail); csak film. */
 export type BlurayTitle = {
   key: string;

@@ -3,18 +3,29 @@ import { FlatList, Text, useWindowDimensions, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
+import { KidsPickCardSkeleton } from '@/components/KidsPickCard';
 import { PosterCardSkeleton } from '@/components/PosterCard';
 import { SectionHeader } from '@/components/SectionHeader';
-import { railLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
+import { TrendingCardSkeleton } from '@/components/TrendingCard';
+import { railLayout, TABLET_MIN_WIDTH, trendingLayout, wideRailLayout } from '@/constants/theme';
 
 const SKELETON_COUNT = 6;
 
-// Szekciócím + vízszintesen görgethető poszter-sor, betöltés (skeleton) / hiba + újra / üres
+// A rail három kártyaformája: álló poszter, sorszámos poszter (Népszerű), fekvő kártya (Gyerek).
+// Mindegyiknek más a mérete és a helykitöltője; a margó (telefon 21, iPad 35) közös.
+const variants = {
+  poster: { layout: railLayout, skeleton: (width: number) => <PosterCardSkeleton width={width} /> },
+  trending: { layout: trendingLayout, skeleton: (width: number) => <TrendingCardSkeleton width={width} /> },
+  wide: { layout: wideRailLayout, skeleton: (width: number) => <KidsPickCardSkeleton width={width} /> },
+};
+
+// Szekciócím + vízszintesen görgethető kártya-sor, betöltés (skeleton) / hiba + újra / üres
 // állapottal. A kártyát a hívó adja (`renderCard`), a rail a design szerinti szélességet adja át.
-// Teljes szélességű: a margót (telefon 21, iPad 35) a rail maga tartja.
+// Teljes szélességű: a margót a rail maga tartja.
 export function PosterRail<T>({
   title,
   note,
+  variant = 'poster',
   data,
   loading,
   error,
@@ -26,23 +37,25 @@ export function PosterRail<T>({
   title: string;
   /** Kis szürke sor a cím alatt (pl. „Német megjelenés”). */
   note?: string;
+  variant?: keyof typeof variants;
   data: T[];
   loading: boolean;
   error: boolean;
   onRetry: () => void;
   onSeeAll?: () => void;
   keyExtractor: (item: T) => string;
-  renderCard: (item: T, cardWidth: number) => ReactElement;
+  renderCard: (item: T, cardWidth: number, index: number) => ReactElement;
 }) {
   const { width } = useWindowDimensions();
-  const { cardWidth, gap, inset } = railLayout[width >= TABLET_MIN_WIDTH ? 'tablet' : 'phone'];
+  const { layout, skeleton } = variants[variant];
+  const { cardWidth, gap, inset } = layout[width >= TABLET_MIN_WIDTH ? 'tablet' : 'phone'];
 
   let body;
   if (loading) {
     body = (
       <View className="flex-row overflow-hidden" style={{ gap, paddingHorizontal: inset }}>
         {Array.from({ length: SKELETON_COUNT }, (_, i) => (
-          <PosterCardSkeleton key={i} width={cardWidth} />
+          <View key={i}>{skeleton(cardWidth)}</View>
         ))}
       </View>
     );
@@ -64,7 +77,7 @@ export function PosterRail<T>({
         horizontal
         data={data}
         keyExtractor={keyExtractor}
-        renderItem={({ item }) => renderCard(item, cardWidth)}
+        renderItem={({ item, index }) => renderCard(item, cardWidth, index)}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap, paddingHorizontal: inset }}
       />

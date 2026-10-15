@@ -8,10 +8,16 @@ export function pickTrailerKey(details: TitleDetails): string | undefined {
   return (pool.find((video) => video.iso_639_1 === 'hu') ?? pool[0])?.key;
 }
 
-/** Korhatár számként: HU, ennek híján a német FSK (D-007). Sorozatnál nincs `release_dates`. */
-export function pickCertification(details: TitleDetails): string | undefined {
+/**
+ * Korhatár számként: HU, ennek híján a német FSK (D-007); a gyerek ajánlók csak a DE-t kérik,
+ * mert a szűrésük is azon alapul. Sorozatnál nincs `release_dates`.
+ */
+export function pickCertification(
+  details: TitleDetails,
+  countryCodes: string[] = ['HU', 'DE'],
+): string | undefined {
   const countries = details.release_dates?.results ?? [];
-  for (const code of ['HU', 'DE']) {
+  for (const code of countryCodes) {
     const certification = countries
       .find((country) => country.iso_3166_1 === code)
       ?.release_dates.map((release) => release.certification)

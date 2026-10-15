@@ -3,12 +3,18 @@ import { Linking, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { HeroCarousel } from '@/components/HeroCarousel';
+import { KidsPickCard } from '@/components/KidsPickCard';
 import { PosterCard } from '@/components/PosterCard';
 import { PosterRail } from '@/components/PosterRail';
+import { SourceCredit } from '@/components/SourceCredit';
+import { TrendingCard } from '@/components/TrendingCard';
 import { strings } from '@/constants/strings';
+import { kidsAccents } from '@/constants/theme';
 import { useBlurayReleases } from '@/hooks/useBlurayReleases';
 import { useHeroItems } from '@/hooks/useHeroItems';
+import { useKidsPicks } from '@/hooks/useKidsPicks';
 import { useNewOnMyServices } from '@/hooks/useNewOnMyServices';
+import { useTrendingInHungary } from '@/hooks/useTrendingInHungary';
 import { formatRelativeDate, formatShortDate } from '@/lib/format';
 import { useWatchlistStore } from '@/store/useWatchlistStore';
 
@@ -16,6 +22,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const newOn = useNewOnMyServices();
   const bluray = useBlurayReleases();
+  const trending = useTrendingInHungary();
+  const kidsPicks = useKidsPicks();
   const heroItems = useHeroItems(newOn.titles);
   const toggleWatchlist = useWatchlistStore((state) => state.toggle);
 
@@ -79,6 +87,43 @@ export default function HomeScreen() {
             />
           )}
         />
+        <PosterRail
+          variant="trending"
+          title={strings.home.trending}
+          data={trending.titles}
+          loading={trending.loading}
+          error={trending.error}
+          onRetry={trending.retry}
+          keyExtractor={(title) => title.key}
+          renderCard={(title, width, index) => (
+            <TrendingCard
+              rank={index + 1}
+              title={title.title}
+              posterPath={title.posterPath}
+              width={width}
+            />
+          )}
+        />
+        <PosterRail
+          variant="wide"
+          title={strings.home.kidsPicks}
+          data={kidsPicks.titles}
+          loading={kidsPicks.loading}
+          error={kidsPicks.error}
+          onRetry={kidsPicks.retry}
+          onSeeAll={() => router.navigate('/kids')}
+          keyExtractor={(title) => title.key}
+          renderCard={(title, width, index) => (
+            <KidsPickCard
+              title={title.title}
+              backdropPath={title.backdropPath}
+              caption={title.caption}
+              accent={kidsAccents[index % kidsAccents.length]}
+              width={width}
+            />
+          )}
+        />
+        <SourceCredit />
       </View>
     </ScrollView>
   );
