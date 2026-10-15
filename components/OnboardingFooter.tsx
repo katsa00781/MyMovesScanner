@@ -1,21 +1,9 @@
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { strings } from '@/constants/strings';
-import { colors, radius } from '@/constants/theme';
-
-// A Pressable-n `style` függvény van (lenyomás), ezért nincs rajta className:
-// a NativeWind a függvényt nem alkalmazza, a méret és a kitöltés elveszne.
-const styles = StyleSheet.create({
-  cta: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    borderRadius: radius.button,
-    backgroundColor: colors.accent,
-  },
-});
+import { colors } from '@/constants/theme';
 
 function RegionLabel() {
   return (
@@ -28,7 +16,7 @@ function RegionLabel() {
 
 function SkipButton({ onPress }: { onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} hitSlop={12} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+    <Pressable onPress={onPress} hitSlop={12} className="active:opacity-60">
       <Text className="font-nunito-semibold text-[16px] text-textPrimary">
         {strings.onboarding.skip}
       </Text>
@@ -63,14 +51,9 @@ export function OnboardingFooter({
         onPress={onContinue}
         disabled={disabled}
         accessibilityRole="button"
-        style={({ pressed }) => [
-          styles.cta,
-          {
-            width: isTablet ? 396 : '100%',
-            height: isTablet ? 58 : 56,
-            opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
-          },
-        ]}>
+        className={`items-center justify-center rounded-button bg-accent px-4 active:opacity-80 ${
+          isTablet ? 'h-[58px] w-[396px]' : 'h-[56px] w-full'
+        } ${disabled ? 'opacity-40' : ''}`}>
         <Text className="font-nunito-bold text-[17px] text-ctaText">
           {strings.onboarding.continueWith(count)}
         </Text>

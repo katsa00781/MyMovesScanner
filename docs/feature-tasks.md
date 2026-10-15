@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Onboarding: Pressable csak className-nel (fix)
+
+**Mit:** A felhasználó iPad képernyőképe szerint az előző javításom (`Pressable` + `StyleSheet` stílus-függvényben) elrontotta a kártyákat: nincs háttér, keret, méret, a CTA fekete szöveggel fekete háttéren láthatatlan. Az előző diagnózisom hiányos volt: a NativeWind a `Pressable` `style` **függvényét** mindig eldobja, `className` nélkül is, tehát a `StyleSheet`-et sem lehet függvényben átadni. Javítás: a `Pressable` csak `className`-t kap (ez bizonyítottan működik); a futásidőben számolt kártyaméret egy burkoló `View` objektum-stílusán van; a lenyomás-hatás `active:opacity-*` osztállyal; a CTA méretei statikus osztályok `isTablet` szerint, letiltva `opacity-40`. Érintett: `ProviderCard`, az onboarding CTA és Kihagyom, `ErrorState`.
+**Fájlok:** components/ProviderCard.tsx, components/OnboardingFooter.tsx, components/ErrorState.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Weben (react-native-web, Chrome, a design méretein: 407×880 és 1244×869, a valós TMDB-adattal) lerenderelve: a kártyák 174×120 / 204×145, 2 / 4 oszlop, 17 / 21 px köz, a CTA 396 px széles, minden a mért design szerint. A web NEM bizonyítja a natív működést (a hibát ott a css-interop okozta), natívan továbbra sem futott: eszközön ellenőrizendő, főleg az `active:` lenyomás-hatás.
+**Nyitva maradt:** A `Sidebar`, `BottomTabBar` és a Beállítások link ugyanazt a (`className` + `style` függvény) mintát használja: az elrendezésük a `className`-ből rendben, csak a lenyomás-hatásuk hiányzik; nem nyúltam hozzájuk. A web-előnézethez az `app.json` `web.output` értékét átmenetileg `single`-re kellett állítani (a `static` Node-ban az AsyncStorage `window`-ját nem találja); visszaállítva, nem commitolva.
+**Commit:** `fix: Pressable csak className-nel (NativeWind style függvény)`
+
 ## 2026-10-15 – Onboarding: névalapú kiemelt szolgáltatólista (feature)
 
 **Mit:** A felhasználó döntése alapján (D-022 nyitott pontja) a szolgáltatók elejére egy névalapú kiemelt lista kerül: Netflix, HBO Max, Disney Plus, SkyShowtime, Amazon Prime Video, Apple TV, RTL+ (a design 7 szolgáltatója, TMDB-nevekkel). A `useProviders` ezeket a lista sorrendjében teszi előre, utánuk a többi a TMDB HU sorrendjében következik. A lista a `data/featuredProviders.ts`-ben él, névre illeszt (kis-nagybetű nélkül), ID-t nem tartalmaz.
@@ -437,10 +445,18 @@ Sablon:
 **Visszavonható?** igen.
 
 ## D-025 – Pressable: `style` függvény mellett nincs `className`
+**Állapot:** FELÜLÍRVA (D-026): a diagnózis hiányos volt, a `StyleSheet` stílus-függvényben szintén elvész.
 **Dátum:** 2026-10-15
 **Döntés:** ha egy `Pressable` lenyomás-állapotot használ (`style={({ pressed }) => …}`), akkor az elemen nincs `className`; a statikus stílus `StyleSheet`-ben van, a tokenekből, a gyerekek viszont használhatnak `className`-t.
 **Miért:** a NativeWind (css-interop) a `className` mellett kapott `style` függvényt nem alkalmazza, így a méretek és a lenyomás-hatás elvész (az onboarding kártyák és CTA így nem kaptak méretet). Ez egyezik a CLAUDE.md „StyleSheet kivételek” szabályával (Pressable pressed state).
 **Alternatíva:** `active:opacity-70` NativeWind osztály a lenyomásra – elkerüli a függvényt, de eltér a CLAUDE.md szabályától, és a dinamikus méret (`width`/`height`) így is külön `style` kellene.
 **Visszavonható?** igen.
+
+## D-026 – Pressable: csak `className`, nincs `style` függvény; futásidejű méret burkoló View-n
+**Dátum:** 2026-10-15
+**Döntés:** a `Pressable`-n nem használunk `style` függvényt (se `StyleSheet`-et, se objektumot függvényben): a stílus `className`, a lenyomás-hatás `active:opacity-*`. Ha a méret futásidőben számolt (pl. rácskártya), akkor a Pressable egy burkoló `View` objektum-stílusú (`style={{ width, height }}`) gyereke, és `h-full w-full`. Ez eltér a CLAUDE.md „StyleSheet kivételek / Pressable pressed state” szabályától, mert ebben a NativeWind-verzióban (4.2.7) a `style` függvény minden stílusát elveszíti.
+**Miért:** a felhasználó eszközén ez bizonyítottan hibát okoz (először méret és kitöltés hiányzott, majd, a `StyleSheet`-es átírás után, a teljes stílus). A `className` a Pressable-n, és a `className` + objektum-`style` a View-n bizonyítottan működik.
+**Alternatíva:** `TouchableOpacity` (a lenyomás-hatás beépített, `style` függvény nélkül) vagy `cssInterop` regisztráció a Pressable-re – egyik sem volt kipróbálva eszközön, ezért nem választottam.
+**Visszavonható?** igen, ha a NativeWind javítja a függvény-stílust.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

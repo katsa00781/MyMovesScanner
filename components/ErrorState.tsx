@@ -1,17 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { strings } from '@/constants/strings';
-import { colors, radius } from '@/constants/theme';
-
-// A Pressable-n `style` függvény van (lenyomás), ezért nincs rajta className.
-const styles = StyleSheet.create({
-  retry: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: radius.pill,
-    backgroundColor: colors.chip,
-  },
-});
 
 // Hiba / üres állapot újrapróbálással, listákhoz.
 export function ErrorState({
@@ -28,7 +17,7 @@ export function ErrorState({
       </Text>
       <Pressable
         onPress={onRetry}
-        style={({ pressed }) => [styles.retry, { opacity: pressed ? 0.6 : 1 }]}>
+        className="rounded-pill bg-chip px-6 py-3 active:opacity-60">
         <Text className="font-nunito-bold text-[15px] text-textPrimary">
           {strings.common.retry}
         </Text>
