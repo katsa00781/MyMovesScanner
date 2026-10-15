@@ -3,14 +3,17 @@ import { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AgeChip } from '@/components/AgeChip';
 import { ErrorState } from '@/components/ErrorState';
 import { OnboardingFooter } from '@/components/OnboardingFooter';
 import { OnboardingHeader } from '@/components/OnboardingHeader';
 import { ProviderCard, ProviderCardSkeleton } from '@/components/ProviderCard';
 import { strings } from '@/constants/strings';
 import { colors, TABLET_MIN_WIDTH } from '@/constants/theme';
+import { type KidsAgeLimit, kidsAgeLimits } from '@/data/kidsAgeLimits';
 import { useProviders } from '@/hooks/useProviders';
 import { useProvidersStore } from '@/store/useProvidersStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 // Design (01, 09): telefonon 2, tableten 4 oszlop; tableten a tartalom max. 880 széles.
 const SIDE_PADDING = 21;
@@ -25,8 +28,15 @@ export default function OnboardingScreen() {
 
   const savedIds = useProvidersStore((state) => state.selectedProviderIds);
   const saveProviders = useProvidersStore((state) => state.saveProviders);
+  const completeOnboarding = useProvidersStore((state) => state.completeOnboarding);
+  const savedAgeLimit = useSettingsStore((state) => state.kidsAgeLimit);
+  const setKidsAgeLimit = useSettingsStore((state) => state.setKidsAgeLimit);
   const { providers, loading, error, retry } = useProviders();
+  const [step, setStep] = useState<1 | 2>(1);
   const [selectedIds, setSelectedIds] = useState(savedIds);
+  // Amíg nincs érintés, a mentett korhatár látszik (a store visszatöltése után is helyes).
+  const [pickedAgeLimit, setPickedAgeLimit] = useState<KidsAgeLimit | null>(null);
+  const ageLimit = pickedAgeLimit ?? savedAgeLimit;
 
   const columns = isTablet ? 4 : 2;
   const gap = isTablet ? 21 : 17;
@@ -43,9 +53,20 @@ export default function OnboardingScreen() {
     );
   }
 
-  // A 2. lépés (Kids korhatár) külön feladat; addig a folytatás itt zárja le az onboardingot.
-  function finish(ids: number[]) {
-    saveProviders(ids);
+  // Az onboarding csak a 2. lépés végén (vagy a Kihagyomnál) zárul le (D-023); addig a
+  // (tabs) őr ide irányít vissza, és az 1. lépés a mentett szolgáltatókkal indul.
+  function continueFromProviders() {
+    saveProviders(selectedIds);
+    setStep(2);
+  }
+
+  function finish() {
+    setKidsAgeLimit(ageLimit);
+    skip();
+  }
+
+  function skip() {
+    completeOnboarding();
     router.replace('/');
   }
 
@@ -63,7 +84,23 @@ export default function OnboardingScreen() {
   } as const;
 
   let content;
-  if (error) {
+  if (step === 2) {
+    // Nincs saját design: a Gyerek sarok korhatár-chipjei (04, 12) az onboarding stílusában.
+    content = (
+      <View
+        accessibilityRole="radiogroup"
+        className={`flex-row gap-3 ${isTablet ? 'justify-center' : ''}`}>
+        {kidsAgeLimits.map((limit) => (
+          <AgeChip
+            key={limit}
+            limit={limit}
+            selected={limit === ageLimit}
+            onPress={() => setPickedAgeLimit(limit)}
+          />
+        ))}
+      </View>
+    );
+  } else if (error) {
     content = <ErrorState onRetry={retry} />;
   } else if (!loading && providers.length === 0) {
     content = <ErrorState message={strings.common.empty} onRetry={retry} />;
@@ -91,22 +128,27 @@ export default function OnboardingScreen() {
   return (
     <View className="flex-1 bg-background">
       <View pointerEvents="none" style={glowStyle} />
+      {/* A key újraindítja a görgetést: a rövid 2. lépés ne örökölje az 1. lépés eltolását. */}
       <ScrollView
+        key={step}
         contentContainerStyle={{
           alignItems: 'center',
           paddingTop: insets.top + (isTablet ? 80 : 14),
           paddingBottom: 24,
         }}>
         <View style={{ width: contentWidth }}>
-          <OnboardingHeader isTablet={isTablet} />
+          <OnboardingHeader step={step} isTablet={isTablet} />
           {content}
         </View>
       </ScrollView>
       <OnboardingFooter
-        count={selectedIds.length}
+        label={
+          step === 1 ? strings.onboarding.continueWith(selectedIds.length) : strings.onboarding.done
+        }
+        disabled={step === 1 && selectedIds.length === 0}
         isTablet={isTablet}
-        onContinue={() => finish(selectedIds)}
-        onSkip={() => finish(savedIds)}
+        onContinue={step === 1 ? continueFromProviders : finish}
+        onSkip={skip}
       />
     </View>
   );

@@ -7,8 +7,10 @@ type ProvidersState = {
   onboardingDone: boolean;
   /** Az AsyncStorage-ból visszatöltés után igaz; nem perzisztált. */
   hasHydrated: boolean;
-  /** Elmenti a választást, és lezárja az onboardingot. */
+  /** Elmenti a szolgáltató-választást (az onboarding 1. lépése). */
   saveProviders: (ids: number[]) => void;
+  /** Lezárja az onboardingot (a 2. lépés végén vagy a Kihagyomnál). */
+  completeOnboarding: () => void;
 };
 
 export const useProvidersStore = create<ProvidersState>()(
@@ -17,7 +19,8 @@ export const useProvidersStore = create<ProvidersState>()(
       selectedProviderIds: [],
       onboardingDone: false,
       hasHydrated: false,
-      saveProviders: (ids) => set({ selectedProviderIds: ids, onboardingDone: true }),
+      saveProviders: (ids) => set({ selectedProviderIds: ids }),
+      completeOnboarding: () => set({ onboardingDone: true }),
     }),
     {
       name: 'mms-providers',

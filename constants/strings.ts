@@ -38,6 +38,9 @@ export const strings = {
     skip: 'Kihagyom',
     region: 'Régió: Magyarország',
     kidsTitle: 'Gyerek korhatár',
+    kidsSubtitle:
+      'A Gyerek sarok csak eddig a korhatárig mutat meséket. Később a Beállításokban módosítható.',
+    done: 'Kész',
   },
 
   home: {

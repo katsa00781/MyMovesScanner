@@ -27,18 +27,19 @@ function SkipButton({ onPress }: { onPress: () => void }) {
 // Fix lábléc a lista alatt. Telefonon: régió, CTA, kihagyás egymás alatt;
 // tableten: keskeny CTA, alatta egy sorban a régió és a kihagyás.
 export function OnboardingFooter({
-  count,
+  label,
+  disabled = false,
   isTablet,
   onContinue,
   onSkip,
 }: {
-  count: number;
+  label: string;
+  disabled?: boolean;
   isTablet: boolean;
   onContinue: () => void;
   onSkip: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const disabled = count === 0;
 
   return (
     <View className="items-center px-[21px] pt-3" style={{ paddingBottom: insets.bottom + 16 }}>
@@ -54,9 +55,7 @@ export function OnboardingFooter({
         className={`items-center justify-center rounded-button bg-accent px-4 active:opacity-80 ${
           isTablet ? 'h-[58px] w-[396px]' : 'h-[56px] w-full'
         } ${disabled ? 'opacity-40' : ''}`}>
-        <Text className="font-bold text-[17px] text-ctaText">
-          {strings.onboarding.continueWith(count)}
-        </Text>
+        <Text className="font-bold text-[17px] text-ctaText">{label}</Text>
       </Pressable>
       {isTablet ? (
         <View className="mt-6 flex-row items-center gap-[19px]">

@@ -29,7 +29,7 @@
 - [x] Design tokenek és szövegek: `constants/theme.ts` a CLAUDE.md „Design tokenek” alapján, `constants/strings.ts` magyar szövegekkel (D-011)
 - [x] Navigációs váz: tab bar (telefon) / oldalsáv + MY SERVICES (iPad), üres képernyőkkel — design: 02, 10
 - [x] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
-- [ ] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
+- [x] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
 - [ ] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
 - [ ] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
 - [ ] Főoldal: „New Blu-ray releases” rail (HU → DE fallback, formátum badge — D-006, D-014)
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Onboarding 2. lépés: Kids korhatár (feature)
+
+**Mit:** Az onboarding képernyő `step` állapottal vált az 1. (szolgáltatók) és a 2. lépés (Gyerek korhatár: 0+ / 6+ / 12+ chipek, alapból 6+) között. Az 1. „Tovább” csak menti a szolgáltatókat és a 2. lépésre lép; az onboarding a 2. lépés „Kész” gombjával (a választott korhatárt menti) vagy bármelyik lépés „Kihagyom” gombjával zárul, és a főoldalra visz (D-023 terve szerint). Amíg nem zárult, a `(tabs)` őr az onboardingra irányít vissza, és az 1. lépés a mentett szolgáltatókkal indul. Új: `AgeChip` (a Kids design chipje: sötét pill, kijelölve `kidsBlue`), `data/kidsAgeLimits.ts` (`0 | 6 | 12`), `useSettingsStore` (egyelőre csak `kidsAgeLimit`, AsyncStorage). A fejléc `step` paramétert, a lábléc `label`/`disabled` paramétert kapott a `count` helyett; új szövegek: `onboarding.kidsSubtitle`, `onboarding.done`.
+**Fájlok:** app/onboarding.tsx, components/{AgeChip,OnboardingHeader,OnboardingFooter}.tsx, data/kidsAgeLimits.ts, store/{useSettingsStore,useProvidersStore}.ts, constants/strings.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Szimulátoron / eszközön NEM futott: a lépésváltás, a chip-választás, a lezárás utáni átirányítás, a mentés újraindítás után, és a vizuális kép (iPhone + iPad) eszközön ellenőrizendő.
+**Nyitva maradt:** (1) A 2. lépésnek nincs saját designja (a CLAUDE.md szerint ideiglenes): az elrendezés az 01/09 onboardingból és a 04/12 Kids chipekből áll össze (chip 44 px magas, 17 px oldalpadding, 18 px betű, 12 px köz, a PNG-ből mérve); ha más kell, szólj. (2) Az új szövegeket („Gyerek korhatár” alcíme, „Kész”) hagyd jóvá. (3) Nincs „Vissza” az 1. lépéshez; a szolgáltatók később a Beállításokból szerkeszthetők (ott az onboarding 2. lépése is megjelenik majd). (4) `useSettingsStore` még nem jelzi a visszatöltést: ha a Gyerek sarok / Kids' picks a korhatárt lekérdezési kulcsnak használja, a visszatöltést meg kell várni (a gyökér layoutban vagy `hasHydrated`-del). (5) A `strings.kids.ageChips` (`['0+','6+','12+']`) használaton kívül maradt, az `AgeChip` `{limit}+`-t írja ki; a Kids feladatnál eldől, melyik marad.
+**Commit:** `feat: onboarding 2. lépés gyerek korhatár`
 
 ## 2026-10-15 – Onboarding: hosszú szolgáltatónév egy sorban (fix)
 
@@ -481,5 +489,12 @@ Sablon:
 **Miért:** a design PDF/PNG-n a betű nem lekerekített, hanem SF/Inter jellegű, szűk betűközzel (a D-019 alapjául szolgáló „lekerekített” megítélés téves volt). A rendszerfont iOS-en pont ezt adja, automatikus optikai betűközzel, és nincs betöltési idő vagy extra csomag. Az app csak iPhone/iPad.
 **Alternatíva:** Inter betöltése (`@expo-google-fonts/inter`) – a webes mockhoz hasonló, de új csomag és az iOS-en a rendszerfont ugyanazt a hatást adja; vagy a Nunito megtartása – eltér a designtól.
 **Visszavonható?** igen, `fontFamily` token + betöltés visszatehető.
+
+## D-028 – Onboarding 2. lépés: ideiglenes Kids korhatár, lezárás a végén, részleges settings store
+**Dátum:** 2026-10-15
+**Döntés:** (1) A 2. lépés a Gyerek korhatár (0+/6+/12+), a CLAUDE.md ideiglenes szabálya szerint; saját design nincs, az elrendezés az onboarding és a Kids design chipjeiből áll össze. (2) Az onboarding a 2. lépés végén zárul (`completeOnboarding`); az 1. „Tovább” csak ment (`saveProviders`), így félbehagyott onboarding után az app újra az onboardingra visz. A „Kihagyom” mindkét lépésen lezár, a már mentett értékeket érintetlenül hagyva. (3) A korhatár alapértéke 6 (a design Kids képernyőjén is a 6+ a kijelölt). (4) A `useSettingsStore` egyelőre csak a `kidsAgeLimit`-et tartalmazza, a CLAUDE.md többi mezője (`region`, `language`, `hideMature`) a Beállítások feladattal jön. (5) Nincs „Vissza” gomb a 2. lépésen.
+**Miért:** (1) a CLAUDE.md szerint a design „STEP 1 OF 2” 2. lépése nem tisztázott, a Kids korhatár az ideiglenes tartalom; új UI-t nem találunk ki, a design chipjét használjuk. (2) A felhasználó a „Kész” előtt kilépve ne kerüljön a főoldalra korhatár nélkül, és a D-023 is ezt írta elő. (3) A korhatárnak alapérték kell, hogy a „Kihagyom” is érvényes állapotot adjon, és a design ezt mutatja. (4) A legkisebb működő verzió; az ismeretlen mezőket nem előre építjük. (5) A design nem ad rá mintát, és a szolgáltatók úgyis szerkeszthetők a Beállításokból.
+**Alternatíva:** (2) az 1. „Tovább” zárja le az onboardingot és a 2. lépés opcionális marad – egyszerűbb, de a korhatár-választás kimaradhatna; (4) a teljes store-alak most – használaton kívüli mezők; (5) „Vissza” szöveggomb – új, a designban nem szereplő elem.
+**Visszavonható?** igen, egy képernyő és egy store.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

@@ -3,7 +3,10 @@ import { Text, View } from 'react-native';
 import { strings } from '@/constants/strings';
 
 // Telefonon balra zárt „n. lépés” + cím; tableten középre igazított márkanév + cím.
-export function OnboardingHeader({ isTablet }: { isTablet: boolean }) {
+export function OnboardingHeader({ step, isTablet }: { step: 1 | 2; isTablet: boolean }) {
+  const title = step === 1 ? strings.onboarding.title : strings.onboarding.kidsTitle;
+  const subtitle = step === 1 ? strings.onboarding.subtitle : strings.onboarding.kidsSubtitle;
+
   if (isTablet) {
     return (
       <View className="mb-9 items-center">
@@ -12,10 +15,10 @@ export function OnboardingHeader({ isTablet }: { isTablet: boolean }) {
           <Text className="font-bold text-[18px] text-textPrimary">{strings.appName}</Text>
         </View>
         <Text className="mt-3 text-center font-extrabold text-[48px] leading-[54px] text-textPrimary">
-          {strings.onboarding.title}
+          {title}
         </Text>
         <Text className="mt-3 max-w-[600px] text-center text-[20px] leading-[28px] text-textSecondary">
-          {strings.onboarding.subtitle}
+          {subtitle}
         </Text>
       </View>
     );
@@ -24,14 +27,12 @@ export function OnboardingHeader({ isTablet }: { isTablet: boolean }) {
   return (
     <View className="mb-7">
       <Text className="font-extrabold text-[13px] tracking-widest text-accent">
-        {strings.onboarding.step(1, 2)}
+        {strings.onboarding.step(step, 2)}
       </Text>
       <Text className="mt-1.5 font-extrabold text-title leading-[40px] text-textPrimary">
-        {strings.onboarding.title}
+        {title}
       </Text>
-      <Text className="mt-3 text-[16px] leading-[23px] text-textSecondary">
-        {strings.onboarding.subtitle}
-      </Text>
+      <Text className="mt-3 text-[16px] leading-[23px] text-textSecondary">{subtitle}</Text>
     </View>
   );
 }
