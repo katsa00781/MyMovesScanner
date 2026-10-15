@@ -1,0 +1,27 @@
+{
+  "colors": {
+    "background": "#000000",
+    "surface": "#1C1C1E",
+    "chip": "#2C2C2E",
+    "accent": "#FF9F0A",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#8E8E93",
+    "ctaText": "#000000",
+    "sidebar": "#151515",
+    "sidebarSelected": "#2D2D2D",
+    "kidsBlue": "#62D1FE",
+    "kidsMint": "#66E3BD",
+    "kidsMintSoft": "#0C1F1B",
+    "kidsYellow": "#FED50A"
+  },
+  "radius": {
+    "card": 12,
+    "cardLarge": 16,
+    "button": 16,
+    "pill": 9999
+  },
+  "fontSize": {
+    "title": 34,
+    "section": 22
+  }
+}

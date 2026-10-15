@@ -3,10 +3,27 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import '@/global.css';
-
 import { Platform } from 'react-native';
 
+import tokens from './theme.json';
+
+// --- Mymoviescanner design tokenek (forrás: constants/theme.json) -----------
+// A NativeWind osztályokhoz (bg-surface, text-accent, rounded-card, text-title)
+// a tailwind.config.js ugyanezt a JSON-t olvassa.
+export const colors = tokens.colors;
+export const radius = tokens.radius;
+export const fontSize = tokens.fontSize;
+
+/** `useWindowDimensions().width >= TABLET_MIN_WIDTH` → tablet. */
+export const TABLET_MIN_WIDTH = 768;
+
+/** Poszter rács oszlopszámok. */
+export const gridColumns = {
+  phone: { default: 3, kids: 2 },
+  tablet: { default: 6, kids: 4 },
+} as const;
+
+// --- Expo template maradék (a navigációs váz feladat törli) ----------------
 export const Colors = {
   light: {
     text: '#000000',

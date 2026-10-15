@@ -26,7 +26,7 @@
 ### Feature-ök (sorrendben) — minden sor külön commit
 > Minden képernyőnél a `docs/design/` megfelelő iPhone + iPad PNG-je a forrás.
 
-- [ ] Design tokenek és szövegek: `constants/theme.ts` a CLAUDE.md „Design tokenek” alapján, `constants/strings.ts` magyar szövegekkel (D-011)
+- [x] Design tokenek és szövegek: `constants/theme.ts` a CLAUDE.md „Design tokenek” alapján, `constants/strings.ts` magyar szövegekkel (D-011)
 - [ ] Navigációs váz: tab bar (telefon) / oldalsáv + MY SERVICES (iPad), üres képernyőkkel — design: 02, 10
 - [ ] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
 - [ ] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Design tokenek és magyar szövegek (feature)
+
+**Mit:** Megnyitottam a 02, 10, 04 design PNG-ket, és a színeket pixelből olvastam ki (Pillow, csak a scratchpadben). Tokenek a `constants/theme.json`-ban: háttér/felület/chip/akcentus/szövegek a CLAUDE.md szerint, plusz a PNG-ből: `sidebar #151515`, `sidebarSelected #2D2D2D`, `kidsBlue #62D1FE`, `kidsMint #66E3BD`, `kidsMintSoft #0C1F1B`, `kidsYellow #FED50A`, `ctaText #000`; radius (card 12, cardLarge 16, button 16, pill), fontSize (title 34, section 22). A `tailwind.config.js` ugyanezt a JSON-t olvassa (`bg-surface`, `text-accent`, `rounded-card`, `text-title` stb.), a `constants/theme.ts` típusosan exportálja (`colors`, `radius`, `fontSize`, `TABLET_MIN_WIDTH = 768`, `gridColumns`). `constants/strings.ts`: magyar feliratok képernyőnként. `app.json`: `userInterfaceStyle: dark`. A template `Colors/Fonts/Spacing` exportjai ideiglenesen megmaradtak a `theme.ts` alján, mert a template komponensek használják; a navigációs váz törli.
+**Fájlok:** constants/theme.json, constants/theme.ts, constants/strings.ts, tailwind.config.js, app.json
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Vizuálisan nem, még nincs token-t használó képernyő.
+**Nyitva maradt:** (1) Betűtípus: a design lekerekített, Nunito-szerű betűtípusnak tűnik, nem a rendszerfontnak. Ehhez új könyvtár kell (`@expo-google-fonts/nunito`), ezért nem adtam hozzá; döntésre vár. (2) A pasztell kids kártyaszínek (rózsaszín, narancs, zöld) a posztereken vannak, nincs hozzájuk token; a Kids képernyőnél dől el. (3) A szövegeket Te hagyd jóvá: ahol a magyar fordítás nem szó szerinti (pl. "Újdonságok a szolgáltatóidon", "Emlékeztess").
+**Commit:** `feat: design tokenek és magyar szövegek`
 
 ## 2026-10-15 – lib réteg és TMDB típusok (backend)
 
@@ -321,6 +329,13 @@ Sablon:
 **Döntés:** az `mms-tmdb` a cache-t `npm:postgres`-szel, a beépített `SUPABASE_DB_URL`-en éri el, a whitelist a függvény saját `ROUTES` listája; a `lib/api.ts` csak tükrözi.
 **Miért:** a `mms` séma nincs kitéve a PostgREST-nek, így a supabase-js nem érné el; a függvény nem importálhat kliens kódot, ezért két helyen él a lista.
 **Alternatíva:** `mms` séma kitétele a PostgREST-nek (tiltott a szabályok szerint), vagy `public` wrapper RPC (a megosztott sémát érintené).
+**Visszavonható?** igen.
+
+## D-018 – Tokenek egy JSON-ban, pixelből kiolvasva
+**Dátum:** 2026-10-15
+**Döntés:** a design tokenek a `constants/theme.json`-ban élnek; a `tailwind.config.js` és a `theme.ts` is ezt olvassa. A CLAUDE.md-ben nem szereplő színeket a design PNG-kből mintavételeztem.
+**Miért:** a NativeWind osztályok és a runtime stílusok (árnyék, ikon-szín) ugyanazt az értéket használják, nincs kétszer felvett hex; a Tailwind config nem tud TypeScriptet (react-native importot) betölteni, JSON-t igen.
+**Alternatíva:** hexek a `tailwind.config.js`-ben és a `theme.ts`-ben külön – eltérésveszély; vagy `theme.js` CommonJS – típus nélkül.
 **Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
