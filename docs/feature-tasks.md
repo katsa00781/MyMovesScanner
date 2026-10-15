@@ -21,7 +21,7 @@
 - [x] Migráció: `mms` séma + `mms.tmdb_cache` tábla + index `expires_at`-ra
 - [x] Edge Function `mms-tmdb`: whitelist, cache olvasás/írás TTL-lel, TMDB hívás secretből
 - [x] `TMDB_API_KEY` secret beállítása, függvény deploy, curl teszt
-- [ ] `lib/supabase.ts`, `lib/api.ts`, `lib/tmdbImage.ts`, `types/tmdb.ts`
+- [x] `lib/supabase.ts`, `lib/api.ts`, `lib/tmdbImage.ts`, `types/tmdb.ts`
 
 ### Feature-ök (sorrendben) — minden sor külön commit
 > Minden képernyőnél a `docs/design/` megfelelő iPhone + iPad PNG-je a forrás.
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – lib réteg és TMDB típusok (backend)
+
+**Mit:** `lib/supabase.ts` (kliens az env kulcsokkal, auth/session kikapcsolva, hiányzó env esetén hibát dob), `lib/api.ts` (típusos `getProviders`, `discover`, `getTrending`, `search`, `getDetails`, mind az `mms-tmdb`-n át, a whitelist tükre), `lib/tmdbImage.ts` (poszter w342, backdrop w1280, szolgáltatólogó w92), `types/tmdb.ts` (Paged, Provider, TitleSummary, TitleDetails, WatchProviderRegion, ReleaseDate; csak a használt mezők).
+**Fájlok:** lib/supabase.ts, lib/api.ts, lib/tmdbImage.ts, types/tmdb.ts
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Curl-lel az éles függvényen: discover movie (`with_watch_providers=8|337`, flatrate, HU) 200, `movie/603` és `tv/1396` adatlap a négy `append_to_response`-szal 200, `search/multi` 200. A `supabase.functions.invoke` hívás az appból még NEM futott, és az iOS bundle sem fordította be a `lib/`-et, mert még nincs importálva.
+**Nyitva maradt:** az első képernyőn (onboarding) ellenőrizni, hogy a supabase-js Expo Go-n polyfill nélkül fut-e. A `logoUrl` (w92) a CLAUDE.md-ben nincs felsorolva, de a szolgáltatólogókhoz kell; a cast profilkép-méretet (`w185`) a Cast feladatnál adjuk hozzá. Sorozatnál a `release_dates` append értelmetlen (ott `content_ratings` van): a TMDB nem hibázik rá, de a sorozat korhatárát a Adatlap feladatnál külön kell megoldani.
+**Commit:** `feat: lib réteg és TMDB típusok`
 
 ## 2026-10-15 – mms-tmdb deploy és curl teszt (backend)
 
