@@ -30,7 +30,7 @@
 - [x] Navigációs váz: tab bar (telefon) / oldalsáv + MY SERVICES (iPad), üres képernyőkkel — design: 02, 10
 - [x] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
 - [x] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
-- [ ] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
+- [x] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
 - [ ] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
 - [ ] Főoldal: „New Blu-ray releases” rail (HU → DE fallback, formátum badge — D-006, D-014)
 - [ ] Főoldal: „Trending in Hungary” sorszámos rail (D-015) + „Kids' picks” fekvő kártyák + forrásmegjelölés lábléc
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Közös komponensek: poszter kártya, rail, szekciócím, állapotok (feature)
+
+**Mit:** A 02, 03, 07, 10, 11, 15 design PNG-ből pixelre mért méretekkel (Pillow, csak a scratchpadben): `PosterCard` (2:3 poszter, 1 px halvány keret, szolgáltató-logó vagy státusz-pill bal felül, Blu-ray formátum-pill jobb felül, opcionális cím + alcím alatta, nincs-poszter tartalék a címmel), `PosterBadge` (pill, narancs pipával vagy áttetsző fekete), `PosterCardSkeleton`, `SectionHeader` (22 pt cím + „Összes >”), `PosterRail` (szekciócím + vízszintes lista, skeleton / hiba + újra / üres állapot, a design szerinti kártyaszélesség, köz és margó telefonon és iPaden), `EmptyState`. Tokenek: `radius.poster` (14) a `theme.json`-ban, `railLayout` a `theme.ts`-ben (telefon 134 / 12 / 21, iPad 146 / 16 / 35: kártyaszélesség / köz / margó).
+**Fájlok:** components/{PosterCard,PosterBadge,PosterRail,SectionHeader,EmptyState}.tsx, constants/theme.json, constants/theme.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul; a komponenseket még nem importálja képernyő, ezért a bundle őket nem fordítja). Ideiglenes előnézeti route-tal (nem commitolva, törölve; az `app.json` `web.output` átmenetileg `single`, visszaállítva) weben, headless Chrome-ban, valós TMDB-adattal, valódi 407 és 1244 px széles nézetben: rail, rács, állapotok a designhoz egyeznek (kártyaméret, köz, margó, logó, pillek, felirat, hosszú cím három ponttal, „Összes”). A web NEM bizonyítja a natív működést: az SF Symbols (pipa, chevron), az `adjustsFontSizeToFit` és az `active:` lenyomás-hatás csak iOS-en látszik; eszközön ellenőrizendő.
+**Nyitva maradt:** (1) **Főoldal-feladat figyelmébe:** a szolgáltató-badge-hez és az „Ma · Netflix” alcímhez tudni kell, melyik szolgáltatón van a cím; a TMDB `discover` ezt nem adja vissza. Megoldás a Főoldalnál (szolgáltatónként külön `discover`, vagy címenként `watch/providers`), a `PosterCard` csak a kapott logót mutatja. (2) A „Elérhető most” (13 betű) hosszabb a 114 px-es kártyánál; a pill a designhoz hasonlóan túllóg, iOS-en a betű legfeljebb 80%-ig zsugorodik, utána három pont. Ha zavaró, rövidebb pill-felirat („Elérhető”) kell: a szövegeket Te hagyod jóvá. (3) A 3 oszlopos rács 407 px-en nem fér el fix 114 px-es kártyával és 12 px közzel (366 > 365): a Böngészés / Watchlist feladatnál a kártyaszélességet a konténerből kell számolni. (4) A „Trending” sorszámos rail és a „Kids' picks” fekvő kártyák külön feladat (más kártyaforma), nem a `PosterRail`-ben. (5) A `PosterCard` nem navigál: az `onPress`-t a képernyő adja, az Adatlap route még nincs. (6) A `PosterRail` a breakpointot maga számolja (`useWindowDimensions`); az `onboarding` és az `AppTabs` mellett ez a 3. hely: ha tovább nő, `useIsTablet` hook jöhet.
+**Commit:** `feat: közös poszter komponensek és rail`
 
 ## 2026-10-15 – Dev reset gomb (chore)
 
@@ -511,5 +519,19 @@ Sablon:
 **Miért:** Expo Go-ban nincs projektenkénti adattörlés, az onboarding tesztelése újratelepítést kért volna. A gyökér layoutba tett overlay nem érinti a képernyők kódját, és egy fájl + egy sor törlésével eltávolítható. A `clear()` + újratöltés a későbbi store-oknál (watchlist, keresés) sem igényel karbantartást, és nem kell a futó képernyők helyi állapotát (pl. az onboarding `step`-jét) külön nullázni.
 **Alternatíva:** store-onként `persist.clearStorage()` / `setState` újratöltés nélkül – minden új store-ot fel kell venni, és az onboarding képernyő helyi állapota megmaradna; gomb a Beállításokban – a képernyő még nem kész, és az onboarding alatt nem érhető el; `DevSettings.addMenuItem` (a rázásos menüben) – Expo Go saját menüjében nem biztos, hogy megjelenik.
 **Visszavonható?** igen, `components/DevResetButton.tsx` és a sora az `app/_layout.tsx`-ben.
+
+## D-030 – Poszter kártya: státusz-pill túllóg, 12 px pill-betű, 14 px sarok, nincs-poszter tartalék
+**Dátum:** 2026-10-15
+**Döntés:** (1) A bal felső státusz-pill a vágó poszter-konténeren kívül rajzolódik, és a designhoz hasonlóan kissé (legfeljebb 8 px) túllóghat a kártya jobb szélén; a formátum-pill (jobb felül) a poszteren belül marad. Hosszabb felirat: a betű iOS-en legfeljebb 80%-ig zsugorodik, utána három pont. (2) A pill szövege 12 px félkövér (a PNG-ből mért 112 px-es pill-szélességből és 9 px-es nagybetű-magasságból). (3) A poszter sarokrádiusza 14 px (mért), új token: `radius.poster`; a 1 px halvány keret `white/7%`-os, a posztert fedő réteg. (4) Ha a TMDB-nek nincs posztere, a kártya `surface` színű, rajta a cím másodlagos színnel (a design nem mutat ilyet; ez a legkisebb tartalék). (5) A pillek feketéje 70%-os (a design pixelértékeiből).
+**Miért:** (1) a design 3 oszlopos telefonos Watchlistjén az „Available now” és „Streaming 2027” pill is túllóg; a poszterhez vágva a felirat csonkulna („Elérhető …”), ami információvesztés. (2) a SF-fel azonos arányok mellett ez adja a design pill-szélességét. (3) a mérés 14 px-et adott, a tokenek 12 és 16 között nem fedik. (4) poszter nélküli cím ne legyen üres, névtelen négyzet.
+**Alternatíva:** (1) a pill a poszterbe vágva rövidített felirattal – olvashatatlan; a felirat rövidítése („Elérhető”) – a szöveg a Te döntésed; (3) a meglévő `card` (12) vagy `cardLarge` (16) token – 2 px-es eltérés a designtól.
+**Visszavonható?** igen, egy komponens és egy token.
+
+## D-031 – `PosterRail` általános, saját margóval; `PosterCard` adatfüggetlen és nem navigál
+**Dátum:** 2026-10-15
+**Döntés:** a `PosterRail<T>` általános (`data`, `renderCard(item, cardWidth)`), és a design szerinti kártyaszélességet, közt és oldalsó margót maga veszi a `railLayout` tokenből a breakpoint szerint, így a képernyő csak adatot és állapotot ad. A `PosterCard` csak megjelenítési propokat kap (poszter, logó, formátum, státusz, alcím, `onPress`), nem tud TMDB-típusról és route-ról. Az üres állapot külön `EmptyState` (nincs újrapróbálás), a hiba az `ErrorState`.
+**Miért:** a Főoldal több railje (új a szolgáltatóimon, Blu-ray) ugyanígy néz ki, ismétlés nélkül; a TMDB-típus és a szolgáltató-logó eredete (a `discover` nem ad szolgáltatót, lásd a „Közös komponensek” munkanapló-bejegyzés Nyitva pontját) a hookok dolga. Az Adatlap route még nincs, ezért a navigációt a képernyő köti be.
+**Alternatíva:** a képernyő adja át a méretet minden railnek – ismétlődő propok; `PosterCard` közvetlenül `TitleSummary`-t kapjon – összekötné a komponenst a TMDB-alakkal, pedig a Watchlist saját elemtípust használ (`WatchlistItem`).
+**Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

@@ -19,6 +19,7 @@
   "radius": {
     "card": 12,
     "cardLarge": 16,
+    "poster": 14,
     "button": 16,
     "pill": 9999
   },
