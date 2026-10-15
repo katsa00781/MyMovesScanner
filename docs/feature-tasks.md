@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Migráció alkalmazva a familyBudget projekten (backend)
+
+**Mit:** A kérésedre alkalmaztam a `202610150930_mms_schema_and_tmdb_cache.sql` tartalmát a familyBudget Supabase projekten (`eguhipjgnhbajbmnrskm`, MCP `apply_migration`, név: `mms_schema_and_tmdb_cache`). Előtte ellenőriztem, hogy az `mms` séma nem létezett. Utána: `mms.tmdb_cache` + pkey + `expires_at` index megvan, RLS be, `anon`/`authenticated` jog nincs, csak `service_role` fér hozzá. Más sémához nem nyúltam.
+**Fájlok:** docs/feature-tasks.md (a migrációs fájl változatlan)
+**Tesztelve:** katalóguslekérdezések a pg_class / role_table_grants nézetekből.
+**Nyitva maradt:** Az MCP a migrációt saját időbélyeggel regisztrálja a `supabase_migrations`-ben, a repó fájlneve (`202610150930`) ettől eltérhet; ha később `supabase db push`-t használunk, ezt egyeztetni kell. A `mms` nincs az exposed schemas között (nem vettem fel). Hátra: `TMDB_API_KEY` secret ellenőrzése, deploy (külön kérésre), curl teszt.
+**Commit:** `docs: mms migráció alkalmazása a naplóban`
+
 ## 2026-10-15 – Edge Function mms-tmdb (backend)
 
 **Mit:** Megírtam az `mms-tmdb` függvényt. POST `{ path, params }`; a `path` whitelistes (discover movie/tv, trending, search multi/movie/tv/person, watch/providers movie/tv, movie/:id, tv/:id), minden más 403. A paraméterek validáltak (kulcs-formátum, max 20 db, max 300 karakter, `api_key` eldobva), `language` alapból `hu-HU`. Cache: `mms.tmdb_cache`, kulcs = path + rendezett paraméterek; TTL lista/discover/trending/search 6 óra, szolgáltatólista 24 óra, adatlap 7 nap. Cache hiba nem töri el a kérést. A TMDB kulcs `TMDB_API_KEY` secretből jön, nem kerül válaszba/logba. A `supabase/functions` kikerült a tsconfig és az ESLint hatóköréből (Deno kód).
