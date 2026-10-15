@@ -3,6 +3,7 @@
     "background": "#000000",
     "surface": "#1C1C1E",
     "chip": "#2C2C2E",
+    "segmentSelected": "#626264",
     "accent": "#FF9F0A",
     "textPrimary": "#FFFFFF",
     "textSecondary": "#8E8E93",

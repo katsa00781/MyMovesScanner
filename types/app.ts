@@ -119,3 +119,20 @@ export type BlurayTitle = {
   /** „4K UHD”, „Steelbook” vagy „Blu-ray” (D-014). */
   format: string;
 };
+
+/** Watchlist kártya státusza (07, 15 design): a felirat, és hogy „Elérhető most” (narancs, pipás). */
+export type WatchlistStatus = { label: string; available: boolean };
+
+/** Amit a Watchlist egy címről tud a részletekből; a státusz ebből számolódik (a szolgáltatóim szerint). */
+export type WatchlistAvailability = {
+  /** A HU előfizetéses (flatrate) szolgáltatók ID-i. */
+  flatrateIds: number[];
+  hasRent: boolean;
+  hasBuy: boolean;
+  /** A legkorábbi fizikai megjelenés (HU, ennek híján DE). */
+  disc?: DiscRelease;
+  /** A legkorábbi magyar mozis megjelenés, ÉÉÉÉ-HH-NN. */
+  cinemaDate?: string;
+  /** Film: `release_date`, sorozat: `first_air_date`; ÉÉÉÉ-HH-NN. */
+  releaseDate?: string;
+};

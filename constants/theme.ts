@@ -81,6 +81,22 @@ export const castGradients = [
   ['#90795A', '#3F3830'],
 ] as const;
 
+/**
+ * Poszter rács (07, 15 design): oldalsó margó, oszlopköz, sorköz. A kártyaszélességet az oszlopszám
+ * (`gridColumns`) és a képernyő szélessége adja.
+ */
+export const gridLayout = {
+  phone: { inset: 21, gap: 11, rowGap: 15 },
+  tablet: { inset: 35, gap: 14, rowGap: 20 },
+} as const;
+
+/** Watchlist fejléc (07, 15 design): a telefon fejlécsor magassága, az iPad szegmens-vezérlő szélessége. */
+export const watchlistLayout = {
+  phone: { barTop: 3, barHeight: 42, controlGap: 19 },
+  tablet: { barTop: 27, barHeight: 41, controlWidth: 438 },
+  gridTop: 20,
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

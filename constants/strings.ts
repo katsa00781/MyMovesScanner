@@ -111,6 +111,9 @@ export const strings = {
     bluray: 'Blu-ray',
     cinema: 'Moziban',
     rentOnly: 'Csak kölcsönzés',
+    buyOnly: 'Csak vásárlás',
+    streaming: (year: string) => `Streaming ${year}`,
+    empty: 'A watchlist még üres.',
   },
 
   settings: {

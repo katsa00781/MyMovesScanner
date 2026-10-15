@@ -6,6 +6,8 @@ import type { WatchlistItem } from '@/types/app';
 
 type WatchlistState = {
   items: WatchlistItem[];
+  /** Az AsyncStorage-ból visszatöltés után igaz; nem perzisztált. */
+  hasHydrated: boolean;
   /** Hozzáadja, ha még nincs a listán, egyébként eltávolítja. */
   toggle: (item: Omit<WatchlistItem, 'addedAt'>) => void;
 };
@@ -14,6 +16,7 @@ export const useWatchlistStore = create<WatchlistState>()(
   persist(
     (set) => ({
       items: [],
+      hasHydrated: false,
       toggle: (item) =>
         set((state) => {
           const exists = state.items.some((i) => i.type === item.type && i.id === item.id);
@@ -27,6 +30,9 @@ export const useWatchlistStore = create<WatchlistState>()(
     {
       name: 'mms-watchlist',
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ items: state.items }),
+      // Hiba esetén is lefut, így a Watchlist nem ragad a betöltésnél.
+      onRehydrateStorage: () => () => useWatchlistStore.setState({ hasHydrated: true }),
     },
   ),
 );

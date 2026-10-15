@@ -15,6 +15,11 @@ export function formatShortDate(date: string): string {
   });
 }
 
+/** ÉÉÉÉ-HH-NN dátumból „nov.”. */
+export function formatMonth(date: string): string {
+  return new Date(`${date}T00:00:00`).toLocaleDateString('hu-HU', { month: 'short' });
+}
+
 /** ÉÉÉÉ-HH-NN dátumból „2026. nov. 14.”. */
 export function formatFullDate(date: string): string {
   return new Date(`${date}T00:00:00`).toLocaleDateString('hu-HU', {
