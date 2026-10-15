@@ -15,6 +15,24 @@ export function formatShortDate(date: string): string {
   });
 }
 
+/** ÉÉÉÉ-HH-NN dátumból „2026. nov. 14.”. */
+export function formatFullDate(date: string): string {
+  return new Date(`${date}T00:00:00`).toLocaleDateString('hu-HU', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/** Nyelv / ország magyar neve az Intl-ből; ha a motor nem tudja, a TMDB neve. */
+export function displayName(type: 'language' | 'region', code: string, fallback: string): string {
+  try {
+    return new Intl.DisplayNames(['hu'], { type }).of(code) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 /** ÉÉÉÉ-HH-NN dátumból „Ma” / „Tegnap” / „szept. 28.” (helyi idő szerint). */
 export function formatRelativeDate(date: string): string {
   const day = new Date(`${date}T00:00:00`);

@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getDetails } from '@/lib/api';
+import { getDetails, REGION } from '@/lib/api';
 import { formatRuntime } from '@/lib/format';
-import { pickCertification, pickMyProvider, pickTrailerKey, runtimeMinutes } from '@/lib/titleInfo';
+import {
+  pickCast,
+  pickCertification,
+  pickDisc,
+  pickFacts,
+  pickMyProvider,
+  pickOffers,
+  pickTrailerKey,
+  runtimeMinutes,
+} from '@/lib/titleInfo';
 import { useProvidersStore } from '@/store/useProvidersStore';
 import type { TitlePage } from '@/types/app';
 import type { MediaType, TitleDetails } from '@/types/tmdb';
@@ -37,6 +46,11 @@ function toTitlePage(
     rating: details.vote_average > 0 ? details.vote_average.toFixed(1) : undefined,
     trailerKey: pickTrailerKey(details),
     myProvider: pickMyProvider(details, selectedProviderIds),
+    offers: pickOffers(details, selectedProviderIds),
+    watchLink: details['watch/providers']?.results[REGION]?.link,
+    disc: pickDisc(details),
+    cast: pickCast(details),
+    facts: pickFacts(details),
   };
 }
 

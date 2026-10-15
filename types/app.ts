@@ -33,7 +33,39 @@ export type HeroItem = {
   watchlisted: boolean;
 };
 
-/** Az Adatlap tetejének adatai a részletekből (hero, meta, értékelés, leírás). */
+export type OfferKind = 'stream' | 'rent' | 'buy';
+
+/** „Hol nézhető” sor: egy szolgáltató egy módon (előfizetés / kölcsönzés / vásárlás). */
+export type WatchOffer = {
+  key: string;
+  kind: OfferKind;
+  provider: Provider;
+  /** A kiválasztott előfizetéseim egyike. */
+  mine: boolean;
+};
+
+/** „Lemezen” kártya: a legkorábbi fizikai megjelenés (HU, ennek híján DE). */
+export type DiscRelease = {
+  /** „Blu-ray”, „4K UHD” vagy „Blu-ray & 4K UHD” (D-014). */
+  formats: string;
+  /** ÉÉÉÉ-HH-NN. */
+  date: string;
+  region: 'HU' | 'DE';
+};
+
+/** „Szereplők és stáb” kör: a rendező, utána a főszereplők. */
+export type CastMember = {
+  key: string;
+  name: string;
+  /** Szerep (színésznél) vagy „Rendező”; lehet üres. */
+  role: string;
+  profilePath: string | null;
+};
+
+/** Az iPad „Névjegy” oszlop adatai; amit a TMDB nem ad, hiányzik. */
+export type TitleFacts = { director?: string; language?: string; country?: string };
+
+/** Az Adatlap adatai a részletekből (hero, meta, értékelés, leírás, hol nézhető, lemez, stáb). */
 export type TitlePage = {
   id: number;
   type: MediaType;
@@ -49,6 +81,12 @@ export type TitlePage = {
   trailerKey?: string;
   /** A kiválasztott szolgáltatóim közül az első, amelyiken előfizetéssel nézhető. */
   myProvider?: Provider;
+  offers: WatchOffer[];
+  /** A TMDB „hol nézhető” oldala (JustWatch adat), a sorok „Megnyitás” gombjának célja. */
+  watchLink?: string;
+  disc?: DiscRelease;
+  cast: CastMember[];
+  facts: TitleFacts;
 };
 
 /** Népszerű cím (Főoldal „Népszerű Magyarországon” rail); film vagy sorozat. */

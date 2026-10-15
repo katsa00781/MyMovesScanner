@@ -59,6 +59,28 @@ export const titleLayout = {
   tablet: { height: 508, padX: 43, barPadX: 26 },
 } as const;
 
+/**
+ * Adatlap blokkjai (06, 14 design): a szekciók köze, a „Szereplők” kör mérete, elem- és betűmérete,
+ * valamint az iPad két oszlopának aránya (a Hol nézhető 489, a Névjegy 362 px, köztük 38 px).
+ */
+export const titleSections = {
+  phone: { gap: 28, castCircle: 76, castItem: 90, castGap: 12, castInitials: 25, castNameGap: 9 },
+  tablet: { gap: 34, castCircle: 88, castItem: 104, castGap: 11, castInitials: 30, castNameGap: 7 },
+} as const;
+export const titleColumns = { left: 489, right: 362, gap: 38 } as const;
+
+/** Monogramos szereplő-körök színátmenete (felül, alul), körbeforgatva (a design sorrendje). */
+export const castGradients = [
+  ['#5350C3', '#2F2E56'],
+  ['#2B96A9', '#21474F'],
+  ['#D7870C', '#5C4317'],
+  ['#D75770', '#5E303B'],
+  ['#2DB342', '#1F4A28'],
+  ['#9F4DC9', '#442B52'],
+  ['#57AFD3', '#2C4854'],
+  ['#90795A', '#3F3830'],
+] as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

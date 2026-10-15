@@ -57,6 +57,7 @@ export type TitleDetails = TitleSummary & {
   episode_run_time?: number[];
   original_language: string;
   production_countries?: { iso_3166_1: string; name: string }[];
+  spoken_languages?: { iso_639_1: string; english_name: string }[];
   'watch/providers': { results: Record<string, WatchProviderRegion> };
   release_dates?: {
     results: { iso_3166_1: string; release_dates: ReleaseDate[] }[];
@@ -64,6 +65,6 @@ export type TitleDetails = TitleSummary & {
   videos: { results: { key: string; site: string; type: string; iso_639_1: string }[] };
   credits: {
     cast: { id: number; name: string; character: string; profile_path: string | null }[];
-    crew: { id: number; name: string; job: string }[];
+    crew: { id: number; name: string; job: string; profile_path: string | null }[];
   };
 };

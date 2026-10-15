@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { discover, getDetails } from '@/lib/api';
+import { formatFromNote, PHYSICAL } from '@/lib/titleInfo';
 import type { BlurayTitle } from '@/types/app';
 import type { ReleaseDate, TitleDetails } from '@/types/tmdb';
 
 const CANDIDATE_LIMIT = 12;
 const WINDOW_DAYS = 60;
-const PHYSICAL = 5;
 
 type BlurayRegion = 'HU' | 'DE';
 
@@ -14,14 +14,6 @@ function isoDay(offsetDays: number): string {
   const day = new Date();
   day.setDate(day.getDate() + offsetDays);
   return day.toISOString().slice(0, 10);
-}
-
-// A TMDB release `note` mezőjéből (D-014): „4K Ultra HD Steelbook / Blu-ray / DVD” → „4K UHD”.
-function formatFromNote(note: string): string {
-  const text = note.toLowerCase();
-  if (text.includes('4k') || text.includes('uhd')) return '4K UHD';
-  if (text.includes('steelbook')) return 'Steelbook';
-  return 'Blu-ray';
 }
 
 // Van magyar megjelenési bejegyzése (bármilyen típus, pl. mozi)? A DE ágon csak az ilyen címek

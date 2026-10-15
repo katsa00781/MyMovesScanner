@@ -11,3 +11,7 @@ export function backdropUrl(path: string | null): string | null {
 export function logoUrl(path: string | null): string | null {
   return path ? `${BASE}/w92${path}` : null;
 }
+
+export function profileUrl(path: string | null): string | null {
+  return path ? `${BASE}/w185${path}` : null;
+}

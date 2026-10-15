@@ -1,5 +1,13 @@
+import { strings } from '@/constants/strings';
 import { REGION } from '@/lib/api';
+import { displayName } from '@/lib/format';
+import type { CastMember, DiscRelease, TitleFacts, WatchOffer } from '@/types/app';
 import type { MediaType, Provider, TitleDetails } from '@/types/tmdb';
+
+/** TMDB release típus: fizikai (Blu-ray, DVD). */
+export const PHYSICAL = 5;
+
+const CAST_LIMIT = 11;
 
 export function trailerUrl(key: string): string {
   return `https://www.youtube.com/watch?v=${key}`;
@@ -48,4 +56,93 @@ export function pickCertification(
 
 export function runtimeMinutes(details: TitleDetails): number | undefined {
   return details.runtime || details.episode_run_time?.[0] || undefined;
+}
+
+/** A szolgáltatók módonként (előfizetés, kölcsönzés, vásárlás), a TMDB sorrendjében (HU). */
+export function pickOffers(details: TitleDetails, selectedProviderIds: number[]): WatchOffer[] {
+  const region = details['watch/providers']?.results[REGION];
+  const groups = [
+    ['stream', region?.flatrate],
+    ['rent', region?.rent],
+    ['buy', region?.buy],
+  ] as const;
+  return groups.flatMap(([kind, providers]) =>
+    (providers ?? []).map((provider) => ({
+      key: `${kind}:${provider.provider_id}`,
+      kind,
+      provider,
+      mine: selectedProviderIds.includes(provider.provider_id),
+    })),
+  );
+}
+
+// A TMDB release `note` mezőjéből (D-014): „4K Ultra HD Steelbook / Blu-ray / DVD” → „4K UHD”.
+export function formatFromNote(note: string): string {
+  const text = note.toLowerCase();
+  if (text.includes('4k') || text.includes('uhd')) return '4K UHD';
+  if (text.includes('steelbook')) return 'Steelbook';
+  return 'Blu-ray';
+}
+
+const FORMAT_ORDER = ['Blu-ray', '4K UHD', 'Steelbook'];
+
+/** A legkorábbi fizikai megjelenés: HU, ennek híján DE (D-006); a formátumok a régió összes kiadásából. */
+export function pickDisc(details: TitleDetails): DiscRelease | undefined {
+  for (const region of ['HU', 'DE'] as const) {
+    const releases = (
+      details.release_dates?.results.find((entry) => entry.iso_3166_1 === region)?.release_dates ??
+      []
+    )
+      .filter((release) => release.type === PHYSICAL)
+      .sort((a, b) => a.release_date.localeCompare(b.release_date));
+    if (releases.length > 0) {
+      const found = releases.map((release) => formatFromNote(release.note));
+      return {
+        region,
+        date: releases[0].release_date.slice(0, 10),
+        formats: FORMAT_ORDER.filter((format) => found.includes(format)).join(' & '),
+      };
+    }
+  }
+  return undefined;
+}
+
+/** A rendező (ha van), utána a főszereplők a TMDB sorrendjében. */
+export function pickCast(details: TitleDetails): CastMember[] {
+  const director = details.credits.crew.find((person) => person.job === 'Director');
+  const members: CastMember[] = details.credits.cast.slice(0, CAST_LIMIT).map((person) => ({
+    key: `cast:${person.id}`,
+    name: person.name,
+    role: person.character,
+    profilePath: person.profile_path,
+  }));
+  if (director) {
+    members.unshift({
+      key: `director:${director.id}`,
+      name: director.name,
+      role: strings.title.director,
+      profilePath: director.profile_path,
+    });
+  }
+  return members;
+}
+
+/** Az iPad „Névjegy” oszlop: rendező, nyelv, ország (a nyelv és az ország magyar neve, ha az Intl tudja). */
+export function pickFacts(details: TitleDetails): TitleFacts {
+  const directors = details.credits.crew
+    .filter((person) => person.job === 'Director')
+    .map((person) => person.name);
+  const languages = (details.spoken_languages ?? []).map((language) =>
+    displayName('language', language.iso_639_1, language.english_name),
+  );
+  const countries = (details.production_countries ?? []).map((country) =>
+    displayName('region', country.iso_3166_1, country.name),
+  );
+  return {
+    director: directors.slice(0, 2).join(', ') || undefined,
+    language:
+      languages.slice(0, 3).join(', ') ||
+      displayName('language', details.original_language, details.original_language),
+    country: countries.slice(0, 3).join(', ') || undefined,
+  };
 }
