@@ -21,6 +21,8 @@ export const strings = {
     retry: 'Újra',
     loadError: 'Nem sikerült betölteni.',
     empty: 'Nincs találat.',
+    today: 'Ma',
+    yesterday: 'Tegnap',
     onYourServices: 'Előfizetéseim',
     film: 'Film',
     series: 'Sorozat',
@@ -46,6 +48,7 @@ export const strings = {
   home: {
     newOn: (provider: string) => `ÚJ A(Z) ${provider.toUpperCase()} KÍNÁLATÁBAN`,
     newOnServices: 'Újdonságok a szolgáltatóidon',
+    noServices: 'Nincs kiválasztott előfizetés.',
     newBluray: 'Új Blu-ray megjelenések',
     trending: 'Népszerű Magyarországon',
     kidsPicks: 'Gyerekeknek',

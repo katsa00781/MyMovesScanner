@@ -60,7 +60,7 @@ export type TitleDetails = TitleSummary & {
   release_dates?: {
     results: { iso_3166_1: string; release_dates: ReleaseDate[] }[];
   };
-  videos: { results: { key: string; site: string; type: string }[] };
+  videos: { results: { key: string; site: string; type: string; iso_639_1: string }[] };
   credits: {
     cast: { id: number; name: string; character: string; profile_path: string | null }[];
     crew: { id: number; name: string; job: string }[];

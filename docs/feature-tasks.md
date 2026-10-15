@@ -31,7 +31,7 @@
 - [x] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
 - [x] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
 - [x] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
-- [ ] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
+- [x] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
 - [ ] Főoldal: „New Blu-ray releases” rail (HU → DE fallback, formátum badge — D-006, D-014)
 - [ ] Főoldal: „Trending in Hungary” sorszámos rail (D-015) + „Kids' picks” fekvő kártyák + forrásmegjelölés lábléc
 - [ ] Adatlap: hero, meta, korhatár, TMDB értékelés, Trailer, Watchlist gomb, leírás — design: 06, 14
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Főoldal: hero carousel + „Újdonságok a szolgáltatóidon” rail (feature)
+
+**Mit:** A 02 és 10 design PNG-ből mért méretekkel (Pillow, csak a scratchpadben). `HeroCarousel`: teljes szélességű, lapozható backdrop (5 lap), rajta a szolgáltató („ÚJ A(Z) … KÍNÁLATÁBAN”), cím, meta (műfaj · év · hossz) + korhatár-pill, Előzetes és Watchlist („+”) gomb; telefonon alul középen, iPaden jobb alul a pöttyök; felső sáv: telefonon márkanév + beállítások ikon, iPaden kereső ikon. Sötétítés a backdropra RN `experimental_backgroundImage` lineáris átmenettel (D-024 mintája, nincs új könyvtár). A Főoldal a herón kívül a `PosterRail`-lel mutatja az új címeket (szolgáltató-logó, „Ma · Netflix” alcím, „Összes” → Böngészés fül). Hookok: `useMyProviders` (kiválasztott szolgáltatók TMDB-adatai), `useNewOnMyServices` (szolgáltatónként és típusonként egy `discover`, egyesítve, rendezve, ismétlődés nélkül), `useHeroItems` (az első 5 hátteres címre `getDetails`). Új: `useWatchlistStore` (a hero „+” gombjához; a Watchlist feladat erre épül), `lib/format.ts` (hossz, „Ma / Tegnap / okt. 9.”), `lib/titleInfo.ts` (előzetes, korhatár, hossz), `types/app.ts`. `getDetails` kapott `include_video_language=hu,en,null`-t (nélküle a hu-HU mellett 0 videó jött, vele 29: curl-lel ellenőrizve). Tokenek: `heroLayout`, `textSoft` (#D1D1D6, a meta/leírás színe a PNG-ből). A `DevResetButton` a jobb felső ikon mellé került (right: 72).
+**Fájlok:** app/(tabs)/index.tsx, components/{HeroCarousel,DevResetButton}.tsx, hooks/{useMyProviders,useNewOnMyServices,useHeroItems}.ts, store/useWatchlistStore.ts, lib/{api,format,titleInfo}.ts, types/{app,tmdb}.ts, constants/{theme.json,theme.ts,strings.ts}, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Weben (headless Chrome, valós TMDB-adat az `mms-tmdb`-ről, a localStorage-ba előre beírt szolgáltatókkal és kész onboardinggal; `app.json` `web.output` átmenetileg `single`, visszaállítva; a CORS miatt a preview Chrome-ja külön profillal, webbiztonság nélkül futott, natívan nincs CORS) telefon (407) és iPad (1244) szélességben a méretek a designhoz egyeznek: gombok 463–515 / 397–448 px, pöttyök 536 / 440 px, hero alja 539 / 467 px, a rail kártyái és a fejléc a design helyén. A web NEM mutatta: az átmeneteket (a web nem támogatja az `experimental_backgroundImage`-et), az SF Symbols ikonokat (lejátszás, „+”, fogaskerék, nagyító, pipa, chevron), az `active:` lenyomás-hatást, az `adjustsFontSizeToFit`-et; ezek eszközön ellenőrizendők, és az Előzetes gomb YouTube-megnyitása (`Linking`) sem futott.
+**Nyitva maradt:** (1) A rail magyar címe („Újdonságok a szolgáltatóidon”) telefonon 22 pt-on három ponttal csonkul; rövidebb szöveg kellene (pl. „Új a szolgáltatóidon”): a szövegeket Te hagyod jóvá. (2) Sem a hero, sem a kártyák nem navigálnak az Adatlapra (a route még nincs); a „Összes” a Böngészés fülre visz (még üres képernyő). (3) Sorozatnál az „új” a TMDB `first_air_date` (a sorozat premierje), nem az új évad dátuma: a `discover` nem ad évaddátumot; a hero sorozatoknál korhatárt sem mutat (nincs `release_dates`, a `content_ratings` az Adatlap feladat). (4) Ha egy címnek nincs magyar leírása, iPaden a hero leírás sora kimarad. (5) A hero nem lapoz magától (a design nem ír róla). (6) Első betöltéskor szolgáltatónként 2 `discover` + 5 `getDetails` fut (az Edge Function 6 órára / 7 napra cache-eli); sok szolgáltatónál ez sok hívás: ha lassú, korlátozni kell. (7) Az oldalsáv „SZOLGÁLTATÓIM” logósora még nincs; a `useMyProviders` hook kiszolgálja. (8) Az Előzetes gomb letiltott (40% átlátszóság), ha nincs YouTube előzetes vagy a részletek még nem érkeztek meg; a design ezt nem mutatja.
+**Commit:** `feat: főoldal hero és új a szolgáltatóimon rail`
 
 ## 2026-10-15 – Közös komponensek: poszter kártya, rail, szekciócím, állapotok (feature)
 
@@ -532,6 +540,20 @@ Sablon:
 **Döntés:** a `PosterRail<T>` általános (`data`, `renderCard(item, cardWidth)`), és a design szerinti kártyaszélességet, közt és oldalsó margót maga veszi a `railLayout` tokenből a breakpoint szerint, így a képernyő csak adatot és állapotot ad. A `PosterCard` csak megjelenítési propokat kap (poszter, logó, formátum, státusz, alcím, `onPress`), nem tud TMDB-típusról és route-ról. Az üres állapot külön `EmptyState` (nincs újrapróbálás), a hiba az `ErrorState`.
 **Miért:** a Főoldal több railje (új a szolgáltatóimon, Blu-ray) ugyanígy néz ki, ismétlés nélkül; a TMDB-típus és a szolgáltató-logó eredete (a `discover` nem ad szolgáltatót, lásd a „Közös komponensek” munkanapló-bejegyzés Nyitva pontját) a hookok dolga. Az Adatlap route még nincs, ezért a navigációt a képernyő köti be.
 **Alternatíva:** a képernyő adja át a méretet minden railnek – ismétlődő propok; `PosterCard` közvetlenül `TitleSummary`-t kapjon – összekötné a komponenst a TMDB-alakkal, pedig a Watchlist saját elemtípust használ (`WatchlistItem`).
+**Visszavonható?** igen.
+
+## D-032 – „Új a szolgáltatóimon”: szolgáltatónkénti discover, hero adatai az adatlapból, videók nyelve
+**Dátum:** 2026-10-15
+**Döntés:** (1) A lista szolgáltatónként és típusonként (film, sorozat) egy `discover`: `watch_region=HU`, `with_watch_providers=<egy ID>`, `flatrate`, dátum szerint csökkenő (film: `primary_release_date`, sorozat: `first_air_date`), a mai napnál nem későbbi dátummal; az eredményt egyesítem, dátum szerint rendezem, ismétlődést kiszűrök (az első szolgáltató marad), és az első 20-at mutatom. A CLAUDE.md `<id1>|<id2>` alakja helyett nem egy hívás, mert a `discover` nem mondja meg, melyik szolgáltatón van a cím. (2) A hero az első 5 hátteres cím; a műfaj, hossz, korhatár (HU, ennek híján DE; sorozatnál nincs) és előzetes címenként egy `getDetails`-ből jön. (3) A `getDetails` `include_video_language=hu,en,null`-t kap.
+**Miért:** (1) a szolgáltató-logó és az „Ma · Netflix” alcím a designban kötelező, és ezt csak a szolgáltatónkénti lekérdezés adja ingyen; 4 szolgáltatónál 8 hívás, szemben a címenkénti `watch/providers` ~22 hívásával. A jövőbeli dátumok kiszűrése kell, mert a megjelenés előtti címek is kaphatnak szolgáltatót. (2) a műfajnevekhez nincs engedélyezett genre-lista végpont, a részletek viszont magyar műfajnevet, hosszt és korhatárt is adnak, és a hívások 7 napra cache-eltek. (3) a `language=hu-HU` mellett a TMDB 0 videót ad (curl: 0 vs. 29).
+**Alternatíva:** (1) egy discover az összes szolgáltatóra + címenként `watch/providers` – több hívás; a műfajok statikus id→név táblája (`data/`) – elavulhat és a nevek kézzel vitt fordítások; (3) nincs: videó nélkül az Előzetes gomb mindig halott lenne.
+**Visszavonható?** igen, egy hook és egy paraméter.
+
+## D-033 – Watchlist store előrehozva, „+” állapot, hero átmenet könyvtár nélkül
+**Dátum:** 2026-10-15
+**Döntés:** (1) A `useWatchlistStore` (`items`, `toggle`) a CLAUDE.md alakjával már most elkészült, mert a hero „+” gombja ezt váltja; a Watchlist feladat erre építi a képernyőt. (2) A gomb a listán lévő címnél pipát (akcentszínű) mutat „+” helyett: a design csak az alapállapotot mutatja. (3) A hero kép feletti sötétítés RN `experimental_backgroundImage` lineáris átmenet (alul: feketébe, iPaden balról is), nem `expo-linear-gradient`. (4) A felső sáv ikon-margója iPaden 35 px (a rail margója), nem a hero szövegének 43 px-e: a design szerint.
+**Miért:** (1) holt „+” gomb helyett működő; a store alakja már rögzített, nincs kockázat. (2) az állapotjelzés nélküli gomb nem mutatná, hogy a címet felvettük. (3) új könyvtárat nem adunk hozzá engedély nélkül, és a D-024 már bevált eszközön ezen az API-n.
+**Alternatíva:** (1) a „+” gomb később kötve – addig dead UI; (3) `expo-linear-gradient` – stabil API, de új függőség.
 **Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

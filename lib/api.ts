@@ -44,5 +44,7 @@ export function search(kind: 'multi' | MediaType | 'person', query: string, page
 export function getDetails(type: MediaType, id: number) {
   return tmdb<TitleDetails>(`${type}/${id}`, {
     append_to_response: 'watch/providers,release_dates,videos,credits',
+    // A `language=hu-HU` mellett a TMDB csak magyar nyelvű videót adna (jellemzően nincs).
+    include_video_language: 'hu,en,null',
   });
 }

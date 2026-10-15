@@ -17,6 +17,15 @@ export const railLayout = {
   tablet: { cardWidth: 146, gap: 16, inset: 35 },
 } as const;
 
+/**
+ * Főoldal hero (02, 10 design): magasság, a szöveg és a felső sáv oldalsó margója, a tartalom
+ * alsó kitöltése, a pöttyök alja.
+ */
+export const heroLayout = {
+  phone: { height: 539, padX: 21, barPadX: 21, contentBottom: 24, dotsBottom: 0 },
+  tablet: { height: 467, padX: 43, barPadX: 35, contentBottom: 19, dotsBottom: 24 },
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

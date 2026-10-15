@@ -14,7 +14,7 @@ export function DevResetButton() {
   }
 
   return (
-    <View className="absolute right-2" style={{ top: insets.top + 4 }}>
+    <View className="absolute" style={{ top: insets.top + 4, right: 72 }}>
       <Pressable
         onPress={reset}
         accessibilityRole="button"
