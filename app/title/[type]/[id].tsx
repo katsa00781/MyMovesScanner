@@ -10,7 +10,8 @@ import { TitleHero } from '@/components/TitleHero';
 import { WhereToWatch } from '@/components/WhereToWatch';
 import { TABLET_MIN_WIDTH, titleColumns, titleLayout, titleSections } from '@/constants/theme';
 import { useTitleDetails } from '@/hooks/useTitleDetails';
-import { tmdbUrl, trailerUrl } from '@/lib/titleInfo';
+import { providerSearchUrl, tmdbUrl, trailerUrl } from '@/lib/titleInfo';
+import type { WatchOffer } from '@/types/app';
 import { useWatchlistStore } from '@/store/useWatchlistStore';
 
 export default function TitleScreen() {
@@ -39,11 +40,14 @@ export default function TitleScreen() {
       posterPath: title.posterPath,
     });
   };
-  const openWatchLink = () => {
-    if (title?.watchLink) Linking.openURL(title.watchLink);
+  // A szolgáltató keresőoldala a címmel; ha ahhoz nincs link, a TMDB „hol nézhető” oldala (D-042).
+  const openOffer = (offer: WatchOffer) => {
+    if (!title) return;
+    const url = providerSearchUrl(offer.provider.provider_name, title.title) ?? title.watchLink;
+    if (url) Linking.openURL(url);
   };
 
-  const whereToWatch = title ? <WhereToWatch offers={title.offers} onOpen={openWatchLink} /> : null;
+  const whereToWatch = title ? <WhereToWatch offers={title.offers} onOpen={openOffer} /> : null;
   // „Emlékeztess”: a címet a watchlistre teszi (D-013); ha már rajta van, nem veszi le.
   const disc = title?.disc ? (
     <DiscCard

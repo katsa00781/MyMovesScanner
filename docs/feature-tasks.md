@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – „Megnyitás”: a szolgáltató keresőoldala a TMDB oldal helyett (fix)
+
+**Mit:** A felhasználó jelezte, hogy a „Hol nézhető” „Megnyitás” gombja a themoviedb.org oldalt nyitja a szolgáltató helyett (D-039 ismert korlátja: a TMDB nem ad szolgáltatónkénti mélylinket). A gomb most a sor szolgáltatójának keresőoldalát nyitja a cím nevével (iOS-en a szolgáltató appja, ha telepítve van); ha a szolgáltatóhoz nincs link, a korábbi TMDB oldal nyílik. A `WhereToWatch` `onOpen` paramétere megkapja a sort. Link: Netflix, Disney Plus, HBO Max, Amazon Prime Video, Apple TV.
+**Fájlok:** data/providerSearchLinks.ts, lib/titleInfo.ts, components/WhereToWatch.tsx, app/title/[type]/[id].tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Eszközön NEM futott: a linkek tényleges megnyílása és az app-átirányítás eszközön ellenőrizendő.
+**Nyitva maradt:** (1) A linkformátumokat a szolgáltatók webes keresőinek mintájára írtam, nem ellenőriztem őket: ha egy nem működik, a `data/providerSearchLinks.ts`-ben javítandó. (2) SkyShowtime, RTL+ és a többi szolgáltató linkjét nem vettem fel (nem ismerem biztosan a formátumot), náluk marad a TMDB oldal; link küldhető, és bekerül. (3) Keresőoldalra visz, nem a címre: a találati listában kell kiválasztani.
+**Commit:** `fix: megnyitás a szolgáltató keresőoldalára` (D-042)
+
 ## 2026-10-15 – Böngészés: szolgáltató szűrő, műfaj chipek, találatszám, rendezés, rács, végtelen görgetés (feature)
 
 **Mit:** A 03 és 11 design PNG-ből mért méretekkel (Pillow, csak a scratchpadben). `app/(tabs)/browse.tsx`: „Böngészés” cím, „Előfizetéseim” gomb + a saját szolgáltatók logói (bekapcsolva narancs keret, kikapcsolva halvány; koppintásra be/ki, az utolsót nem lehet kikapcsolni; a gomb mindet visszakapcsolja), műfaj chipek (vízszintesen görgethető, kijelölve fehér), találatszám („N cím M szolgáltatódon”) és rendezés (telefonon szürke szöveg a számláló sorában, iPaden pirula a címsorban), alatta poszter rács szolgáltató-logó badge-dzsel, koppintásra az Adatlap. Rendezés: Legújabb elöl / Legnépszerűbb / Legjobban értékelt (iOS rendszer-választólap, `ActionSheetIOS`). Állapotok: skeleton, hiba + újra, üres találat, „Nincs kiválasztott előfizetés.”. Új: `useBrowseTitles` (szolgáltatónként és típusonként egy `discover` oldalanként, egyesítve; az 1. oldalnál még egy-egy az összes szolgáltatóra a pontos találatszámhoz; a rács 36-os adagokban nő, ha elfogyott a lekért készlet, jön a következő oldal), `ProviderFilter`, `GenreChips`, `data/browseGenres.ts`, `data/browseSorts.ts`, `BrowseTitle` típus, `browseLayout` token, `PosterGrid` `rowGap` paraméter, magyar szövegek.
@@ -667,5 +675,12 @@ Sablon:
 **Miért:** (1) a `discover` nem adja vissza a szolgáltatót, a design viszont minden kártyán mutatja; a külön számláló kérés elkerüli a szolgáltatónkénti összegek kétszeres számolását. (2) a rács nem virtualizált, a szolgáltatónkénti oldalak (akár 160 cím) egyszerre kirajzolva lassítanák; az adagolás egyszerű és nincs új könyvtár. (3) a műfaj-lista nincs az Edge Function whitelistjén, a bővítése éles függvény-módosítás lenne (csak kérésre); a TMDB azonosítók stabilak. (4) a rendezési menü a designban nincs kirajzolva, a rendszer választólapja a legkisebb új UI. (5) a kérés szerint a Böngészés szűrői nem tartósak, a szolgáltatók a Beállításokban szerkeszthetők. (6) a 11-es iPad-PNG ezen a soron hibás (összenyomott logók, levágott chipek).
 **Alternatíva:** (1) egyetlen `discover` az összes szolgáltatóra: pontos sorrend és számláló, de nem tudjuk, melyik szolgáltatón van a cím (badge nélkül eltérne a designtól); címenkénti `getDetails`: 20–40 plusz hívás oldalanként. (2) `FlatList numColumns`: az oszlopszám váltása (forgatás) kulcs-újramountot kér (D-040). (3) `genre/movie/list` végpont a whitelistre: dinamikus lista, de éles függvény módosítása.
 **Visszavonható?** igen.
+
+## D-042 – „Megnyitás”: szolgáltatói keresőlink névre illesztve, TMDB oldal tartalékként
+**Dátum:** 2026-10-15
+**Döntés:** A „Hol nézhető” sor „Megnyitás” gombja a szolgáltató keresőoldalát nyitja a cím nevével; a linksablonok a `data/providerSearchLinks.ts`-ben vannak, TMDB szolgáltatónévre illesztve. Ahol nincs sablon, a HU `watch/providers` link (TMDB) nyílik. Módosítja a D-039 (1) pontját.
+**Miért:** a felhasználó a szolgáltatót várta; a TMDB nem ad mélylinket, a keresőoldal a legközelebbi megoldás scraping és új könyvtár nélkül. Névre illesztünk, mert szolgáltató ID-t nem hardcode-olunk (D-022 mintája).
+**Alternatíva:** marad a TMDB oldal (egy plusz koppintás, de pontos cím); JustWatch mélylink-scraping – ToS-ellenes (D-005).
+**Visszavonható?** igen, egy fájl.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

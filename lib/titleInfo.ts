@@ -1,4 +1,5 @@
 import { strings } from '@/constants/strings';
+import { providerSearchLinks } from '@/data/providerSearchLinks';
 import { REGION } from '@/lib/api';
 import { displayName } from '@/lib/format';
 import type { CastMember, DiscRelease, TitleFacts, WatchOffer } from '@/types/app';
@@ -19,6 +20,12 @@ export function tmdbUrl(type: MediaType, id: number): string {
 }
 
 /** A kiválasztott szolgáltatóim közül az első, amelyiken a cím előfizetéssel nézhető (HU). */
+// A szolgáltató keresőoldala a cím nevével; `undefined`, ha a szolgáltatóhoz nincs link (D-042).
+export function providerSearchUrl(providerName: string, title: string): string | undefined {
+  const link = providerSearchLinks[providerName.toLowerCase()];
+  return link?.(encodeURIComponent(title));
+}
+
 export function pickMyProvider(
   details: TitleDetails,
   selectedProviderIds: number[],

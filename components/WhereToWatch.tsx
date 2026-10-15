@@ -68,9 +68,15 @@ function OfferRow({
 }
 
 // „Hol nézhető” (06, 14 design): szekciócím + „Adatok: JustWatch”, Mind / Előfizetés / Kölcsönzés /
-// Vásárlás szűrő, szolgáltatónként egy sor. Ár és minőség nincs (D-012): a gomb a TMDB / JustWatch
-// oldalát nyitja. A vízszintes margót a használó adja.
-export function WhereToWatch({ offers, onOpen }: { offers: WatchOffer[]; onOpen: () => void }) {
+// Vásárlás szűrő, szolgáltatónként egy sor. Ár és minőség nincs (D-012): a gomb a szolgáltatót
+// nyitja (D-042). A vízszintes margót a használó adja.
+export function WhereToWatch({
+  offers,
+  onOpen,
+}: {
+  offers: WatchOffer[];
+  onOpen: (offer: WatchOffer) => void;
+}) {
   const [filter, setFilter] = useState<Filter>('all');
   // A magyar szűrőfeliratok hosszabbak a designénál: telefonon a chipek szűkebbek (15 px, 11 px
   // kitöltés), hogy mind a négy egy sorba férjen; iPaden a design mérete (16 px, 16 px).
@@ -114,7 +120,7 @@ export function WhereToWatch({ offers, onOpen }: { offers: WatchOffer[]; onOpen:
       <View className="mt-3 overflow-hidden rounded-cardLarge bg-surface">
         {visible.length > 0 ? (
           visible.map((offer, index) => (
-            <OfferRow key={offer.key} offer={offer} first={index === 0} onOpen={onOpen} />
+            <OfferRow key={offer.key} offer={offer} first={index === 0} onOpen={() => onOpen(offer)} />
           ))
         ) : (
           <EmptyState message={offers.length === 0 ? strings.title.noOffers : strings.common.empty} />
