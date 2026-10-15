@@ -9,7 +9,7 @@
 - [x] Git init, első commit: `init`
 - [x] `.env`, `.env.example`, `.gitignore` (EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY)
 - [x] NativeWind telepítése és konfigurálása
-- [ ] Függőségek: zustand, @react-native-async-storage/async-storage, expo-image, @supabase/supabase-js
+- [x] Függőségek: zustand, @react-native-async-storage/async-storage, expo-image, @supabase/supabase-js
 - [x] `docs/design/` mappa elhelyezése a projektben (PDF + 16 PNG)
 - [ ] Assets elhelyezése (`assets/images/`: logo, tmdb-logo) + `constants/images.ts`
 - [x] `npm run lint` és `npm run typecheck` scriptek
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Függőségek (setup)
+
+**Mit:** `npx expo install` zustand, @react-native-async-storage/async-storage, @supabase/supabase-js; az expo-image már a template-ben volt, az `expo install` felvette a config pluginját az `app.json`-ba.
+**Fájlok:** package.json, package-lock.json, app.json
+**Tesztelve:** `npm run lint`, `npm run typecheck`
+**Nyitva maradt:** a supabase-js React Native-on AsyncStorage/URL polyfill igényét a `lib/supabase.ts` írásakor ellenőrizni (auth nincs, így valószínűleg nem kell).
+**Commit:** `setup: zustand, async-storage, expo-image, supabase-js`
 
 ## 2026-10-15 – NativeWind (setup)
 
