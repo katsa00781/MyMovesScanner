@@ -13,6 +13,8 @@ import tokens from './theme.json';
 export const colors = tokens.colors;
 export const radius = tokens.radius;
 export const fontSize = tokens.fontSize;
+/** Nunito súlyonként külön betűcsalád (lásd app/_layout.tsx, tailwind: font-nunito-*). */
+export const fonts = tokens.fonts;
 
 /** `useWindowDimensions().width >= TABLET_MIN_WIDTH` → tablet. */
 export const TABLET_MIN_WIDTH = 768;

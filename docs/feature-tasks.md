@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Nunito betűtípus (setup)
+
+**Mit:** A jóváhagyásoddal hozzáadtam a `@expo-google-fonts/nunito` csomagot (az `expo-font` már megvolt, a config plugin bekerült az `app.json`-ba). Az `app/_layout.tsx` betölti a 4 súlyt (400, 600, 700, 800), és a betöltésig nem renderel. A `theme.json` új `fonts` kulcsa → `tailwind.config.js` `fontFamily`: `font-nunito`, `font-nunito-semibold`, `font-nunito-bold`, `font-nunito-extrabold`; a `theme.ts` exportálja (`fonts`). A `fontSize` tokenekből kikerült a beágyazott `fontWeight` (egyedi betűcsaláddal nem működik), a súlyt a `font-nunito-*` osztály adja.
+**Fájlok:** package.json, package-lock.json, app.json, app/_layout.tsx, constants/theme.json, constants/theme.ts, tailwind.config.js
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul, a font-assetek bekerültek). Szimulátoron/Expo Go-n még nem néztem.
+**Nyitva maradt:** a betűk vizuális egyezése a designnal (Nunito vs. a design tényleges fontja) az első képernyőnél ellenőrzendő. Minden `Text`-nek explicit `font-nunito*` osztály kell (RN-ben nincs globális alapfont); ha ismétlődik, közös szövegkomponens jöhet. A template demo `ThemedText` még a rendszerfontot használja, a navigációs váz törli.
+**Commit:** `setup: Nunito betűtípus`
+
 ## 2026-10-15 – strings.ts felhasználói átnézése (docs)
 
 **Mit:** A felhasználó átnézte és javította a `constants/strings.ts`-t: „A szolgáltatóimon” → „Előfizetéseim”, „Szolgáltatóim” → „Előfizetéseim” (Böngészés), a találatszám „… cím a(z) N kínálatában”, a „Bérlés” → „Kölcsönzés” (Search chip és Watchlist „Csak kölcsönzés”).
@@ -345,5 +353,12 @@ Sablon:
 **Miért:** a NativeWind osztályok és a runtime stílusok (árnyék, ikon-szín) ugyanazt az értéket használják, nincs kétszer felvett hex; a Tailwind config nem tud TypeScriptet (react-native importot) betölteni, JSON-t igen.
 **Alternatíva:** hexek a `tailwind.config.js`-ben és a `theme.ts`-ben külön – eltérésveszély; vagy `theme.js` CommonJS – típus nélkül.
 **Visszavonható?** igen.
+
+## D-019 – Nunito betűtípus (`@expo-google-fonts/nunito`)
+**Dátum:** 2026-10-15
+**Döntés:** a design lekerekített betűtípusához a Nunito négy súlya (400/600/700/800) külön betűcsaládként töltődik, tailwind `font-nunito*` osztályokkal.
+**Miért:** a design szövegei lekerekített végű, Nunito-szerű betűvel készültek; a felhasználó jóváhagyta az új könyvtárat. A csomag csak a betűfájlokat hozza, nincs natív kód.
+**Alternatíva:** rendszerfont (SF) – nulla függőség, de eltér a designtól; vagy a fontfájlok kézi bemásolása az `assets/`-be – több karbantartás.
+**Visszavonható?** igen, a `fonts` token és a `_layout` betöltés cserélhető.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
