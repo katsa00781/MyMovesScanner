@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Gyerek sarok: animációs sorozatok is (feature)
+
+**Mit:** A felhasználó kérésére a Gyerek sarok a filmek mellett animációs sorozatokat is mutat. Oldalanként egy `discover/movie` (korhatár szerint, mint eddig) és egy `discover/tv` (`with_genres=16`, korhatár nélkül), népszerűség szerint egyesítve; a téma kulcsszó mindkettőre vonatkozik. A kártya a címtípus szerinti Adatlapra visz. Ha az egyik lekérdezés elbukik, a másik eredménye megmarad. Új: `kidsSeriesDiscoverParams`, `KidsTitle.type`.
+**Fájlok:** hooks/useKidsTitles.ts, lib/kidsDiscover.ts, types/app.ts, app/(tabs)/kids.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Éles függvényen curl-lel: `discover/tv` animáció (16) mind a 6 témával 200, találatokkal. Weben (headless Chrome, valós adat, `web.output` átmenetileg `single`, visszaállítva, nem commitolva): oldalanként 40 kártya (20 film + 20 sorozat), a végtelen görgetés tovább tölt (40 → 80 → 120 → 160 → 200). Sorozat Adatlapra navigálás és a képernyőkép eszközön nem lett nézve.
+**Nyitva maradt:** (1) **A sorozatok nincsenek korhatárra szűrve:** a 0+ / 6+ / 12+ chip csak a filmekre hat, és az animáció műfaj felnőtt sorozatot is tartalmaz: az alapnézet élén ma A Simpson család, Family Guy, Amerikai fater, Rick és Morty áll. A „Felnőtt tartalom elrejtve” jelzés így sorozatokra nem igaz. Szűkítés: `with_genres=16,10762` (animáció ÉS gyerek-műfaj) egy sor a `lib/kidsDiscover.ts`-ben; ezt kérésre átírom. (2) A téma-találatok sorozatnál is vegyesek (pl. Zene: Hazbin Hotel, Helluva Boss). (3) A film- és sorozatlista oldalanként 20-20, a sorrend csak oldalon belül népszerűség szerinti.
+**Commit:** `feat: gyerek sarok animációs sorozatok` (D-044)
+
 ## 2026-10-15 – Gyerek sarok: korhatár chipek, téma chipek, Nagy kalandok rács (feature)
 
 **Mit:** A 04 és 12 design PNG-ből mért méretekkel (Pillow, csak a scratchpadben). `app/(tabs)/kids.tsx`: „Gyerek sarok” cím (38 pt), zöld „Felnőtt tartalom elrejtve” badge, 0+ / 6+ / 12+ korhatár-chipek (a `useSettingsStore` közös `kidsAgeLimit`-je: a Főoldal „Gyerekeknek” rail és a Beállítások ugyanazt használja), téma chipek (Állatok, Világűr, Hercegnők, Dinoszauruszok, Zene, Sport; vízszintesen görgethető, a kijelölt világoskék, újra koppintva kikapcsol), „Nagy kalandok” szekció és alatta poszter rács (telefon 2, iPad 4 oszlop; 20 px sarkú kártya, alatta színes pötty + cím, a pötty színe körbeforog), koppintásra az Adatlap. Végtelen görgetés oldalanként (20 cím). Állapotok: skeleton, hiba + újra, üres találat. iPaden a korhatár-chipek a cím jobb oldalán, a badge fix 266 px, mint a designban. Új: `useKidsTitles` (egy `discover/movie` oldalanként, `with_keywords` a témára), `KidsTitleCard`, `KidsThemeChips`, `MatureHiddenBadge`, `data/kidsThemes.ts`, `KidsTitle` típus, tokenek `kidsLayout`, `radius.kidsCard`, `fontSize.kidsTitle`, magyar szövegek. A `PosterGrid` kapott `kids` paramétert (oszlopszám, margó, köz, skeleton). Az eddig használaton kívüli `strings.kids.ageChips` törölve (az `AgeChip` `{limit}+`-t ír).
@@ -705,5 +713,12 @@ Sablon:
 **Miért:** (1) a CLAUDE.md egyetlen kids-lekérdezést ír le, a design egy szekciót mutat; így a Főoldal rail és a Gyerek sarok ugyanazt a „mi gyerekbarát” definíciót használja. (2) a D-015 kulcsszavas megoldás kulcsszó-azonosítókat kér; az azonosítókat nem találgattam: mintafilmek (Dínó tesó, Wall-E, Jégvarázs, Zootropolis, Verdák) `keywords` listájából olvastam ki az éles függvényen, és mind a 6 × 3 kombináció ad találatot. A `with_keywords` az éles függvény módosítása nélkül átmegy (a `discover` paraméterei szabadok, a whitelist az útvonalra szűr). (3) a korhatár egy helyen él, ahogy az onboarding 2. lépése is írja. (4) a design nem mutat kijelölt téma-chipet; a világoskék a Kids akcentus. (5) a mért sarok (20 px) eltér a poszter-kártya 14 px-étől, ezért külön token és komponens, a `PosterCard` változatlan. (6) a PNG-ből mért betűmagasság a Böngészés címénél 12%-kal nagyobb.
 **Alternatíva:** (1) téma-szekciók külön rail-ekként (design nincs); sorozat is (D-036: nincs korhatár-szűrő); (2) kulcsszó-keresés végpont (`search/keyword`) a whitelistre – éles függvény módosítása, csak kérésre; (3) téma tárolása – a kérés szerint a szűrők nem tartósak (D-041 mintája); (5) a `PosterCard` `radius` paramétere – a közös komponens bonyolódna.
 **Visszavonható?** igen.
+
+## D-044 – Gyerek sarok: animációs sorozatok korhatár-szűrés nélkül
+**Dátum:** 2026-10-15
+**Döntés:** A Gyerek sarok a filmek mellett `discover/tv` `with_genres=16` (animáció) sorozatokat is mutat, oldalanként a film- és sorozatoldal népszerűség szerint egyesítve. A korhatár-chip csak a filmekre hat. Módosítja a D-043 (1) pontját és a D-036 sorozat nélküli döntését a Gyerek sarokra (a Főoldal „Gyerekeknek” rail változatlanul csak film).
+**Miért:** a felhasználó kérte, hogy legyen sorozat, a kategória az animáció, „valamennyire szűr”. A TMDB `discover/tv` nem tud korhatárra szűrni, a CLAUDE.md szerinti `10762` (gyerek) műfaj helyett az animációt választotta.
+**Alternatíva:** `with_genres=16,10762` (animáció ÉS gyerek-műfaj): sokkal tisztább gyerek lista, a felnőtt rajzfilmek (Simpson, Family Guy, Rick és Morty) kiesnek, de kevesebb a találat; sorozat nélkül: nincs szűrési gond, de a felhasználó kérésével ellentétes.
+**Visszavonható?** igen, egy paraméter.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

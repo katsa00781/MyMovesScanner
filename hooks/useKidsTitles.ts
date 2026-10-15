@@ -3,23 +3,44 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KidsAgeLimit } from '@/data/kidsAgeLimits';
 import type { KidsTheme } from '@/data/kidsThemes';
 import { discover } from '@/lib/api';
-import { kidsDiscoverParams } from '@/lib/kidsDiscover';
+import { kidsDiscoverParams, kidsSeriesDiscoverParams } from '@/lib/kidsDiscover';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import type { KidsTitle } from '@/types/app';
-import type { Paged, TitleSummary } from '@/types/tmdb';
+import type { MediaType, Paged, TitleSummary } from '@/types/tmdb';
 
-function fetchPage(ageLimit: KidsAgeLimit, theme: KidsTheme | undefined, page: number) {
-  const params = { ...kidsDiscoverParams(ageLimit), page };
-  return discover('movie', theme ? { ...params, with_keywords: theme.keywordId } : params);
-}
+type Page = { titles: KidsTitle[]; hasMore: boolean };
 
 // Poszter nélküli címek kimaradnak: a rács kártyái csak a posztert mutatják.
-function toTitles(items: TitleSummary[]): KidsTitle[] {
-  return items.flatMap((item) =>
-    item.title && item.poster_path
-      ? [{ key: `movie:${item.id}`, id: item.id, title: item.title, posterPath: item.poster_path }]
-      : [],
-  );
+function toTitles(type: MediaType, items: TitleSummary[]) {
+  return items.flatMap((item) => {
+    const title = item.title ?? item.name;
+    return title && item.poster_path
+      ? [{ key: `${type}:${item.id}`, id: item.id, type, title, posterPath: item.poster_path, popularity: item.popularity }]
+      : [];
+  });
+}
+
+// Egy oldal: film (korhatár szerint) és animációs sorozat (korhatár nélkül) egy-egy `discover`-e,
+// népszerűség szerint egyesítve. Ha az egyik lekérdezés elbukik, a másik eredménye megmarad.
+async function fetchPage(ageLimit: KidsAgeLimit, theme: KidsTheme | undefined, page: number): Promise<Page> {
+  const extra: Record<string, number> = theme ? { page, with_keywords: theme.keywordId } : { page };
+  const [movies, series] = await Promise.allSettled([
+    discover('movie', { ...kidsDiscoverParams(ageLimit), ...extra }),
+    discover('tv', { ...kidsSeriesDiscoverParams(), ...extra }),
+  ]);
+  if (movies.status === 'rejected' && series.status === 'rejected') {
+    throw new Error('A gyerek címek lekérdezése nem sikerült.');
+  }
+  const entries = [
+    ...(movies.status === 'fulfilled' ? toTitles('movie', movies.value.results) : []),
+    ...(series.status === 'fulfilled' ? toTitles('tv', series.value.results) : []),
+  ].sort((a, b) => b.popularity - a.popularity);
+  const more = (r: PromiseSettledResult<Paged<TitleSummary>>) =>
+    r.status === 'fulfilled' && r.value.page < r.value.total_pages;
+  return {
+    titles: entries.map(({ popularity: _popularity, ...title }) => title),
+    hasMore: more(movies) || more(series),
+  };
 }
 
 type State = {
@@ -34,11 +55,9 @@ type State = {
 
 const initial: State = { key: null, titles: [], page: 0, hasMore: false, loadingMore: false, error: false };
 
-const hasMore = (result: Paged<TitleSummary>) => result.page < result.total_pages;
-
 // Gyerek sarok: a választott korhatár (DE FSK, D-007) és téma szerinti népszerű animációs /
-// családi filmek, végtelen görgetéssel. A mentett korhatár visszatöltését megvárja, hogy az
-// alapértékkel ne induljon felesleges lekérdezés.
+// családi filmek és animációs sorozatok (D-044), végtelen görgetéssel. A mentett korhatár
+// visszatöltését megvárja, hogy az alapértékkel ne induljon felesleges lekérdezés.
 export function useKidsTitles(ageLimit: KidsAgeLimit, theme: KidsTheme | undefined) {
   const hydrated = useSettingsStore((state) => state.hasHydrated);
   const [attempt, setAttempt] = useState(0);
@@ -53,9 +72,9 @@ export function useKidsTitles(ageLimit: KidsAgeLimit, theme: KidsTheme | undefin
     let cancelled = false;
     busy.current = false;
     fetchPage(ageLimit, theme, 1)
-      .then((result) => {
+      .then(({ titles, hasMore }) => {
         if (cancelled) return;
-        setState({ ...initial, key, titles: toTitles(result.results), page: 1, hasMore: hasMore(result) });
+        setState({ ...initial, key, titles, page: 1, hasMore });
       })
       .catch(() => {
         if (!cancelled) setState({ ...initial, key, error: true });
@@ -72,15 +91,14 @@ export function useKidsTitles(ageLimit: KidsAgeLimit, theme: KidsTheme | undefin
     busy.current = true;
     setState((s) => ({ ...s, loadingMore: true }));
     fetchPage(ageLimit, theme, state.page + 1)
-      .then((result) => {
+      .then(({ titles, hasMore }) => {
         setState((s) => {
           const known = new Set(s.titles.map((t) => t.key));
-          const added = toTitles(result.results).filter((t) => !known.has(t.key));
           return {
             ...s,
-            titles: [...s.titles, ...added],
+            titles: [...s.titles, ...titles.filter((t) => !known.has(t.key))],
             page: s.page + 1,
-            hasMore: hasMore(result),
+            hasMore,
             loadingMore: false,
           };
         });

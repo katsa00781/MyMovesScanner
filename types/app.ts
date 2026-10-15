@@ -108,10 +108,12 @@ export type KidsPick = {
   caption: string;
 };
 
-/** Gyerek sarok rács eleme; csak film (D-036). */
+/** Gyerek sarok rács eleme: film vagy animációs sorozat (D-044). */
 export type KidsTitle = {
+  /** `${type}:${id}`, listakulcsnak. */
   key: string;
   id: number;
+  type: MediaType;
   title: string;
   posterPath: string;
 };

@@ -82,7 +82,7 @@ export default function KidsScreen() {
               posterPath={item.posterPath}
               accent={kidsAccents[titles.indexOf(item) % kidsAccents.length]}
               width={cardWidth}
-              onPress={() => router.push(titleHref('movie', item.id))}
+              onPress={() => router.push(titleHref(item.type, item.id))}
             />
           )}
         />
