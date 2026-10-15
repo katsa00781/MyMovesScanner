@@ -1,9 +1,21 @@
 import { SymbolView } from 'expo-symbols';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { strings } from '@/constants/strings';
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
+
+// A Pressable-n `style` függvény van (lenyomás), ezért nincs rajta className:
+// a NativeWind a függvényt nem alkalmazza, a méret és a kitöltés elveszne.
+const styles = StyleSheet.create({
+  cta: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    borderRadius: radius.button,
+    backgroundColor: colors.accent,
+  },
+});
 
 function RegionLabel() {
   return (
@@ -51,12 +63,14 @@ export function OnboardingFooter({
         onPress={onContinue}
         disabled={disabled}
         accessibilityRole="button"
-        className="items-center justify-center rounded-button bg-accent"
-        style={({ pressed }) => ({
-          width: isTablet ? 396 : '100%',
-          height: isTablet ? 58 : 56,
-          opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
-        })}>
+        style={({ pressed }) => [
+          styles.cta,
+          {
+            width: isTablet ? 396 : '100%',
+            height: isTablet ? 58 : 56,
+            opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
+          },
+        ]}>
         <Text className="font-nunito-bold text-[17px] text-ctaText">
           {strings.onboarding.continueWith(count)}
         </Text>

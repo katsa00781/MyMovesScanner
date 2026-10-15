@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Onboarding: Pressable méretek és kitöltés (fix)
+
+**Mit:** A felhasználó jelezte: a szolgáltató kártyák mérete változó, a „Tovább N szolgáltatóval” gombon nincs kitöltés, a szöveg a gomb széléig ér. Ok: a `Pressable`-n `className` mellett `style` függvény volt (`({ pressed }) => …`); a NativeWind (css-interop) a függvényt nem alkalmazza, így a `width`/`height` és a lenyomás-átlátszóság elveszett, a elemek tartalomhoz méreteződtek. Javítás: ahol `style` függvény van, ott nincs `className`; a statikus stílus `StyleSheet`-ben, a tokenekből (`colors`, `radius`). A CTA kapott 16 px vízszintes kitöltést is. Érintett: `ProviderCard`, az onboarding CTA, az `ErrorState` újrapróbálás gombja.
+**Fájlok:** components/ProviderCard.tsx, components/OnboardingFooter.tsx, components/ErrorState.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Az okot a `react-native-css-interop` forrásában követtem végig (a függvény stílusobjektumként kerül a szabálylistába, és nincs deklarációja). Szimulátoron / eszközön NEM futott: a kártyaméretek és a gomb kitöltése eszközön ellenőrizendő.
+**Nyitva maradt:** Ugyanez a minta (`className` + `style` függvény) a korábbi `Sidebar`, `BottomTabBar` és `Settings` link `Pressable`-jein is megvan: ott az elrendezés a `className`-ből rendben van, de a lenyomás-átlátszóság sem működik. Nem nyúltam hozzájuk (nem kért változtatás); javítás külön kérésre.
+**Commit:** `fix: Pressable méretek és kitöltés NativeWinddel`
+
 ## 2026-10-15 – Onboarding 1. lépés (feature)
 
 **Mit:** A 01 és 09 design PNG-ből mért méretekkel (kártya 174×120 / 204×145, radius 16, 2 px narancs keret, 50 px logó, 26 px jelölő, CTA 56/58 px, glow). `app/onboarding.tsx`: telefonon 2, tableten 4 oszlop (max. 880 széles, 21 px köz), skeleton / hiba+újra / üres állapot, fix lábléc (CTA „Tovább N szolgáltatóval”, Kihagyom, Régió). `useProvidersStore` (Zustand + AsyncStorage persist, `selectedProviderIds`, `onboardingDone`, `hasHydrated`, `saveProviders`). `useProviders` hook: `watch/providers/movie` + `tv` HU, egyesítve és a TMDB HU `display_priorities` szerint rendezve. A gyökér layout megvárja a store visszatöltését (splash), a `(tabs)/_layout` `<Redirect>`-tel az onboardingra küld, amíg `onboardingDone` hamis. Új: `components/{ProviderCard,ErrorState,OnboardingHeader,OnboardingFooter}.tsx`, `store/useProvidersStore.ts`, `hooks/useProviders.ts`; módosult: `lib/api.ts` (`REGION` konstans), `types/tmdb.ts` (`display_priorities`).
@@ -418,6 +426,13 @@ Sablon:
 **Döntés:** (1) A lábléc (Régió, CTA, Kihagyom) a lista alatt fix sáv, nem fedi át a kártyákat: a telefon-PNG-n a „Region: Hungary” egy kártyára rajzolódik, ez a mock túlcsorduló tartalma. Tableten a CTA így a képernyő aljához kerül, nem közvetlenül a rács alá, mert a valós lista hosszabb, mint a 7 kártyás design. (2) A „Tovább” 0 kijelölésnél letiltott (40% átlátszóság), a design ezt nem mutatja; „Kihagyom” ilyenkor is van. (3) A narancs háttérfény a RN `experimental_backgroundImage: radial-gradient(...)` stílusával készült, a sugarak a PNG-ből kiolvasva; ez nem véglegesített RN API.
 **Miért:** (1) olvashatóság és érinthetőség; (2) az üres kijelölés értelmetlen CTA-val folytatna; (3) nincs új könyvtár (`expo-linear-gradient`), a CLAUDE.md tiltja az engedély nélküli bővítést.
 **Alternatíva:** (1) a design szó szerinti átfedése – olvashatatlan szöveg a kártyán; (3) `expo-linear-gradient` – stabil API, de új függőség.
+**Visszavonható?** igen.
+
+## D-025 – Pressable: `style` függvény mellett nincs `className`
+**Dátum:** 2026-10-15
+**Döntés:** ha egy `Pressable` lenyomás-állapotot használ (`style={({ pressed }) => …}`), akkor az elemen nincs `className`; a statikus stílus `StyleSheet`-ben van, a tokenekből, a gyerekek viszont használhatnak `className`-t.
+**Miért:** a NativeWind (css-interop) a `className` mellett kapott `style` függvényt nem alkalmazza, így a méretek és a lenyomás-hatás elvész (az onboarding kártyák és CTA így nem kaptak méretet). Ez egyezik a CLAUDE.md „StyleSheet kivételek” szabályával (Pressable pressed state).
+**Alternatíva:** `active:opacity-70` NativeWind osztály a lenyomásra – elkerüli a függvényt, de eltér a CLAUDE.md szabályától, és a dinamikus méret (`width`/`height`) így is külön `style` kellene.
 **Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

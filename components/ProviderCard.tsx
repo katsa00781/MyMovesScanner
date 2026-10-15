@@ -1,12 +1,26 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 import { logoUrl } from '@/lib/tmdbImage';
 import type { Provider } from '@/types/tmdb';
 
 type Size = { width: number; height: number };
+
+// A Pressable-n `style` függvény van (lenyomás), ezért nincs rajta className:
+// a NativeWind a függvényt nem alkalmazza, a méretek elvesznének.
+const styles = StyleSheet.create({
+  card: {
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: radius.cardLarge,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    backgroundColor: colors.surface,
+  },
+  selected: { borderColor: colors.accent },
+});
 
 // Szolgáltató kártya az onboardinghoz: logó, név, jobb felül kijelölés-jelző.
 // Kijelölve narancs keret + pipa; a keret helye mindig foglalt, nincs elugrás.
@@ -22,10 +36,11 @@ export function ProviderCard({
       onPress={onPress}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
-      className={`justify-between rounded-cardLarge border-2 bg-surface p-4 ${
-        selected ? 'border-accent' : 'border-transparent'
-      }`}
-      style={({ pressed }) => ({ width, height, opacity: pressed ? 0.7 : 1 })}>
+      style={({ pressed }) => [
+        styles.card,
+        selected && styles.selected,
+        { width, height, opacity: pressed ? 0.7 : 1 },
+      ]}>
       <View className="flex-row items-start justify-between">
         <View className="h-[50px] w-[50px] overflow-hidden rounded-[11px]">
           <Image source={logoUrl(provider.logo_path)} style={{ flex: 1 }} contentFit="cover" />
