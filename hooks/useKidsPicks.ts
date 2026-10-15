@@ -2,15 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { strings } from '@/constants/strings';
 import type { KidsAgeLimit } from '@/data/kidsAgeLimits';
-import { discover, getDetails, REGION } from '@/lib/api';
+import { discover, getDetails } from '@/lib/api';
+import { KIDS_GENRES, kidsDiscoverParams } from '@/lib/kidsDiscover';
 import { pickCertification } from '@/lib/titleInfo';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import type { KidsPick } from '@/types/app';
 import type { TitleDetails } from '@/types/tmdb';
 
 const CANDIDATE_LIMIT = 8;
-// Animáció, Családi (CLAUDE.md: film). A sorozat (10762) kimarad: a `discover/tv` nem szűr korhatárra.
-const KIDS_GENRES = [16, 10751];
 
 function genreName(details: TitleDetails): string | undefined {
   const kids = details.genres.find((genre) => KIDS_GENRES.includes(genre.id));
@@ -20,14 +19,7 @@ function genreName(details: TitleDetails): string | undefined {
 // Korhatár szerinti (DE FSK, D-007) népszerű animációs / családi filmek. A `discover` nem ad
 // korhatárt és műfajnevet, ezért a jelöltekre `getDetails` fut (7 napra cache-elt).
 async function fetchKidsPicks(ageLimit: KidsAgeLimit): Promise<KidsPick[]> {
-  const page = await discover('movie', {
-    sort_by: 'popularity.desc',
-    with_genres: KIDS_GENRES.join('|'),
-    certification_country: 'DE',
-    'certification.lte': ageLimit,
-    watch_region: REGION,
-    with_watch_monetization_types: 'flatrate|free|ads|rent|buy',
-  });
+  const page = await discover('movie', kidsDiscoverParams(ageLimit));
   const candidates = page.results
     .flatMap((item) =>
       item.title && item.backdrop_path

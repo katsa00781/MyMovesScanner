@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Gyerek discover paraméterek közös helye (chore)
+
+**Mit:** A „Gyerekeknek” rail `discover` paraméterei (műfajok, DE korhatár, népszerűség, HU elérhetőség) kiemelve a `lib/kidsDiscover.ts`-be, mert a Gyerek sarok ugyanezt kéri (a második előfordulás, CLAUDE.md: ismétlésnél refaktor). Viselkedés nem változott.
+**Fájlok:** lib/kidsDiscover.ts, hooks/useKidsPicks.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. A rail képernyőn nem futott (a kért paraméterek azonosak).
+**Nyitva maradt:** –
+**Commit:** `chore: gyerek discover paraméterek közös helye`
+
 ## 2026-10-15 – „Megnyitás”: a szolgáltató keresőoldala a TMDB oldal helyett (fix)
 
 **Mit:** A felhasználó jelezte, hogy a „Hol nézhető” „Megnyitás” gombja a themoviedb.org oldalt nyitja a szolgáltató helyett (D-039 ismert korlátja: a TMDB nem ad szolgáltatónkénti mélylinket). A gomb most a sor szolgáltatójának keresőoldalát nyitja a cím nevével (iOS-en a szolgáltató appja, ha telepítve van); ha a szolgáltatóhoz nincs link, a korábbi TMDB oldal nyílik. A `WhereToWatch` `onOpen` paramétere megkapja a sort. Link: Netflix, Disney Plus, HBO Max, Amazon Prime Video, Apple TV.
