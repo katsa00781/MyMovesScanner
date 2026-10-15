@@ -37,6 +37,17 @@ export type TitleSummary = {
   media_type?: MediaType | 'person';
 };
 
+// Személy a keresés találatai között (search/person, search/multi).
+export type PersonSummary = {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department?: string;
+};
+
+/** Egy keresési találat: cím vagy személy (a személyt a `profile_path` mező különbözteti meg). */
+export type SearchHit = TitleSummary | PersonSummary;
+
 export type WatchProviderRegion = {
   link?: string;
   flatrate?: Provider[];

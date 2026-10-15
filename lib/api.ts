@@ -6,6 +6,7 @@ import type {
   MediaType,
   Paged,
   ProviderList,
+  SearchHit,
   TitleDetails,
   TitleSummary,
 } from '@/types/tmdb';
@@ -38,7 +39,7 @@ export function getTrending(type: MediaType, window: 'day' | 'week' = 'week') {
 }
 
 export function search(kind: 'multi' | MediaType | 'person', query: string, page = 1) {
-  return tmdb<Paged<TitleSummary>>(`search/${kind}`, { query, page });
+  return tmdb<Paged<SearchHit>>(`search/${kind}`, { query, page });
 }
 
 export function getDetails(type: MediaType, id: number) {

@@ -118,6 +118,36 @@ export type KidsTitle = {
   posterPath: string;
 };
 
+/** Keresési találat: film, sorozat vagy személy (`type: 'person'`). */
+export type SearchResult = {
+  /** `${type}:${id}`, listakulcsnak. */
+  key: string;
+  id: number;
+  type: MediaType | 'person';
+  /** A cím vagy a személy neve. */
+  title: string;
+  /** Poszter (cím) vagy profilkép (személy). */
+  imagePath: string | null;
+  /** Megjelenés éve; személynél nincs. */
+  year?: string;
+  /** Személynél a szakma magyarul („Színész”); címnél nincs. */
+  role?: string;
+};
+
+/**
+ * A találati sor: a találat és a részletekből később érkező adatok. A műfaj és a „hol nézhető”
+ * chipek csak `details === 'ready'` után vannak; `failed` esetén a sor ezek nélkül marad.
+ */
+export type SearchRow = {
+  result: SearchResult;
+  details: 'loading' | 'ready' | 'failed';
+  genre?: string;
+  /** „A szolgáltatóidon”: a cím előfizetéssel nézhető valamelyik kiválasztott szolgáltatón. */
+  onMyServices: boolean;
+  /** Módonként legfeljebb egy szolgáltató (előfizetés, kölcsönzés, vásárlás). */
+  chips: WatchOffer[];
+};
+
 /** Új Blu-ray megjelenés (Főoldal rail); csak film. */
 export type BlurayTitle = {
   key: string;

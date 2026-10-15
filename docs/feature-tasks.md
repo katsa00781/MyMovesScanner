@@ -39,7 +39,7 @@
 - [x] Watchlist: hozzáadás/eltávolítás, szegmens számlálóval, státusz badge-ek — design: 07, 15
 - [x] Böngészés: My services szűrő, műfaj chipek, találatszám, rendezés, rács, végtelen görgetés — design: 03, 11
 - [x] Gyerek sarok: korhatár chipek, Mature titles hidden, téma chipek (keywordök), Big adventures — design: 04, 12
-- [ ] Keresés: debounce, Recent searches (`useSearchStore`), All/Films/Series/People, találati sor Stream/Rent/Buy chipekkel — design: 05, 13
+- [x] Keresés: debounce, Recent searches (`useSearchStore`), All/Films/Series/People, találati sor Stream/Rent/Buy chipekkel — design: 05, 13
 - [ ] Beállítások: My services + Edit, Region & language, Kids corner, About (Notifications rejtve — D-013) — design: 08, 16
 - [ ] iPad finomhangolás: rács oszlopszámok, kétoszlopos adatlap, portrait/landscape ellenőrzés a designnal összevetve
 
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Keresés: mező, Legutóbbi keresések, szűrők, találati sorok (feature)
+
+**Mit:** Az 05 és 13 design PNG-ből mért méretekkel (Pillow, csak a scratchpadben). `app/(tabs)/search.tsx`: „Keresés” cím (34 pt), keresőmező nagyítóval, törlés-gombbal és „Mégse”-vel, Legutóbbi keresések, Mind / Filmek / Sorozatok / Személyek szűrő, találati sorok. Sor: poszter (telefon 67, iPad 79 px), cím + „A szolgáltatóidon” jelzés, év · típus · műfaj, Előfizetés / Kölcsönzés / Vásárlás chipek a szolgáltató logójával (módonként egy szolgáltató, előfizetésnél a saját előnyben), nyíl; koppintásra az Adatlap. A keresés 350 ms késleltetéssel indul, legalább 2 karaktertől, a szűrőnek megfelelő TMDB végponton (`search/multi|movie|tv|person`, első oldal); a műfaj és a chipek címenként egy `getDetails`-ből érkeznek, a sorok ezek előtt is látszanak (a chip helyén helykitöltő). Legutóbbi keresések: `useSearchStore` (max. 10, kis-nagybetűtől független duplázás nélkül, AsyncStorage); mentés a billentyűzet „Keresés” gombjával és találat koppintásakor. Telefonon vízszintes chip-sor a margóig vágva, iPaden (az oldalsáv nélküli szélesség ≥ 830 px) bal oszlop soronkénti törléssel, jobb oszlopban „Találatok: „…”” fejléc, szűrő és sorok; keskenyebb (álló) iPaden egy oszlop. Állapotok: súgó (nincs keresés), skeleton, hiba + újra, nincs találat. Új: `SearchField`, `RecentChips` / `RecentList`, `SearchFilterChips`, `SearchResultRow` (+ skeleton), `useSearch`, `lib/searchResults.ts` (`toSearchResults`, `pickSearchChips`, `isOnMyServices`), `pickRegionOffers` (a `pickOffers` közös magja), `data/searchFilters.ts`, `PersonSummary` / `SearchHit` típus, `SearchResult` / `SearchRow` app-típus, token `searchLayout`, magyar szövegek. Az Edge Function nem változott (a `search/*` és a `movie|tv/{id}` már a whitelisten volt).
+**Fájlok:** app/(tabs)/search.tsx, components/{SearchField,RecentSearches,SearchFilterChips,SearchResultRow}.tsx, hooks/useSearch.ts, store/useSearchStore.ts, lib/{searchResults,titleInfo,api}.ts, data/searchFilters.ts, types/{app,tmdb}.ts, constants/{theme,strings}.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Az éles függvényen curl-lel: `search/multi|movie|tv|person` 200, 20 találat oldalanként; a `profile_path` kulcs csak a személy-találatokon van (a `null` értékű is), ez különbözteti meg őket a címektől. Weben (headless Chrome CDP-vel, valós TMDB-adat, `web.output` átmenetileg `single`, visszaállítva, nem commitolva; a saját előnézet a 8099-es porton, a 8081-es nem lett érintve) telefon (407), iPad fekvő (1244) és álló (834) szélességben „harbor” keresésre: a mező, a Legutóbbi sor, a szűrő chipek és a sorok függőleges helye a designhoz ±0–1 px (a webes safe area-hiány levonásával; telefon 59 px, iPad 16 px), a chip-sor és a szűrő x helye, a sorköz (121–122 / 140 px), a poszter 67×101 és a bal lista elválasztói (iPad) egyeznek. Személyek szűrő („nolan”: profilképes sorok, szakma), nincs találat, hiba + „Újra” (hálózat kikapcsolva) és a súgó állapot képernyőn nézve. A web NEM mutatta: az SF Symbols ikonokat (nagyító, óra, ×, nyíl, törlés-gomb x-e), a billentyűzetet / a „Keresés” gombot, az `active:` lenyomás-hatást, a Legutóbbi chip / törlés / sor-koppintás tényleges működését eszközön (a szűrőváltás weben kattintással működött), a hosszú címek és az iOS-es betűmetrika hatását.
+**Nyitva maradt:** (1) **Személy-sor:** a designban nincs; chip és nyíl nélküli, nem koppintható sor lett (D-046), mert a v1-ben nincs személy-oldal. Ha kell (pl. a személy címei), külön feladat. A „Mind” szűrő a személyeket is mutatja, a TMDB sorrendjében. (2) **Csak az első oldal** (20 találat) szűrőnként, nincs végtelen görgetés; a „legfontosabb 20” a TMDB relevancia-sorrendjében. (3) **Szövegek jóváhagyásra:** „A szolgáltatóidon” (a design „On your services”-e; a `strings.common.onYourServices` „Előfizetéseim” erre nem volt jó), „Legutóbbi” (iPad), „Találatok: „…””, „Még nincs keresés.”, „Keress filmet, sorozatot vagy személyt.”, a szakmák („Színész”, „Rendező”, „Író”, …). (4) **Magyar feliratok szélesebbek:** a három chip („Előfizetés”, „Kölcsönzés”, „Vásárlás”) telefonon két sorba törik; a szűrő chipek telefonon vízszintesen görgethetők; iPaden a „Találatok: „…”” fejléc és a szűrő chipek együtt kb. 600 px-t kérnek, a 589 px-es jobb oszlopban a szűrő a fejléc alá törik (a designban egy sor). (5) A hosszú cím + „A szolgáltatóidon” jelzés új sorba törik, ilyenkor a sor magasabb a posztornál (a designban nincs ilyen eset). (6) Címenként egy `getDetails` fut (az Edge Function 7 napra cache-eli): 20 találatnál 20 hívás; ha lassú, korlátozni kell a látható sorokra. (7) A „Mégse” törli a szöveget, a szűrőt „Mind”-re állítja és bezárja a billentyűzetet. (8) Az `isTablet` számítás a 8. helyen ismétlődik: `useIsTablet` hook külön `chore:` commitban jöhet. (9) A webes TextInput kék fókusz-keretet mutat; natívan nincs.
+**Commit:** `feat: keresés mező, legutóbbi keresések, szűrők és találati sorok` (D-045, D-046, D-047)
 
 ## 2026-10-15 – Gyerek sarok: animációs sorozatok is (feature)
 
@@ -720,5 +728,26 @@ Sablon:
 **Miért:** a felhasználó kérte, hogy legyen sorozat, a kategória az animáció, „valamennyire szűr”. A TMDB `discover/tv` nem tud korhatárra szűrni, a CLAUDE.md szerinti `10762` (gyerek) műfaj helyett az animációt választotta.
 **Alternatíva:** `with_genres=16,10762` (animáció ÉS gyerek-műfaj): sokkal tisztább gyerek lista, a felnőtt rajzfilmek (Simpson, Family Guy, Rick és Morty) kiesnek, de kevesebb a találat; sorozat nélkül: nincs szűrési gond, de a felhasználó kérésével ellentétes.
 **Visszavonható?** igen, egy paraméter.
+
+## D-045 – Keresés: szűrőnként külön végpont, első oldal, címenkénti részletek
+**Dátum:** 2026-10-15
+**Döntés:** A Mind / Filmek / Sorozatok / Személyek szűrő mind külön TMDB végpontot kér (`search/multi|movie|tv|person`), szűrőnként csak az első oldalt (20 találat). A műfaj és a „hol nézhető” chipek címenként egy `getDetails` hívásból jönnek (a sorok ezek előtt is látszanak), a képernyő élete alatt megőrizve; csak a műfaj és a HU régió adata tárolódik, a „saját előfizetésem” jelölés megjelenítéskor számolódik. A chipek módonként egy szolgáltatót mutatnak (előfizetésnél a sajátot előnyben): a design is ennyit, legfeljebb hármat mutat. A keresés legalább 2 karaktertől, 350 ms késleltetéssel indul; a Legutóbbiakba a billentyűzet „Keresés” gombja és a találat koppintása ment (nem minden gépelt betű).
+**Miért:** a `search/multi` 20 találatából a Filmek szűrő kliensoldalon néhány elemre fogyna; a külön végpont teljes oldalnyi szűrt találatot ad (a függvény már cache-eli 6 órára). A `search` válasza nem tartalmaz műfajnevet és elérhetőséget, a `getDetails` az egyetlen forrás, amit az Edge Function már whitelistel és 7 napra cache-el: nem kell új végpont. A módonkénti egy chip követi a designt, és a hosszú szolgáltatólisták nem töltik meg a sort.
+**Alternatíva:** `search/multi` + kliensoldali szűrés (kevesebb hívás, de a szűrt lista rövid / üres lehet); új `watch/providers` végpont címenként (kisebb válasz, de függvény- és whitelist-módosítás, ami a `getDetails` mellett kevés nyereség); teljes lista chipekkel (a magyar feliratok miatt több soros, zsúfolt sor).
+**Visszavonható?** igen.
+
+## D-046 – Keresés: a személy-találat chip és nyíl nélküli, nem koppintható sor
+**Dátum:** 2026-10-15
+**Döntés:** A Személyek szűrő (és a Mind szűrő személy-találatai) ugyanolyan sorként jelennek meg, profilképpel, névvel és „Személy · Szakma” alsorral, de chip, „A szolgáltatóidon” jelzés és nyíl nélkül, és a sor nem koppintható.
+**Miért:** a design a Személyek szűrőt mutatja, a személy-sort nem; a CLAUDE.md szerint ilyenkor nem találunk ki új UI-t. A v1-ben nincs személy-oldal (a mappastruktúrában sincs), így a koppintásnak nincs célja; a nyíl hiánya jelzi, hogy nem nyílik meg.
+**Alternatíva:** a személy koppintásra az ismert címeit keresse (új, nem tervezett viselkedés); a Személyek szűrő elhagyása (eltérés a designtól); nyíllal, de hatás nélkül (félrevezető).
+**Visszavonható?** igen, a funkció külön feladatként bővíthető.
+
+## D-047 – Keresés iPad: két oszlop csak elég széles nézetben
+**Dátum:** 2026-10-15
+**Döntés:** A bal Legutóbbiak oszlop + jobb találati oszlop (13 design) csak akkor jelenik meg, ha az oldalsáv nélküli szélesség legalább 830 px (iPad fekvő); keskenyebb nézetben (álló iPad) egy oszlop van, mint a telefonon (Legutóbbi chip-sor, szűrő, találatok), iPad méretű mezővel és margóval. A szűrő chipek a jobb oszlop fejlécében a fejléc alá törnek, ha a magyar felirat miatt nem férnek el mellette.
+**Miért:** a design egyetlen (1244 px-es, fekvő) iPad nézetet mutat: a bal oszlop 282 px, a köz 38 px; álló iPaden (834 px, az oldalsávval 564 px) a jobb oszlop 176 px lenne, a sor használhatatlan. A 830 px-es határ a jobb oszlopnak legalább 440 px-t ad (a poszter, a cím és a chipek még elférnek).
+**Alternatíva:** arányos oszlopszélesség (álló iPaden a Legutóbbi sorok szétesnek); mindig két oszlop (álló iPaden használhatatlan); csak telefon-elrendezés iPaden (eltérés a designtól fekvőben).
+**Visszavonható?** igen, egy token (`searchLayout.tablet.twoColumnsMin`).
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

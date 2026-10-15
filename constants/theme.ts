@@ -124,6 +124,27 @@ export const kidsLayout = {
   },
 } as const;
 
+/**
+ * Keresés (05, 13 design): oldalsó margó, a keresőmező magassága és sarka, a függőleges távolságok
+ * (cím → mező → legutóbbiak → szűrő chipek → találatok). Az iPad széles nézetében (az oldalsáv
+ * nélküli szélesség ≥ `twoColumnsMin`) a Legutóbbiak külön oszlopba kerülnek: az oszlopok a mező
+ * alatt `columnsTop` távolságra indulnak, a bal oszlop `recentWidth` széles, köztük `columnGap`
+ * a köz; a bal lista a fejléc-sor alatt `recentListTop`, a találatok `columnResultsTop` távolságra
+ * indulnak (egy oszlopban a találatok a szűrő chipek alatt `resultsTop` távolságra).
+ */
+export const searchLayout = {
+  phone: {
+    inset: 21, fieldGap: 19, fieldHeight: 46, fieldRadius: 12,
+    recentGap: 23, chipsGap: 17, filterGap: 16, resultsTop: 17,
+  },
+  tablet: {
+    inset: 34, fieldGap: 29, fieldHeight: 51, fieldRadius: 14,
+    recentGap: 23, chipsGap: 17, filterGap: 16, resultsTop: 17,
+    twoColumnsMin: 830, columnsTop: 22, recentWidth: 282, columnGap: 38, recentListTop: 8,
+    columnResultsTop: 11,
+  },
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

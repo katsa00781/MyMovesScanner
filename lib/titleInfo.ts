@@ -3,7 +3,7 @@ import { providerSearchLinks } from '@/data/providerSearchLinks';
 import { REGION } from '@/lib/api';
 import { displayName } from '@/lib/format';
 import type { CastMember, DiscRelease, TitleFacts, WatchOffer } from '@/types/app';
-import type { MediaType, Provider, TitleDetails } from '@/types/tmdb';
+import type { MediaType, Provider, TitleDetails, WatchProviderRegion } from '@/types/tmdb';
 
 /** TMDB release típus: fizikai (Blu-ray, DVD). */
 export const PHYSICAL = 5;
@@ -67,7 +67,14 @@ export function runtimeMinutes(details: TitleDetails): number | undefined {
 
 /** A szolgáltatók módonként (előfizetés, kölcsönzés, vásárlás), a TMDB sorrendjében (HU). */
 export function pickOffers(details: TitleDetails, selectedProviderIds: number[]): WatchOffer[] {
-  const region = details['watch/providers']?.results[REGION];
+  return pickRegionOffers(details['watch/providers']?.results[REGION], selectedProviderIds);
+}
+
+/** A `pickOffers` a régió „hol nézhető” adatából (a Keresés csak ezt tárolja a részletekből). */
+export function pickRegionOffers(
+  region: WatchProviderRegion | undefined,
+  selectedProviderIds: number[],
+): WatchOffer[] {
   const groups = [
     ['stream', region?.flatrate],
     ['rent', region?.rent],
