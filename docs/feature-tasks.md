@@ -7,7 +7,7 @@
 ### Setup (egyszeri) — minden sor külön commit
 - [x] Expo projekt létrehozása (`npx create-expo-app@latest mymoviescanner -t default`), TypeScript strict
 - [x] Git init, első commit: `init`
-- [ ] `.env`, `.env.example`, `.gitignore` (EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY)
+- [x] `.env`, `.env.example`, `.gitignore` (EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY)
 - [ ] NativeWind telepítése és konfigurálása
 - [ ] Függőségek: zustand, @react-native-async-storage/async-storage, expo-image, @supabase/supabase-js
 - [x] `docs/design/` mappa elhelyezése a projektben (PDF + 16 PNG)
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – .env, .env.example, .gitignore (setup)
+
+**Mit:** `.env.example` a két kliens kulcsnévvel (érték nélkül), helyi üres `.env` ugyanezekkel; a `.gitignore` mostantól kizárja a `.env`-et.
+**Fájlok:** .env.example, .gitignore (a `.env` gitignore-os, nem kerül commitba)
+**Tesztelve:** `git check-ignore .env`
+**Nyitva maradt:** a `.env` értékeit (Supabase URL + publishable/anon kulcs) a felhasználónak kell kitöltenie.
+**Commit:** `setup: .env.example és .gitignore`
 
 ## 2026-10-15 – Expo projekt + lint/typecheck scriptek (setup)
 
