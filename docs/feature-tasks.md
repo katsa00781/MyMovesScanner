@@ -5,14 +5,14 @@
 > A részletes szabályok a `CLAUDE.md` „Munkanapló és commitok” szakaszában vannak.
 
 ### Setup (egyszeri) — minden sor külön commit
-- [ ] Expo projekt létrehozása (`npx create-expo-app@latest mymoviescanner -t default`), TypeScript strict
+- [x] Expo projekt létrehozása (`npx create-expo-app@latest mymoviescanner -t default`), TypeScript strict
 - [x] Git init, első commit: `init`
 - [ ] `.env`, `.env.example`, `.gitignore` (EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY)
 - [ ] NativeWind telepítése és konfigurálása
 - [ ] Függőségek: zustand, @react-native-async-storage/async-storage, expo-image, @supabase/supabase-js
 - [x] `docs/design/` mappa elhelyezése a projektben (PDF + 16 PNG)
 - [ ] Assets elhelyezése (`assets/images/`: logo, tmdb-logo) + `constants/images.ts`
-- [ ] `npm run lint` és `npm run typecheck` scriptek
+- [x] `npm run lint` és `npm run typecheck` scriptek
 - [ ] `app.json`: iPad támogatás (`supportsTablet: true`), minden orientáció
 - [x] CLAUDE.md és docs/ elhelyezése a projekt gyökerében
 - [ ] Push GitHub-ra
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Expo projekt + lint/typecheck scriptek (setup)
+
+**Mit:** Expo SDK 57 `default` template legenerálva (a nem üres mappa miatt ideiglenes helyen), a tartalma a projekt gyökerébe másolva. A `src/` mappát a CLAUDE.md mappastruktúrája miatt lapítottam (D-016), a `@/*` alias a gyökérre mutat. `npm install`, `npm run lint` (az `expo lint` az első futáskor telepítette az eslintet és létrehozta az `eslint.config.js`-t) és új `typecheck` script (`tsc --noEmit`); mindkettő hibamentes. A template `reset-project` scriptje, LICENSE, README és `.claude/` nem került át. Ezzel két setup sor zárult egy commitban (a lockfile miatt nem szétválasztható).
+**Fájlok:** package.json, package-lock.json, tsconfig.json, app.json, eslint.config.js, .gitignore, AGENTS.md, app/, components/, constants/, hooks/, assets/, global.css, .vscode/
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Az appot még nem indítottam.
+**Nyitva maradt:** A template demo képernyői (app/index, explore, app-tabs, themed-*) és `constants/theme.ts` még a template-é; a "Design tokenek" és "Navigációs váz" feladatok cserélik. A `expo-env.d.ts` gitignore-os és `expo start` generálja; friss klónon a typecheck előtt egyszer `npx expo start`/`npx expo customize` kell, vagy létre kell hozni (`/// <reference types="expo/types" />`). 29 npm audit figyelmeztetés (template függőségek), nem kezeltem.
+**Commit:** `setup: Expo projekt, lint és typecheck scriptek`
 
 ## 2026-10-15 – Git init és meglévő doksik (setup)
 
@@ -228,5 +236,12 @@ Sablon:
 **Miért:** a TMDB trending végpont csak globális; a téma chipekre nincs műfaj.
 **Alternatíva:** globális trending – nem magyar.
 **Visszavonható?** igen.
+
+## D-016 – Gyökérszintű mappastruktúra (nincs `src/`)
+**Dátum:** 2026-10-15
+**Döntés:** az Expo template `src/` mappáját lapítottam: `app/`, `components/`, `constants/`, `hooks/` a projekt gyökerében, `@/*` → `./*`.
+**Miért:** a CLAUDE.md mappastruktúrája gyökérszintű; így a doksi és a kód egyezik.
+**Alternatíva:** a template `src/` elrendezése megtartva – az Expo alapértelmezése, de eltérne a CLAUDE.md-től és minden útvonalat át kellene írni a doksikban.
+**Visszavonható?** igen, mappa-mozgatás és alias.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
