@@ -8,7 +8,7 @@
 - [x] Expo projekt létrehozása (`npx create-expo-app@latest mymoviescanner -t default`), TypeScript strict
 - [x] Git init, első commit: `init`
 - [x] `.env`, `.env.example`, `.gitignore` (EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY)
-- [ ] NativeWind telepítése és konfigurálása
+- [x] NativeWind telepítése és konfigurálása
 - [ ] Függőségek: zustand, @react-native-async-storage/async-storage, expo-image, @supabase/supabase-js
 - [x] `docs/design/` mappa elhelyezése a projektben (PDF + 16 PNG)
 - [ ] Assets elhelyezése (`assets/images/`: logo, tmdb-logo) + `constants/images.ts`
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – NativeWind (setup)
+
+**Mit:** NativeWind 4.2.7 + Tailwind 3 telepítve a hivatalos Expo útmutató szerint (SDK 57, Reanimated 4 → `react-native-worklets` is). Új: `tailwind.config.js`, `babel.config.js`, `metro.config.js`, `nativewind-env.d.ts`; a `global.css` elejére a Tailwind direktívák kerültek (a template webes font változói megmaradtak), és az `app/_layout.tsx` importálja.
+**Fájlok:** package.json, package-lock.json, tailwind.config.js, babel.config.js, metro.config.js, nativewind-env.d.ts, global.css, app/_layout.tsx
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (a bundle lefordul). Szimulátoron className még nem volt kipróbálva.
+**Nyitva maradt:** első valódi className használatnál vizuális ellenőrzés; a Tailwind `content` csak az `app/` és `components/` mappát nézi.
+**Commit:** `setup: NativeWind konfigurálása`
 
 ## 2026-10-15 – .env, .env.example, .gitignore (setup)
 
