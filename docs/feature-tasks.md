@@ -20,7 +20,7 @@
 ### Backend (familyBudget Supabase, `mms` séma) — minden sor külön commit
 - [x] Migráció: `mms` séma + `mms.tmdb_cache` tábla + index `expires_at`-ra
 - [x] Edge Function `mms-tmdb`: whitelist, cache olvasás/írás TTL-lel, TMDB hívás secretből
-- [ ] `TMDB_API_KEY` secret beállítása, függvény deploy, curl teszt
+- [x] `TMDB_API_KEY` secret beállítása, függvény deploy, curl teszt
 - [ ] `lib/supabase.ts`, `lib/api.ts`, `lib/tmdbImage.ts`, `types/tmdb.ts`
 
 ### Feature-ök (sorrendben) — minden sor külön commit
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – mms-tmdb deploy és curl teszt (backend)
+
+**Mit:** A kérésedre deployoltam az `mms-tmdb` függvényt a familyBudget projektre (`supabase functions deploy mms-tmdb --use-api`, csak ez az egy függvény). A `TMDB_API_KEY` secret megvan a projektben (csak a nevet ellenőriztem, az értéket nem láttam). A helyi `.env`-et (gitignore-os) kitöltöttem a projekt URL-jével és a publishable (legacy anon) kulccsal.
+**Fájlok:** .env (nincs commitban), docs/feature-tasks.md
+**Tesztelve:** curl, anon kulccsal. (1) `watch/providers/movie` `watch_region=HU` → 200, 2,7 s (TMDB hívás + cache írás). (2) ugyanaz → 200, 0,37 s (cache találat). (3) nem whitelistes `account` → 403 `path_not_allowed`. (4) érvénytelen paraméterkulcs → 400 `invalid_params`. (5) a válaszban nincs `api_key`.
+**Nyitva maradt:** A `discover`, `search` és adatlap végpontok még nincsenek curl-lel kipróbálva, a `lib/api.ts`-ből jönnek majd. A függvény `verify_jwt` bekapcsolt: a kliens a publishable kulccsal hívja. A legacy anon kulcs használatban van; ha a projekt áttér az új `sb_publishable_` kulcsra, a `.env`-et frissíteni kell. A Supabase CLI elavult (2.24.3 → 2.121.0), nem frissítettem.
+**Commit:** `fn: mms-tmdb deploy és curl teszt a naplóban`
 
 ## 2026-10-15 – Migráció alkalmazva a familyBudget projekten (backend)
 
