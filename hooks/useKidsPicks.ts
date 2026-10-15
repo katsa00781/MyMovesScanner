@@ -18,7 +18,7 @@ function genreName(details: TitleDetails): string | undefined {
 
 // Korhatár szerinti (DE FSK, D-007) népszerű animációs / családi filmek. A `discover` nem ad
 // korhatárt és műfajnevet, ezért a jelöltekre `getDetails` fut (7 napra cache-elt).
-async function fetchKidsPicks(ageLimit: KidsAgeLimit): Promise<KidsPick[]> {
+async function fetchKidsPicks(ageLimit: KidsAgeLimit | null): Promise<KidsPick[]> {
   const page = await discover('movie', kidsDiscoverParams(ageLimit));
   const candidates = page.results
     .flatMap((item) =>
@@ -49,10 +49,13 @@ async function fetchKidsPicks(ageLimit: KidsAgeLimit): Promise<KidsPick[]> {
 
 type State = { titles: KidsPick[]; loading: boolean; error: boolean };
 
-// „Gyerekeknek” a Főoldalra, a Beállítások / onboarding korhatára szerint. A mentett korhatár
-// visszatöltését megvárja, hogy az alapértékkel ne induljon felesleges lekérdezés.
+// „Gyerekeknek” a Főoldalra, a Beállítások / onboarding korhatára szerint (korhatár nélkül, ha a
+// „Felnőtt tartalom elrejtése” ki van kapcsolva). A mentett beállítások visszatöltését megvárja,
+// hogy az alapértékkel ne induljon felesleges lekérdezés.
 export function useKidsPicks() {
-  const ageLimit = useSettingsStore((state) => state.kidsAgeLimit);
+  const savedAgeLimit = useSettingsStore((state) => state.kidsAgeLimit);
+  const hideMature = useSettingsStore((state) => state.hideMature);
+  const ageLimit = hideMature ? savedAgeLimit : null;
   const hydrated = useSettingsStore((state) => state.hasHydrated);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<State>({ titles: [], loading: true, error: false });

@@ -20,6 +20,11 @@
     "star": "#FAD808",
     "certBorder": "#AEAEB2",
     "disc": "#093C90",
+    "settingsBlue": "#0A83FE",
+    "settingsPurple": "#5D5AE6",
+    "settingsTeal": "#2EAFC9",
+    "settingsGreen": "#31D64B",
+    "chevron": "#5F5F61",
     "tabBar": "#0F0F0F",
     "separator": "#262626"
   },
@@ -33,6 +38,7 @@
   },
   "fontSize": {
     "title": 34,
+    "titleTablet": 40,
     "kidsTitle": 38,
     "section": 22
   },

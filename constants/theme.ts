@@ -145,6 +145,25 @@ export const searchLayout = {
   },
 } as const;
 
+/**
+ * Beállítások (08, 16 design): a kártyák oldalsó margója, a „Főoldal” link és a cím eltolása a
+ * kártyák bal szélétől, a link teteje, a link és a cím köze, a cím sormagassága, a cím és az első
+ * szekció köze (a szekciók köze mindenhol `sectionGap`). iPaden a tartalom legfeljebb `maxWidth`
+ * széles (a design oldalsáv melletti területe), két oszlopban, köztük `columnGap` a köz; a design
+ * iPad címe 40 pt (`text-titleTablet`), a link a cím feletti üres sávba kerül.
+ */
+export const settingsLayout = {
+  phone: {
+    inset: 17, backOffset: 7, titleOffset: 4, backTop: 18, titleGap: 23, titleHeight: 42, firstSectionGap: 27,
+    maxWidth: undefined,
+  },
+  tablet: {
+    inset: 43, backOffset: 0, titleOffset: 0, backTop: 2, titleGap: 2, titleHeight: 48, firstSectionGap: 26,
+    maxWidth: 974, columnGap: 30,
+  },
+  sectionGap: 27,
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

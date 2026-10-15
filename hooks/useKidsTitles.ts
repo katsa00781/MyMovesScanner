@@ -22,7 +22,7 @@ function toTitles(type: MediaType, items: TitleSummary[]) {
 
 // Egy oldal: film (korhatár szerint) és animációs sorozat (korhatár nélkül) egy-egy `discover`-e,
 // népszerűség szerint egyesítve. Ha az egyik lekérdezés elbukik, a másik eredménye megmarad.
-async function fetchPage(ageLimit: KidsAgeLimit, theme: KidsTheme | undefined, page: number): Promise<Page> {
+async function fetchPage(ageLimit: KidsAgeLimit | null, theme: KidsTheme | undefined, page: number): Promise<Page> {
   const extra: Record<string, number> = theme ? { page, with_keywords: theme.keywordId } : { page };
   const [movies, series] = await Promise.allSettled([
     discover('movie', { ...kidsDiscoverParams(ageLimit), ...extra }),
@@ -57,8 +57,9 @@ const initial: State = { key: null, titles: [], page: 0, hasMore: false, loading
 
 // Gyerek sarok: a választott korhatár (DE FSK, D-007) és téma szerinti népszerű animációs /
 // családi filmek és animációs sorozatok (D-044), végtelen görgetéssel. A mentett korhatár
-// visszatöltését megvárja, hogy az alapértékkel ne induljon felesleges lekérdezés.
-export function useKidsTitles(ageLimit: KidsAgeLimit, theme: KidsTheme | undefined) {
+// visszatöltését megvárja, hogy az alapértékkel ne induljon felesleges lekérdezés. `ageLimit` null:
+// nincs korhatár-szűrés (a „Felnőtt tartalom elrejtése” ki van kapcsolva, D-049).
+export function useKidsTitles(ageLimit: KidsAgeLimit | null, theme: KidsTheme | undefined) {
   const hydrated = useSettingsStore((state) => state.hasHydrated);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<State>(initial);

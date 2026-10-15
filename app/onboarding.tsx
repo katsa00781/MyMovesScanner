@@ -65,9 +65,12 @@ export default function OnboardingScreen() {
     skip();
   }
 
+  // A Beállításokból szerkesztve a meglévő főoldalra lépünk vissza (nem hagyunk második főoldalt
+  // a veremben); az első indításkor nincs hova visszalépni, ott csere.
   function skip() {
     completeOnboarding();
-    router.replace('/');
+    if (router.canGoBack()) router.dismissTo('/');
+    else router.replace('/');
   }
 
   // Narancs fény a tetején, a design háttere. Nincs külön gradiens könyvtár: a RN saját

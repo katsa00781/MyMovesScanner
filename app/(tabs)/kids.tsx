@@ -38,9 +38,14 @@ export default function KidsScreen() {
 
   const ageLimit = useSettingsStore((state) => state.kidsAgeLimit);
   const setAgeLimit = useSettingsStore((state) => state.setKidsAgeLimit);
+  const hideMature = useSettingsStore((state) => state.hideMature);
   const [themeKey, setThemeKey] = useState<KidsThemeKey>();
   const theme = kidsThemes.find((t) => t.key === themeKey);
-  const { titles, loading, loadingMore, error, loadMore, retry } = useKidsTitles(ageLimit, theme);
+  // Ha a „Felnőtt tartalom elrejtése” ki van kapcsolva, nincs korhatár-szűrés, badge és chip (D-049).
+  const { titles, loading, loadingMore, error, loadMore, retry } = useKidsTitles(
+    hideMature ? ageLimit : null,
+    theme,
+  );
 
   const onScroll = ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
@@ -110,12 +115,16 @@ export default function KidsScreen() {
                   {strings.kids.title}
                 </Text>
               </View>
-              <View style={{ marginTop: layout.badgeGap }}>
-                <MatureHiddenBadge width={layout.badgeWidth} />
-              </View>
-              {isTablet ? null : <View style={{ marginTop: layout.ageChipsGap }}>{ageChips}</View>}
+              {hideMature ? (
+                <View style={{ marginTop: layout.badgeGap }}>
+                  <MatureHiddenBadge width={layout.badgeWidth} />
+                </View>
+              ) : null}
+              {isTablet || !hideMature ? null : (
+                <View style={{ marginTop: layout.ageChipsGap }}>{ageChips}</View>
+              )}
             </View>
-            {isTablet ? ageChips : null}
+            {isTablet && hideMature ? ageChips : null}
           </View>
         </View>
 
