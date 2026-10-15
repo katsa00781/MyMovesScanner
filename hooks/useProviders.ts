@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { featuredProviderNames } from '@/data/featuredProviders';
 import { getProviders, REGION } from '@/lib/api';
 import type { Provider } from '@/types/tmdb';
 
-// Film és sorozat szolgáltatólistája egyesítve, a TMDB régiós sorrendjében.
+const featured = featuredProviderNames.map((name) => name.toLowerCase());
+
+// Film és sorozat szolgáltatólistája egyesítve: elöl a kiemeltek (a lista sorrendjében),
+// utánuk a többi a TMDB régiós sorrendjében, azonos prioritásnál névsorban.
 function mergeProviders(...lists: Provider[][]): Provider[] {
   const byId = new Map<number, Provider>();
   for (const provider of lists.flat()) {
@@ -11,9 +15,16 @@ function mergeProviders(...lists: Provider[][]): Provider[] {
       byId.set(provider.provider_id, provider);
     }
   }
+  const featuredRank = (p: Provider) => {
+    const index = featured.indexOf(p.provider_name.toLowerCase());
+    return index === -1 ? featured.length : index;
+  };
   const priority = (p: Provider) => p.display_priorities?.[REGION] ?? p.display_priority;
   return [...byId.values()].sort(
-    (a, b) => priority(a) - priority(b) || a.provider_name.localeCompare(b.provider_name),
+    (a, b) =>
+      featuredRank(a) - featuredRank(b) ||
+      priority(a) - priority(b) ||
+      a.provider_name.localeCompare(b.provider_name),
   );
 }
 

@@ -75,9 +75,17 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Onboarding: névalapú kiemelt szolgáltatólista (feature)
+
+**Mit:** A felhasználó döntése alapján (D-022 nyitott pontja) a szolgáltatók elejére egy névalapú kiemelt lista kerül: Netflix, HBO Max, Disney Plus, SkyShowtime, Amazon Prime Video, Apple TV, RTL+ (a design 7 szolgáltatója, TMDB-nevekkel). A `useProviders` ezeket a lista sorrendjében teszi előre, utánuk a többi a TMDB HU sorrendjében következik. A lista a `data/featuredProviders.ts`-ben él, névre illeszt (kis-nagybetű nélkül), ID-t nem tartalmaz.
+**Fájlok:** data/featuredProviders.ts, hooks/useProviders.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`; a hook tényleges rendezőkódját a valós HU TMDB-adaton futtattam: Netflix, HBO Max, Disney Plus, SkyShowtime, Amazon Prime Video, Apple TV, utána JustWatch TV, Apple TV Store, YouTube Premium… (45 szolgáltató). Eszközön NEM futott.
+**Nyitva maradt:** (1) Az RTL+ nincs a TMDB HU listájában, ezért nem jelenik meg (a lista tartalmazza, ha a TMDB felveszi, előre kerül). (2) A kiemelt nevek a TMDB aktuális elnevezései („Disney Plus”, „Amazon Prime Video”, „Apple TV”); átnevezésnél a lista karbantartandó. (3) A kiemeltek utáni rész továbbra is a TMDB sorrendje (JustWatch TV, Apple TV Store elöl); ha zavaró, a `featuredProviderNames` bővíthető.
+**Commit:** `feat: onboarding kiemelt szolgáltatók név szerint`
+
 ## 2026-10-15 – Onboarding: Pressable méretek és kitöltés (fix)
 
-**Mit:** A felhasználó jelezte: a szolgáltató kártyák mérete változó, a „Tovább N szolgáltatóval” gombon nincs kitöltés, a szöveg a gomb széléig ér. Ok: a `Pressable`-n `className` mellett `style` függvény volt (`({ pressed }) => …`); a NativeWind (css-interop) a függvényt nem alkalmazza, így a `width`/`height` és a lenyomás-átlátszóság elveszett, a elemek tartalomhoz méreteződtek. Javítás: ahol `style` függvény van, ott nincs `className`; a statikus stílus `StyleSheet`-ben, a tokenekből (`colors`, `radius`). A CTA kapott 16 px vízszintes kitöltést is. Érintett: `ProviderCard`, az onboarding CTA, az `ErrorState` újrapróbálás gombja.
+**Mit:** A felhasználó jelezte: a szolgáltató kártyák mérete változó, a „Tovább N szolgáltatóval” gombon nincs kitöltés, a szöveg a gomb széléig ér. Ok: a `Pressable`-n `className` mellett `style` függvény volt (`({ pressed }) => …`); a NativeWind (css-interop) a függvényt nem alkalmazza, így a `width`/`height` és a lenyomás-átlátszóság elveszett, az elemek tartalomhoz méreteződtek. Javítás: ahol `style` függvény van, ott nincs `className`; a statikus stílus `StyleSheet`-ben, a tokenekből (`colors`, `radius`). A CTA kapott 16 px vízszintes kitöltést is. Érintett: `ProviderCard`, az onboarding CTA, az `ErrorState` újrapróbálás gombja.
 **Fájlok:** components/ProviderCard.tsx, components/OnboardingFooter.tsx, components/ErrorState.tsx, docs/feature-tasks.md
 **Tesztelve:** `npm run lint`, `npm run typecheck`. Az okot a `react-native-css-interop` forrásában követtem végig (a függvény stílusobjektumként kerül a szabálylistába, és nincs deklarációja). Szimulátoron / eszközön NEM futott: a kártyaméretek és a gomb kitöltése eszközön ellenőrizendő.
 **Nyitva maradt:** Ugyanez a minta (`className` + `style` függvény) a korábbi `Sidebar`, `BottomTabBar` és `Settings` link `Pressable`-jein is megvan: ott az elrendezés a `className`-ből rendben van, de a lenyomás-átlátszóság sem működik. Nem nyúltam hozzájuk (nem kért változtatás); javítás külön kérésre.
@@ -407,12 +415,12 @@ Sablon:
 **Alternatíva:** megtartani a demót a későbbi törlésig – zaj és félrevezető útvonalak (pl. `src/app/index.tsx` felirat).
 **Visszavonható?** a git történetből igen.
 
-## D-022 – Onboarding szolgáltatólista: minden HU szolgáltató, TMDB HU sorrendben
+## D-022 – Onboarding szolgáltatólista: minden HU szolgáltató, elöl a névalapú kiemeltek
 **Dátum:** 2026-10-15
-**Döntés:** az onboarding a film és sorozat HU szolgáltatóit egyesítve mutatja (logó nélküliek kihagyva), a TMDB `display_priorities.HU` szerint, azonos prioritásnál névsorban. Nincs szűrés vagy kiemelés ID alapján.
-**Miért:** a CLAUDE.md szerint a szolgáltatók dinamikusak, provider ID nem hardcode-olható; a TMDB listája nem jelöli, melyik előfizetéses, ezért nem lehet adatból szűrni.
-**Alternatíva:** (a) névalapú „kiemelt” lista elöl (HBO Max, SkyShowtime stb.) – jobb első képernyő, de szóhasználat-függő hardcode; (b) szolgáltatónként `discover` darabszám relevanciának – 45 hívás az első indításkor. Mindkettő a felhasználó döntésére vár, mert a HBO Max most a 28. kártya.
-**Visszavonható?** igen, egy rendezőfüggvény a `hooks/useProviders.ts`-ben.
+**Döntés:** az onboarding a film és sorozat HU szolgáltatóit egyesítve mutatja (logó nélküliek kihagyva). Elöl a `data/featuredProviders.ts` névlistája (a design szolgáltatói) áll a lista sorrendjében, utánuk a többi a TMDB `display_priorities.HU` szerint, azonos prioritásnál névsorban. A felhasználó választása; szűrés nincs, csak sorrend, és nincs ID-hardcode.
+**Miért:** a CLAUDE.md szerint a szolgáltatók dinamikusak, provider ID nem hardcode-olható; a TMDB listája nem jelöli, melyik előfizetéses, a TMDB HU sorrendje viszont rossz (HBO Max a 28., SkyShowtime a 23. volt). A névalapú sorrend a listát továbbra is a TMDB-ből veszi, csak a sorrendjét igazítja.
+**Alternatíva:** szolgáltatónként `discover` darabszám relevanciának – adatalapú, de 45 hívás az első indításkor; vagy tisztán a TMDB sorrendje – a design első képernyőjétől messze áll.
+**Visszavonható?** igen, egy névlista és egy rendezőfüggvény.
 
 ## D-023 – Onboarding őr a tabs layoutban, a store visszatöltését a gyökér megvárja
 **Dátum:** 2026-10-15
