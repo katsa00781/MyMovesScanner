@@ -19,7 +19,7 @@
 
 ### Backend (familyBudget Supabase, `mms` séma) — minden sor külön commit
 - [x] Migráció: `mms` séma + `mms.tmdb_cache` tábla + index `expires_at`-ra
-- [ ] Edge Function `mms-tmdb`: whitelist, cache olvasás/írás TTL-lel, TMDB hívás secretből
+- [x] Edge Function `mms-tmdb`: whitelist, cache olvasás/írás TTL-lel, TMDB hívás secretből
 - [ ] `TMDB_API_KEY` secret beállítása, függvény deploy, curl teszt
 - [ ] `lib/supabase.ts`, `lib/api.ts`, `lib/tmdbImage.ts`, `types/tmdb.ts`
 
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Edge Function mms-tmdb (backend)
+
+**Mit:** Megírtam az `mms-tmdb` függvényt. POST `{ path, params }`; a `path` whitelistes (discover movie/tv, trending, search multi/movie/tv/person, watch/providers movie/tv, movie/:id, tv/:id), minden más 403. A paraméterek validáltak (kulcs-formátum, max 20 db, max 300 karakter, `api_key` eldobva), `language` alapból `hu-HU`. Cache: `mms.tmdb_cache`, kulcs = path + rendezett paraméterek; TTL lista/discover/trending/search 6 óra, szolgáltatólista 24 óra, adatlap 7 nap. Cache hiba nem töri el a kérést. A TMDB kulcs `TMDB_API_KEY` secretből jön, nem kerül válaszba/logba. A `supabase/functions` kikerült a tsconfig és az ESLint hatóköréből (Deno kód).
+**Fájlok:** supabase/functions/mms-tmdb/index.ts, tsconfig.json, eslint.config.js
+**Tesztelve:** NEM futott. Nincs deno a gépen, a lokális `functions serve` Dockert kér, és a migráció sincs alkalmazva. `npm run lint` és `npm run typecheck` tiszta.
+**Nyitva maradt:** A whitelist a függvényben él; a `lib/api.ts`-nek tükröznie kell (D-017). Deploy és curl teszt a következő sor, a migráció és a secret után. A kulcsnévhez nincs érték, a TMDB kulcsot Te állítod be.
+**Commit:** `fn: mms-tmdb Edge Function whitelisttel és cache-sel`
 
 ## 2026-10-15 – Migráció: mms séma és tmdb_cache (backend)
 
@@ -283,5 +291,12 @@ Sablon:
 **Miért:** a CLAUDE.md mappastruktúrája gyökérszintű; így a doksi és a kód egyezik.
 **Alternatíva:** a template `src/` elrendezése megtartva – az Expo alapértelmezése, de eltérne a CLAUDE.md-től és minden útvonalat át kellene írni a doksikban.
 **Visszavonható?** igen, mappa-mozgatás és alias.
+
+## D-017 – Közvetlen Postgres a függvényben, whitelist a függvényben
+**Dátum:** 2026-10-15
+**Döntés:** az `mms-tmdb` a cache-t `npm:postgres`-szel, a beépített `SUPABASE_DB_URL`-en éri el, a whitelist a függvény saját `ROUTES` listája; a `lib/api.ts` csak tükrözi.
+**Miért:** a `mms` séma nincs kitéve a PostgREST-nek, így a supabase-js nem érné el; a függvény nem importálhat kliens kódot, ezért két helyen él a lista.
+**Alternatíva:** `mms` séma kitétele a PostgREST-nek (tiltott a szabályok szerint), vagy `public` wrapper RPC (a megosztott sémát érintené).
+**Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
