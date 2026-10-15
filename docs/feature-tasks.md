@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – strings.ts felhasználói átnézése (docs)
+
+**Mit:** A felhasználó átnézte és javította a `constants/strings.ts`-t: „A szolgáltatóimon” → „Előfizetéseim”, „Szolgáltatóim” → „Előfizetéseim” (Böngészés), a találatszám „… cím a(z) N kínálatában”, a „Bérlés” → „Kölcsönzés” (Search chip és Watchlist „Csak kölcsönzés”).
+**Fájlok:** constants/strings.ts
+**Tesztelve:** –
+**Nyitva maradt:** A CLAUDE.md és a D-012 még „Bérlés”-t ír; a `title.*` és későbbi szövegeknél az új szóhasználatot („Kölcsönzés”, „Előfizetéseim”) követem. A Böngészés találatszám-szövegében a „kínálatában” mellé a szolgáltatók számát jelző `services` paraméter már nem szerepel a szövegben (a függvény aláírása változatlan) — a Böngészés feladatnál ellenőrizni.
+**Commit:** `docs: strings.ts szóhasználat javítása`
+
 ## 2026-10-15 – Design tokenek és magyar szövegek (feature)
 
 **Mit:** Megnyitottam a 02, 10, 04 design PNG-ket, és a színeket pixelből olvastam ki (Pillow, csak a scratchpadben). Tokenek a `constants/theme.json`-ban: háttér/felület/chip/akcentus/szövegek a CLAUDE.md szerint, plusz a PNG-ből: `sidebar #151515`, `sidebarSelected #2D2D2D`, `kidsBlue #62D1FE`, `kidsMint #66E3BD`, `kidsMintSoft #0C1F1B`, `kidsYellow #FED50A`, `ctaText #000`; radius (card 12, cardLarge 16, button 16, pill), fontSize (title 34, section 22). A `tailwind.config.js` ugyanezt a JSON-t olvassa (`bg-surface`, `text-accent`, `rounded-card`, `text-title` stb.), a `constants/theme.ts` típusosan exportálja (`colors`, `radius`, `fontSize`, `TABLET_MIN_WIDTH = 768`, `gridColumns`). `constants/strings.ts`: magyar feliratok képernyőnként. `app.json`: `userInterfaceStyle: dark`. A template `Colors/Fonts/Spacing` exportjai ideiglenesen megmaradtak a `theme.ts` alján, mert a template komponensek használják; a navigációs váz törli.

@@ -21,7 +21,7 @@ export const strings = {
     retry: 'Újra',
     loadError: 'Nem sikerült betölteni.',
     empty: 'Nincs találat.',
-    onYourServices: 'A szolgáltatóimon',
+    onYourServices: 'Előfizetéseim',
     film: 'Film',
     series: 'Sorozat',
     films: 'Filmek',
@@ -54,9 +54,9 @@ export const strings = {
 
   browse: {
     title: 'Böngészés',
-    myServices: 'Szolgáltatóim',
+    myServices: 'Előfizetéseim',
     count: (titles: number, services: number) =>
-      `${titles} cím a(z) ${services} szolgáltatódon`,
+      `${titles} cím a(z) ${services} kínálatában`,
     sortNewest: 'Legújabb elöl',
   },
 
@@ -73,7 +73,7 @@ export const strings = {
     placeholder: 'Filmek, sorozatok, személyek',
     recent: 'Legutóbbi keresések',
     stream: 'Előfizetés',
-    rent: 'Bérlés',
+    rent: 'Kölcsönzés',
     buy: 'Vásárlás',
   },
 
@@ -97,7 +97,7 @@ export const strings = {
     comingSoon: 'Hamarosan',
     bluray: 'Blu-ray',
     cinema: 'Moziban',
-    rentOnly: 'Csak bérlés',
+    rentOnly: 'Csak kölcsönzés',
   },
 
   settings: {
