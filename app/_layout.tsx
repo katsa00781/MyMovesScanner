@@ -6,31 +6,42 @@ import {
   Nunito_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/nunito';
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { colors } from '@/constants/theme';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const navigationTheme = {
+  ...DarkTheme,
+  colors: { ...DarkTheme.colors, background: colors.background, primary: colors.accent },
+};
+
+export default function RootLayout() {
   const [fontsLoaded, fontsError] = useFonts({
     Nunito_400Regular,
     Nunito_600SemiBold,
     Nunito_700Bold,
     Nunito_800ExtraBold,
   });
+  const ready = fontsLoaded || fontsError !== null;
 
-  // A splash a template overlay-je rejti el; a betűk betöltéséig nem renderelünk.
-  if (!fontsLoaded && !fontsError) return null;
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+    <ThemeProvider value={navigationTheme}>
+      <StatusBar style="light" />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="settings" />
+      </Stack>
     </ThemeProvider>
   );
 }

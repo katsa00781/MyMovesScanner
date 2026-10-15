@@ -27,7 +27,7 @@
 > Minden képernyőnél a `docs/design/` megfelelő iPhone + iPad PNG-je a forrás.
 
 - [x] Design tokenek és szövegek: `constants/theme.ts` a CLAUDE.md „Design tokenek” alapján, `constants/strings.ts` magyar szövegekkel (D-011)
-- [ ] Navigációs váz: tab bar (telefon) / oldalsáv + MY SERVICES (iPad), üres képernyőkkel — design: 02, 10
+- [x] Navigációs váz: tab bar (telefon) / oldalsáv + MY SERVICES (iPad), üres képernyőkkel — design: 02, 10
 - [ ] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
 - [ ] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
 - [ ] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Navigációs váz (feature)
+
+**Mit:** A 02 és 10 design alapján (PNG-ből mért méretekkel/színekkel): `expo-router/ui` headless `Tabs`. Telefonon alsó tab bar (`#0F0F0F`, felső vonal, aktív = narancs ikon + félkövér felirat), `width >= 768`-tól bal oldalsáv (270 px, `#151515`, jobb oldali vonal, Mymoviescanner szójel narancs ponttal, kijelölt elem `#2D2D2D` lekerekítve, elválasztó, Settings link). Ikonok: SF Symbols az `expo-symbols`-szal. Route-ok: `app/(tabs)/` index, browse, kids, search, watchlist + `app/settings.tsx`, mind üres, címmel (`ScreenPlaceholder`). Root: `Stack` (tabs + settings), sötét navigációs téma, `StatusBar light`, a splash a betűk betöltése után tűnik el. Új fájlok: `components/{AppTabs,BottomTabBar,Sidebar,ScreenPlaceholder}.tsx`, `data/tabs.ts`; tokenek: `tabBar`, `separator`, `layout.sidebarWidth/tabBarHeight`. A template demót töröltem (komponensek, hookok, demo képernyők, nem használt demo képek) és a `theme.ts` template maradékát is (D-021).
+**Fájlok:** app/_layout.tsx, app/(tabs)/*, app/settings.tsx, components/*, data/tabs.ts, constants/theme.json, constants/theme.ts, global.css (+ törölt template fájlok)
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Szimulátoron és Expo Go-n NEM néztem meg, sem iPhone-on, sem iPaden: a tab váltás, az oldalsáv és a vizuális egyezés a designnal ellenőrizendő.
+**Nyitva maradt:** (1) „MY SERVICES” logósor az oldalsáv alján: a `useProvidersStore` és a logók az Onboarding feladattal jönnek, addig nincs a sávban. (2) A telefon Home jobb felső beállítások ikonja a Főoldal hero feladatnál készül; addig a Settings telefonon nem elérhető. (3) A `>= 768` szabály miatt az iPhone fekvő állásban (pl. Pro Max, ~932 pt) is oldalsávot kap; a CLAUDE.md szerint így maradt, ha zavaró, finomítani kell. (4) A 270 px-es oldalsávszélesség a design pixelértéke, nem pt-re skálázva; iPad portrait-ban szűk lehet, az „iPad finomhangolás” feladatnál ellenőrizni. (5) A typed routes típusait az Expo generálja (`.expo/types`, gitignore-os): friss klónon egyszer `npx expo start` kell a typecheck előtt. (6) SF Symbols csak iOS-en jelenik meg (az app iPhone/iPad), webre/Androidra nem alkalmas.
+**Commit:** `feat: navigációs váz tab bar és oldalsáv`
 
 ## 2026-10-15 – Nunito betűtípus (setup)
 
@@ -360,5 +368,19 @@ Sablon:
 **Miért:** a design szövegei lekerekített végű, Nunito-szerű betűvel készültek; a felhasználó jóváhagyta az új könyvtárat. A csomag csak a betűfájlokat hozza, nincs natív kód.
 **Alternatíva:** rendszerfont (SF) – nulla függőség, de eltér a designtól; vagy a fontfájlok kézi bemásolása az `assets/`-be – több karbantartás.
 **Visszavonható?** igen, a `fonts` token és a `_layout` betöltés cserélhető.
+
+## D-020 – Headless tabs (`expo-router/ui`) és SF Symbols ikonok
+**Dátum:** 2026-10-15
+**Döntés:** a tab bar és az iPad oldalsáv az `expo-router/ui` headless `Tabs/TabList/TabTrigger/TabSlot` elemeire épül egyedi komponensekkel; az ikonok SF Symbols (`expo-symbols`).
+**Miért:** a design tab bar és az oldalsáv eltér a natív tabtól (narancs aktív állapot, kijelölt pill, Settings elválasztó mögött, alul szolgáltatólogók), ezt a headless réteg engedi pontosan; az `expo-symbols` már a projekt része, nincs új könyvtár, és az SF Symbols vonalas stílusa illik a designhoz.
+**Alternatíva:** `NativeTabs` (a template-é) – natív érzet, de nem szabható a designra, iPaden nincs egyedi oldalsáv; saját SVG ikonkészlet – új függőség (react-native-svg) és több karbantartás.
+**Visszavonható?** igen, a navigáció egy komponenscsoport.
+
+## D-021 – Template demó eltávolítva
+**Dátum:** 2026-10-15
+**Döntés:** az Expo template demó fájljai (ThemedText/ThemedView, animated-icon, hint-row, collapsible, demo képernyők, hookok, nem használt demo képek, a `theme.ts` template exportjai) törölve.
+**Miért:** a CLAUDE.md szerint az `app/` csak a saját route-okat tartalmazza, és a template exportjai a design tokenekkel keveredtek volna.
+**Alternatíva:** megtartani a demót a későbbi törlésig – zaj és félrevezető útvonalak (pl. `src/app/index.tsx` felirat).
+**Visszavonható?** a git történetből igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

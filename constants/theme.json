@@ -12,7 +12,9 @@
     "kidsBlue": "#62D1FE",
     "kidsMint": "#66E3BD",
     "kidsMintSoft": "#0C1F1B",
-    "kidsYellow": "#FED50A"
+    "kidsYellow": "#FED50A",
+    "tabBar": "#0F0F0F",
+    "separator": "#262626"
   },
   "radius": {
     "card": 12,
@@ -29,5 +31,9 @@
     "semibold": "Nunito_600SemiBold",
     "bold": "Nunito_700Bold",
     "extrabold": "Nunito_800ExtraBold"
+  },
+  "layout": {
+    "sidebarWidth": 270,
+    "tabBarHeight": 49
   }
 }
