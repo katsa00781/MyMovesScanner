@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Betűtípus a PDF szerint: rendszerfont a Nunito helyett (fix)
+
+**Mit:** A felhasználó kérésére újra átnéztem a `docs/design/mymoviescanner-design.pdf`-et: az onboarding oldalai (1., 9.) pixelre megegyeznek a PNG-kkel, új információt nem adnak. Az összevetésnél az egyik fő eltérés a betűtípus: a design nem lekerekített (nem Nunito), hanem SF/Inter jellegű, szűk betűközű, ez volt a korábbi „Nunito-szerű” megítélés tévedése. A betűtípus az iOS rendszerfontja (SF) lett: `font-nunito*` → `font-semibold/bold/extrabold` (a normál súlyhoz nincs osztály), töröltem a betűbetöltést a gyökér layoutból (a splash csak a store visszatöltését várja), a `fonts` tokent a `theme.json`/`theme.ts`-ből, a `fontFamily`-t a `tailwind.config.js`-ből, és eltávolítottam a `@expo-google-fonts/nunito` csomagot.
+**Fájlok:** app/_layout.tsx, components/{BottomTabBar,ErrorState,OnboardingFooter,OnboardingHeader,ProviderCard,ScreenPlaceholder,Sidebar}.tsx, constants/theme.json, constants/theme.ts, tailwind.config.js, package.json, package-lock.json
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Weben (Chrome, 407×880 és 1244×869, a design 4 kijelölt kártyájával, valós TMDB-adattal) a kép a designhoz hasonló: szűk betűköz, súlyok, kártyaméret, keret, CTA. Natívan továbbra sem futott: eszközön ellenőrizendő.
+**Nyitva maradt:** A webes előnézet nem mutatja a pipát (SF Symbols) és a háttérfényt (radial gradient), ezeket csak natívan lehet ellenőrizni; a felhasználó iPad képernyőképén mindkettő megjelent. A nav (oldalsáv, tab bar) szövegei a betűváltással együtt a rendszerfontra váltak: a 02/10 designnal összevetendő.
+**Commit:** `fix: rendszerfont a design szerint, Nunito eltávolítva`
+
 ## 2026-10-15 – Onboarding: Pressable csak className-nel (fix)
 
 **Mit:** A felhasználó iPad képernyőképe szerint az előző javításom (`Pressable` + `StyleSheet` stílus-függvényben) elrontotta a kártyákat: nincs háttér, keret, méret, a CTA fekete szöveggel fekete háttéren láthatatlan. Az előző diagnózisom hiányos volt: a NativeWind a `Pressable` `style` **függvényét** mindig eldobja, `className` nélkül is, tehát a `StyleSheet`-et sem lehet függvényben átadni. Javítás: a `Pressable` csak `className`-t kap (ez bizonyítottan működik); a futásidőben számolt kártyaméret egy burkoló `View` objektum-stílusán van; a lenyomás-hatás `active:opacity-*` osztállyal; a CTA méretei statikus osztályok `isTablet` szerint, letiltva `opacity-40`. Érintett: `ProviderCard`, az onboarding CTA és Kihagyom, `ErrorState`.
@@ -458,5 +466,12 @@ Sablon:
 **Miért:** a felhasználó eszközén ez bizonyítottan hibát okoz (először méret és kitöltés hiányzott, majd, a `StyleSheet`-es átírás után, a teljes stílus). A `className` a Pressable-n, és a `className` + objektum-`style` a View-n bizonyítottan működik.
 **Alternatíva:** `TouchableOpacity` (a lenyomás-hatás beépített, `style` függvény nélkül) vagy `cssInterop` regisztráció a Pressable-re – egyik sem volt kipróbálva eszközön, ezért nem választottam.
 **Visszavonható?** igen, ha a NativeWind javítja a függvény-stílust.
+
+## D-027 – Betűtípus: iOS rendszerfont (SF), nincs egyedi betöltés
+**Dátum:** 2026-10-15
+**Döntés:** az app az iOS rendszerfontját használja, a súlyt a `font-semibold/bold/extrabold` osztályok adják; a Nunito és a `@expo-google-fonts/nunito` csomag megszűnik. Felülírja D-019-et.
+**Miért:** a design PDF/PNG-n a betű nem lekerekített, hanem SF/Inter jellegű, szűk betűközzel (a D-019 alapjául szolgáló „lekerekített” megítélés téves volt). A rendszerfont iOS-en pont ezt adja, automatikus optikai betűközzel, és nincs betöltési idő vagy extra csomag. Az app csak iPhone/iPad.
+**Alternatíva:** Inter betöltése (`@expo-google-fonts/inter`) – a webes mockhoz hasonló, de új csomag és az iOS-en a rendszerfont ugyanazt a hatást adja; vagy a Nunito megtartása – eltér a designtól.
+**Visszavonható?** igen, `fontFamily` token + betöltés visszatehető.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

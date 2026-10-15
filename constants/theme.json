@@ -26,12 +26,6 @@
     "title": 34,
     "section": 22
   },
-  "fonts": {
-    "regular": "Nunito_400Regular",
-    "semibold": "Nunito_600SemiBold",
-    "bold": "Nunito_700Bold",
-    "extrabold": "Nunito_800ExtraBold"
-  },
   "layout": {
     "sidebarWidth": 270,
     "tabBarHeight": 49

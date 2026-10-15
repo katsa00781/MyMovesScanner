@@ -22,7 +22,7 @@ export function Sidebar({ children }: { children?: ReactNode }) {
       }}>
       <View className="mb-[22px] flex-row items-center gap-[10px] px-[15px]">
         <View className="h-[10px] w-[10px] rounded-pill bg-accent" />
-        <Text className="font-nunito-extrabold text-[20px] text-textPrimary">
+        <Text className="font-extrabold text-[20px] text-textPrimary">
           {strings.appName}
         </Text>
       </View>
@@ -33,7 +33,7 @@ export function Sidebar({ children }: { children?: ReactNode }) {
           className="h-12 flex-row items-center gap-[14px] rounded-card px-[15px]"
           style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <SymbolView name="gearshape" size={22} tintColor={colors.textPrimary} />
-          <Text className="font-nunito-semibold text-[17px] text-textPrimary">
+          <Text className="font-semibold text-[17px] text-textPrimary">
             {strings.tabs.settings}
           </Text>
         </Pressable>
@@ -57,7 +57,7 @@ export function SidebarButton({ tab, isFocused, children: _children, ...props }:
         size={22}
         tintColor={isFocused ? colors.accent : colors.textPrimary}
       />
-      <Text className="font-nunito-semibold text-[17px] text-textPrimary">{tab.label}</Text>
+      <Text className="font-semibold text-[17px] text-textPrimary">{tab.label}</Text>
     </Pressable>
   );
 }

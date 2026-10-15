@@ -9,7 +9,7 @@ function RegionLabel() {
   return (
     <View className="flex-row items-center gap-[6px]">
       <SymbolView name="globe" size={16} tintColor={colors.textSecondary} />
-      <Text className="font-nunito text-[14px] text-textSecondary">{strings.onboarding.region}</Text>
+      <Text className="text-[14px] text-textSecondary">{strings.onboarding.region}</Text>
     </View>
   );
 }
@@ -17,7 +17,7 @@ function RegionLabel() {
 function SkipButton({ onPress }: { onPress: () => void }) {
   return (
     <Pressable onPress={onPress} hitSlop={12} className="active:opacity-60">
-      <Text className="font-nunito-semibold text-[16px] text-textPrimary">
+      <Text className="font-semibold text-[16px] text-textPrimary">
         {strings.onboarding.skip}
       </Text>
     </Pressable>
@@ -54,7 +54,7 @@ export function OnboardingFooter({
         className={`items-center justify-center rounded-button bg-accent px-4 active:opacity-80 ${
           isTablet ? 'h-[58px] w-[396px]' : 'h-[56px] w-full'
         } ${disabled ? 'opacity-40' : ''}`}>
-        <Text className="font-nunito-bold text-[17px] text-ctaText">
+        <Text className="font-bold text-[17px] text-ctaText">
           {strings.onboarding.continueWith(count)}
         </Text>
       </Pressable>

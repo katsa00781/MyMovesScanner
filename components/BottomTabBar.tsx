@@ -29,7 +29,7 @@ export function BottomTabButton({ tab, isFocused, children: _children, ...props 
       className="flex-1 items-center justify-center gap-1"
       style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
       <SymbolView name={tab.icon} size={24} tintColor={color} />
-      <Text className="font-nunito-bold text-[11px]" style={{ color }}>
+      <Text className="font-bold text-[11px]" style={{ color }}>
         {tab.label}
       </Text>
     </Pressable>

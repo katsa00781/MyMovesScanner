@@ -11,13 +11,6 @@ module.exports = {
       fontSize: Object.fromEntries(
         Object.entries(tokens.fontSize).map(([name, size]) => [name, `${size}px`]),
       ),
-      // Egy súly = egy betűcsalád: font-nunito, font-nunito-semibold, -bold, -extrabold
-      fontFamily: {
-        nunito: tokens.fonts.regular,
-        'nunito-semibold': tokens.fonts.semibold,
-        'nunito-bold': tokens.fonts.bold,
-        'nunito-extrabold': tokens.fonts.extrabold,
-      },
     },
   },
   plugins: [],
