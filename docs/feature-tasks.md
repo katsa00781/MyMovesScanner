@@ -34,7 +34,7 @@
 - [x] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
 - [x] Főoldal: „New Blu-ray releases” rail (HU → DE fallback, formátum badge — D-006, D-014)
 - [x] Főoldal: „Trending in Hungary” sorszámos rail (D-015) + „Kids' picks” fekvő kártyák + forrásmegjelölés lábléc
-- [ ] Adatlap: hero, meta, korhatár, TMDB értékelés, Trailer, Watchlist gomb, leírás — design: 06, 14
+- [x] Adatlap: hero, meta, korhatár, TMDB értékelés, Trailer, Watchlist gomb, leírás — design: 06, 14
 - [ ] Adatlap: Where to watch (All/Stream/Rent/Buy, ár nélkül — D-012), On disc kártya (D-013), Cast & crew, iPad About oszlop
 - [ ] Watchlist: hozzáadás/eltávolítás, szegmens számlálóval, státusz badge-ek — design: 07, 15
 - [ ] Böngészés: My services szűrő, műfaj chipek, találatszám, rendezés, rács, végtelen görgetés — design: 03, 11
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Adatlap: hero, meta, korhatár, értékelés, Előzetes, Watchlist, leírás (feature)
+
+**Mit:** A 06 és 14 design PNG-ből mért méretekkel (Pillow, csak a scratchpadben). Új route: `app/title/[type]/[id].tsx` (CLAUDE.md szerinti hely, gyökér `Stack`). `useTitleDetails`: egy `getDetails` hívás (skeleton / hiba + újra), `TitlePage` nézetmodell (meta „2026 · 2 ó 08 p · Akció, Sci-Fi”, korhatár HU → DE, TMDB értékelés egy tizedessel, előzetes, a kiválasztott szolgáltatóim közül az első, amelyiken előfizetéssel nézhető). `TitleHero`: backdrop + sötétítés (Főoldal hero mintája), vissza és megosztás kör gomb, cím (44 / 72 pt), meta + korhatár-keret, ★ értékelés (telefonon a meta alatt, iPaden mellette), Előzetes és Watchlist gomb (telefonon 165 / 190, iPaden 188 / 205 px széles; a Watchlist pipára vált, ha a listán van), iPaden „ELŐFIZETÉSEIDEN: NETFLIX” sor. Megosztás: rendszer megosztólap a címmel és a TMDB linkkel. A leírás a hero alatt. Bekötve a Főoldalról: a hero (háttérre koppintás), az „Újdonságok”, Blu-ray, Népszerű és Gyerekeknek kártyák az adatlapra visznek; a hero „Előzetes” és az adatlap közös `trailerUrl` helpert használ. Új: `lib/routes.ts` (`titleHref`), `lib/titleInfo.ts` (`trailerUrl`, `tmdbUrl`, `pickMyProvider`), tokenek `star`, `certBorder`, `titleLayout`.
+**Fájlok:** app/title/[type]/[id].tsx, app/_layout.tsx, app/(tabs)/index.tsx, components/{TitleHero,HeroCarousel}.tsx, hooks/useTitleDetails.ts, lib/{routes,titleInfo}.ts, types/app.ts, constants/{theme.json,theme.ts,strings.ts}, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). Az éles függvényen curl-lel: `movie/603` és `tv/1396` a négy `append_to_response`-szal: magyar cím, év, hossz (filmnél), műfajok, értékelés, leírás és a HU `flatrate` lista megvan (a sorozatnak nincs `runtime`, a Totál szívásnál az `episode_run_time` is üres, ezért a meta ott hossz nélküli). Képernyőn / szimulátoron / eszközön NEM futott: a vizuális egyezés a designnal, a navigáció a Főoldalról, a vissza gomb, a megosztólap, az Előzetes (YouTube) és az SF Symbols ikonok eszközön ellenőrizendők.
+**Nyitva maradt:** (1) **A tab bar / oldalsáv az adatlapon nincs:** a design mutatja, de a CLAUDE.md szerinti gyökér-route (és a headless `Tabs`, amely csak a felsorolt triggereket építi) ezt nem adja, lásd D-038; ha kell, külön döntés. (2) A „Hol nézhető”, „Lemezen”, „Szereplők és stáb” blokkok és az iPad „Névjegy” oszlop a következő feladat: addig iPaden a leírás a hero alatt áll (a designban a Névjegy oszlopban), a következő feladat áthelyezi. (3) Új szövegek jóváhagyásra: „Hozzáadás a watchlisthez” (iPad gomb), „A watchlistben”, „ELŐFIZETÉSEIDEN: NETFLIX”, „Vissza”, „Megosztás”. (4) Sorozatnál nincs korhatár (nincs `release_dates`; a `content_ratings` nincs lekérve), mint a Főoldal herónál. (5) A `flex-[165]` / `flex-[190]` arányos gombszélesség NativeWinddel eszközön ellenőrizendő. (6) A telefon-PNG „Watchlist” gombja szegély nélküli `chip` szín (#2C2C2E), a Főoldal hero gombja áttetsző fehér: a két gomb nem azonos stílus, a design szerint. (7) A Blu-ray, Gyerekeknek kártyák mindig filmre mutatnak (ezek a hookok csak filmet adnak).
+**Commit:** `feat: adatlap hero, meta, értékelés és gombok` (D-038)
 
 ## 2026-10-15 – Blu-ray rail: a DE ágon csak a nálunk is megjelent címek (fix)
 
@@ -607,5 +615,12 @@ Sablon:
 **Miért:** a felhasználó csak olyan megjelenést akar látni, ami nálunk is megjelenik; a mai DE jelöltek fele nálunk nem jelent meg. A magyar bejegyzés a már lekért adatlapból ingyen ellenőrizhető.
 **Alternatíva:** a DE fallback törlése – a HU lemezes adat szinte üres, a rail jellemzően üres lenne; a szűrés nélküli DE lista – német-only címeket mutat.
 **Visszavonható?** igen, egy feltétel.
+
+## D-038 – Adatlap: gyökér-route tab bar nélkül, iPaden a leírás ideiglenesen a hero alatt
+**Dátum:** 2026-10-15
+**Döntés:** (1) Az Adatlap a CLAUDE.md szerinti `app/title/[type]/[id].tsx` gyökér `Stack`-route, ezért az alsó tab bar (telefon) és az oldalsáv (iPad) nem látszik rajta, a design viszont mutatja. (2) iPaden a leírás a hero alatt jelenik meg, nem a „Névjegy” oszlopban, amíg a kétoszlopos elrendezés (következő feladat) el nem készül. (3) A hero tetején a „saját szolgáltatóm” sor (iPad) a `watch/providers` HU `flatrate` listájának és a kiválasztott szolgáltatóknak a metszetéből jön, az első találat. (4) A megosztás a rendszer megosztólapját nyitja a címmel és a TMDB linkkel (`themoviedb.org/<type>/<id>`). (5) A TMDB értékelés rejtett, ha 0 (nincs szavazat). (6) A meta legfeljebb két műfajt mutat. (7) A hero a Főoldal hero sötétítését használja, iPaden az oldalsó átmenettel is.
+**Miért:** (1) a CLAUDE.md mappastruktúrája kifejezett, az `expo-router/ui` `Tabs` pedig csak a felsorolt `TabTrigger`-eket építi navigátorrá, így egy „rejtett” route-hoz külön trigger kellene, ami nem kipróbált, és a vissza gomb (a designban) amúgy is verem-képernyőt jelez; az egyszerűbb, dokumentált megoldást választottam. (2) a Névjegy oszlop a Rendező / Nyelv / Ország mezőkkel együtt a következő feladat, félkész oszlop nélkül is olvasható az oldal. (3) a design szerint a sor „ON YOUR NETFLIX”; adat a már lekért részletekből jön, nincs új hívás. (4) a TMDB nem ad megosztási linket, a közvetlen TMDB-oldal a legközelebbi nyilvános cím. (5) a nem értékelt cím „0.0”-ja félrevezető. (6) a design két műfajt mutat, egy sorban marad. (7) az iPad design háttere sötét, valós backdropnál a bal oldali szöveg olvashatósága ezt kéri (mint a Főoldal).
+**Alternatíva:** (1) a route a `(tabs)` csoportba rejtett `TabTrigger`-rel – megőrizné a chrome-ot, de kipróbálatlan, és eltér a CLAUDE.md-től; saját oldalsáv / tab bar a képernyőn – a navigációs logika duplikálása. (2) a Névjegy oszlop most, üres bal oszloppal – hiányos elrendezés. (4) `Share` csak a címmel – nem nyit semmit a címzettnél.
+**Visszavonható?** igen, a route mozgatható és a komponensek változatlanok maradnak.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

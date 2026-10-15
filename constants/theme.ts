@@ -50,6 +50,15 @@ export const heroLayout = {
   tablet: { height: 467, padX: 43, barPadX: 35, contentBottom: 19, dotsBottom: 24 },
 } as const;
 
+/**
+ * Adatlap hero (06, 14 design): magasság (a gombok aljáig), a szöveg és a felső sáv oldalsó
+ * margója. A kép a hero mögött, a gombok alatt már feketébe fakul.
+ */
+export const titleLayout = {
+  phone: { height: 561, padX: 21, barPadX: 17 },
+  tablet: { height: 508, padX: 43, barPadX: 26 },
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

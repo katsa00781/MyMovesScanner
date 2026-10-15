@@ -16,6 +16,8 @@
     "kidsYellow": "#FED50A",
     "kidsCoral": "#FD8A80",
     "outline": "#48484A",
+    "star": "#FAD808",
+    "certBorder": "#AEAEB2",
     "tabBar": "#0F0F0F",
     "separator": "#262626"
   },

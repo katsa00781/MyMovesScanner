@@ -84,6 +84,11 @@ export const strings = {
   },
 
   title: {
+    back: 'Vissza',
+    share: 'Megosztás',
+    watchlistAdd: 'Hozzáadás a watchlisthez',
+    onWatchlist: 'A watchlistben',
+    onYourService: (provider: string) => `ELŐFIZETÉSEIDEN: ${provider.toUpperCase()}`,
     whereToWatch: 'Hol nézhető',
     dataBy: 'Adatok: JustWatch',
     open: 'Megnyitás',

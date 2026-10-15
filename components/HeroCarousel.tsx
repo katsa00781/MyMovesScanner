@@ -20,6 +20,7 @@ type HeroCarouselProps = {
   items: HeroItem[];
   loading: boolean;
   onTrailer: (item: HeroItem) => void;
+  onOpenTitle: (item: HeroItem) => void;
   onToggleWatchlist: (item: HeroItem) => void;
   onOpenSettings: () => void;
   onOpenSearch: () => void;
@@ -33,6 +34,7 @@ export function HeroCarousel({
   items,
   loading,
   onTrailer,
+  onOpenTitle,
   onToggleWatchlist,
   onOpenSettings,
   onOpenSearch,
@@ -121,7 +123,14 @@ export function HeroCarousel({
               {isTablet ? (
                 <View pointerEvents="none" style={[StyleSheet.absoluteFill, sideFade]} />
               ) : null}
+              <Pressable
+                onPress={() => onOpenTitle(item)}
+                accessibilityRole="button"
+                accessibilityLabel={title.title}
+                style={StyleSheet.absoluteFill}
+              />
               <View
+                pointerEvents="box-none"
                 className="absolute bottom-0 left-0 right-0"
                 style={{ paddingHorizontal: padX, paddingBottom: contentBottom }}>
                 <View className="flex-row items-center gap-[10px]">

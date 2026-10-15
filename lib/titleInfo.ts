@@ -1,4 +1,23 @@
-import type { TitleDetails } from '@/types/tmdb';
+import { REGION } from '@/lib/api';
+import type { MediaType, Provider, TitleDetails } from '@/types/tmdb';
+
+export function trailerUrl(key: string): string {
+  return `https://www.youtube.com/watch?v=${key}`;
+}
+
+/** A TMDB oldala, megosztáshoz (a TMDB nem ad saját megosztási linket). */
+export function tmdbUrl(type: MediaType, id: number): string {
+  return `https://www.themoviedb.org/${type}/${id}`;
+}
+
+/** A kiválasztott szolgáltatóim közül az első, amelyiken a cím előfizetéssel nézhető (HU). */
+export function pickMyProvider(
+  details: TitleDetails,
+  selectedProviderIds: number[],
+): Provider | undefined {
+  const flatrate = details['watch/providers']?.results[REGION]?.flatrate ?? [];
+  return flatrate.find((provider) => selectedProviderIds.includes(provider.provider_id));
+}
 
 /** YouTube előzetes kulcsa: előzetes híján teaser; magyar nyelvű előnyben, utána bármely. */
 export function pickTrailerKey(details: TitleDetails): string | undefined {

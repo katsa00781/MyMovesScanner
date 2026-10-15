@@ -33,6 +33,24 @@ export type HeroItem = {
   watchlisted: boolean;
 };
 
+/** Az Adatlap tetejének adatai a részletekből (hero, meta, értékelés, leírás). */
+export type TitlePage = {
+  id: number;
+  type: MediaType;
+  title: string;
+  overview: string;
+  posterPath: string | null;
+  backdropPath: string | null;
+  /** „2026 · 2 ó 08 p · Dráma, Kaland” (az ismeretlen részek nélkül). */
+  meta: string;
+  certification?: string;
+  /** TMDB értékelés egy tizedessel („7.9”); nincs, ha a címet még senki nem értékelte. */
+  rating?: string;
+  trailerKey?: string;
+  /** A kiválasztott szolgáltatóim közül az első, amelyiken előfizetéssel nézhető. */
+  myProvider?: Provider;
+};
+
 /** Népszerű cím (Főoldal „Népszerű Magyarországon” rail); film vagy sorozat. */
 export type TrendingTitle = {
   key: string;

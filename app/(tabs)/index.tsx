@@ -16,6 +16,8 @@ import { useKidsPicks } from '@/hooks/useKidsPicks';
 import { useNewOnMyServices } from '@/hooks/useNewOnMyServices';
 import { useTrendingInHungary } from '@/hooks/useTrendingInHungary';
 import { formatRelativeDate, formatShortDate } from '@/lib/format';
+import { titleHref } from '@/lib/routes';
+import { trailerUrl } from '@/lib/titleInfo';
 import { useWatchlistStore } from '@/store/useWatchlistStore';
 
 export default function HomeScreen() {
@@ -33,9 +35,10 @@ export default function HomeScreen() {
         <HeroCarousel
           items={heroItems}
           loading={newOn.loading}
-          onTrailer={(item) =>
-            Linking.openURL(`https://www.youtube.com/watch?v=${item.trailerKey}`)
-          }
+          onTrailer={(item) => {
+            if (item.trailerKey) Linking.openURL(trailerUrl(item.trailerKey));
+          }}
+          onOpenTitle={({ title }) => router.push(titleHref(title.type, title.id))}
           onToggleWatchlist={({ title }) =>
             toggleWatchlist({
               id: title.id,
@@ -63,6 +66,7 @@ export default function HomeScreen() {
                 width={width}
                 providerLogoPath={title.provider.logo_path}
                 subtitle={`${formatRelativeDate(title.releaseDate)} · ${title.provider.provider_name}`}
+                onPress={() => router.push(titleHref(title.type, title.id))}
               />
             )}
           />
@@ -84,6 +88,7 @@ export default function HomeScreen() {
               width={width}
               formatLabel={title.format}
               subtitle={`${formatShortDate(title.releaseDate)} · ${strings.watchlist.bluray}`}
+              onPress={() => router.push(titleHref('movie', title.id))}
             />
           )}
         />
@@ -101,6 +106,7 @@ export default function HomeScreen() {
               title={title.title}
               posterPath={title.posterPath}
               width={width}
+              onPress={() => router.push(titleHref(title.type, title.id))}
             />
           )}
         />
@@ -120,6 +126,7 @@ export default function HomeScreen() {
               caption={title.caption}
               accent={kidsAccents[index % kidsAccents.length]}
               width={width}
+              onPress={() => router.push(titleHref('movie', title.id))}
             />
           )}
         />
