@@ -40,7 +40,11 @@ export function ProviderCard({
             <View className="h-[26px] w-[26px] rounded-pill border-[1.5px] border-textSecondary/70" />
           )}
         </View>
-        <Text numberOfLines={1} className="font-semibold text-[17px] text-textPrimary">
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+          className="font-semibold text-[17px] text-textPrimary">
           {provider.provider_name}
         </Text>
       </Pressable>

@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Onboarding: hosszú szolgáltatónév egy sorban (fix)
+
+**Mit:** A design rövid neveket mutat (Netflix, Prime Video), a TMDB nevei hosszabbak („Amazon Prime Video”, „WOW Presents Plus”), és a telefon 174 px-es kártyáján levágódtak („Amazon Prime …”). A név egy sorban marad, iOS-en legfeljebb 75%-ig zsugorodik (`adjustsFontSizeToFit`, `minimumFontScale`), így a kártya magassága és a design elrendezése nem változik.
+**Fájlok:** components/ProviderCard.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. A zsugorítás iOS-specifikus, a webes előnézeten nem látszik: eszközön ellenőrizendő.
+**Nyitva maradt:** A legalább 75%-ra zsugorított név is levágódhat nagyon hosszú névnél (három pontos vége marad).
+**Commit:** `fix: hosszú szolgáltatónév egy sorban a kártyán`
+
 ## 2026-10-15 – Betűtípus a PDF szerint: rendszerfont a Nunito helyett (fix)
 
 **Mit:** A felhasználó kérésére újra átnéztem a `docs/design/mymoviescanner-design.pdf`-et: az onboarding oldalai (1., 9.) pixelre megegyeznek a PNG-kkel, új információt nem adnak. Az összevetésnél az egyik fő eltérés a betűtípus: a design nem lekerekített (nem Nunito), hanem SF/Inter jellegű, szűk betűközű, ez volt a korábbi „Nunito-szerű” megítélés tévedése. A betűtípus az iOS rendszerfontja (SF) lett: `font-nunito*` → `font-semibold/bold/extrabold` (a normál súlyhoz nincs osztály), töröltem a betűbetöltést a gyökér layoutból (a splash csak a store visszatöltését várja), a `fonts` tokent a `theme.json`/`theme.ts`-ből, a `fontFamily`-t a `tailwind.config.js`-ből, és eltávolítottam a `@expo-google-fonts/nunito` csomagot.
