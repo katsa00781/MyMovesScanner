@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { colors } from '@/constants/theme';
+import { useProvidersStore } from '@/store/useProvidersStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,7 +28,9 @@ export default function RootLayout() {
     Nunito_700Bold,
     Nunito_800ExtraBold,
   });
-  const ready = fontsLoaded || fontsError !== null;
+  // Az onboarding-döntéshez a mentett állapotnak is be kell töltődnie.
+  const storeHydrated = useProvidersStore((state) => state.hasHydrated);
+  const ready = (fontsLoaded || fontsError !== null) && storeHydrated;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
@@ -40,6 +43,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" />
         <Stack.Screen name="settings" />
       </Stack>
     </ThemeProvider>

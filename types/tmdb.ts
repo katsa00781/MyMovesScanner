@@ -14,6 +14,8 @@ export type Provider = {
   provider_name: string;
   logo_path: string | null;
   display_priority: number;
+  /** Régiónként (országkód) a TMDB saját sorrendje, kisebb = előrébb. */
+  display_priorities?: Record<string, number>;
 };
 
 export type ProviderList = { results: Provider[] };

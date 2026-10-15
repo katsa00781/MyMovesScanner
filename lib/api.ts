@@ -10,6 +10,9 @@ import type {
   TitleSummary,
 } from '@/types/tmdb';
 
+/** A v1 egyetlen régiója (TMDB `watch_region`). */
+export const REGION = 'HU';
+
 type Params = Record<string, string | number | boolean>;
 
 async function tmdb<T>(path: string, params: Params = {}): Promise<T> {
@@ -23,7 +26,7 @@ async function tmdb<T>(path: string, params: Params = {}): Promise<T> {
 }
 
 export function getProviders(type: MediaType) {
-  return tmdb<ProviderList>(`watch/providers/${type}`, { watch_region: 'HU' });
+  return tmdb<ProviderList>(`watch/providers/${type}`, { watch_region: REGION });
 }
 
 export function discover(type: MediaType, params: Params = {}) {

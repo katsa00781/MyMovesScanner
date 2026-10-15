@@ -28,7 +28,7 @@
 
 - [x] Design tokenek és szövegek: `constants/theme.ts` a CLAUDE.md „Design tokenek” alapján, `constants/strings.ts` magyar szövegekkel (D-011)
 - [x] Navigációs váz: tab bar (telefon) / oldalsáv + MY SERVICES (iPad), üres képernyőkkel — design: 02, 10
-- [ ] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
+- [x] Onboarding 1. lépés: HU szolgáltatók dinamikus listája, kártyák, CTA számlálóval, Skip — design: 01, 09
 - [ ] Onboarding 2. lépés: Kids korhatár választás (ideiglenes, lásd CLAUDE.md), átirányítás ha nincs kész
 - [ ] Közös komponensek: `PosterCard` (szolgáltató / formátum / státusz badge), `PosterRail`, `SectionHeader` (See all), skeleton, üres és hiba állapot
 - [ ] Főoldal: hero carousel (NEW ON …, Trailer, +, pöttyök) + „New on your services” rail — design: 02, 10
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – Onboarding 1. lépés (feature)
+
+**Mit:** A 01 és 09 design PNG-ből mért méretekkel (kártya 174×120 / 204×145, radius 16, 2 px narancs keret, 50 px logó, 26 px jelölő, CTA 56/58 px, glow). `app/onboarding.tsx`: telefonon 2, tableten 4 oszlop (max. 880 széles, 21 px köz), skeleton / hiba+újra / üres állapot, fix lábléc (CTA „Tovább N szolgáltatóval”, Kihagyom, Régió). `useProvidersStore` (Zustand + AsyncStorage persist, `selectedProviderIds`, `onboardingDone`, `hasHydrated`, `saveProviders`). `useProviders` hook: `watch/providers/movie` + `tv` HU, egyesítve és a TMDB HU `display_priorities` szerint rendezve. A gyökér layout megvárja a store visszatöltését (splash), a `(tabs)/_layout` `<Redirect>`-tel az onboardingra küld, amíg `onboardingDone` hamis. Új: `components/{ProviderCard,ErrorState,OnboardingHeader,OnboardingFooter}.tsx`, `store/useProvidersStore.ts`, `hooks/useProviders.ts`; módosult: `lib/api.ts` (`REGION` konstans), `types/tmdb.ts` (`display_priorities`).
+**Fájlok:** app/onboarding.tsx, app/_layout.tsx, app/(tabs)/_layout.tsx, components/ProviderCard.tsx, components/ErrorState.tsx, components/OnboardingHeader.tsx, components/OnboardingFooter.tsx, store/useProvidersStore.ts, hooks/useProviders.ts, lib/api.ts, types/tmdb.ts
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). A `mergeProviders` logikát a valós HU TMDB-adaton futtattam (45 szolgáltató, nincs duplikátum, nincs logó nélküli). Szimulátoron / eszközön NEM futott (a gépen nincs szimulátor-eszköz): a vizuális egyezés a designnal, a tablet elrendezés, a store visszatöltés + átirányítás és a supabase-js futása az appban még ellenőrizendő.
+**Nyitva maradt:** (1) **Sorrend:** a TMDB HU listában a HBO Max a 28., a SkyShowtime a 23. helyen van, az RTL+ nincs benne; előttük JustWatch TV, Apple TV Store stb. Provider ID-t nem hardcode-oltam, a javítás (névalapú „kiemelt elöl” lista vagy relevancia szolgáltatónként `discover` darabszámmal) döntésre vár. (2) A design 7 kártyás; a valós lista hosszú, ezért a lábléc fix (D-024). (3) A 2. lépés (Kids korhatár) külön feladat: addig a „Tovább” lezárja az onboardingot és a főoldalra visz; a 2. lépés ide illeszti be magát. (4) Oldalsáv „SZOLGÁLTATÓIM” logósor még nincs: a kiválasztott szolgáltatók logóihoz közös hook kell (a Beállítások „Szolgáltatóim”-nak is), a Settings feladatnál / külön lépésben. (5) A „Szolgáltatók szerkesztése” a Beállításokból ezt a képernyőt használhatja: a kezdő kijelölés a store-ból jön, a „Kihagyom” a mentettet érintetlenül hagyja. (6) A betűtípus (Nunito) vizuális egyezése és a `ErrorState` újrafelhasználása a „Közös komponensek” feladatban.
+**Commit:** `feat: onboarding 1. lépés szolgáltató választás`
 
 ## 2026-10-15 – Assets és constants/images.ts (setup)
 
@@ -390,5 +398,26 @@ Sablon:
 **Miért:** a CLAUDE.md szerint az `app/` csak a saját route-okat tartalmazza, és a template exportjai a design tokenekkel keveredtek volna.
 **Alternatíva:** megtartani a demót a későbbi törlésig – zaj és félrevezető útvonalak (pl. `src/app/index.tsx` felirat).
 **Visszavonható?** a git történetből igen.
+
+## D-022 – Onboarding szolgáltatólista: minden HU szolgáltató, TMDB HU sorrendben
+**Dátum:** 2026-10-15
+**Döntés:** az onboarding a film és sorozat HU szolgáltatóit egyesítve mutatja (logó nélküliek kihagyva), a TMDB `display_priorities.HU` szerint, azonos prioritásnál névsorban. Nincs szűrés vagy kiemelés ID alapján.
+**Miért:** a CLAUDE.md szerint a szolgáltatók dinamikusak, provider ID nem hardcode-olható; a TMDB listája nem jelöli, melyik előfizetéses, ezért nem lehet adatból szűrni.
+**Alternatíva:** (a) névalapú „kiemelt” lista elöl (HBO Max, SkyShowtime stb.) – jobb első képernyő, de szóhasználat-függő hardcode; (b) szolgáltatónként `discover` darabszám relevanciának – 45 hívás az első indításkor. Mindkettő a felhasználó döntésére vár, mert a HBO Max most a 28. kártya.
+**Visszavonható?** igen, egy rendezőfüggvény a `hooks/useProviders.ts`-ben.
+
+## D-023 – Onboarding őr a tabs layoutban, a store visszatöltését a gyökér megvárja
+**Dátum:** 2026-10-15
+**Döntés:** a `(tabs)/_layout` `<Redirect href="/onboarding">`-ot ad, amíg `onboardingDone` hamis; a gyökér layout a splashen marad a betűk ÉS a `useProvidersStore` visszatöltéséig (`hasHydrated`, nem perzisztált). A „Tovább” és a „Kihagyom” `saveProviders`-szel lezárja az onboardingot és `router.replace('/')`; a 2. lépés megépítésekor a lezárás a 2. lépésre költözik.
+**Miért:** a visszatöltés nélkül minden indításkor egy pillanatra az onboarding villanna fel, vagy a már kész felhasználó is átirányítódna. A `Redirect` a dokumentált auth-minta, és az onboarding útvonal elérhető marad a Beállításokból is.
+**Alternatíva:** `Stack.Protected` – az onboarding és a tabs kölcsönösen kizárná egymást, így a „Szolgáltatók szerkesztése” nem nyithatná meg a képernyőt.
+**Visszavonható?** igen.
+
+## D-024 – Onboarding eltérések a designtól
+**Dátum:** 2026-10-15
+**Döntés:** (1) A lábléc (Régió, CTA, Kihagyom) a lista alatt fix sáv, nem fedi át a kártyákat: a telefon-PNG-n a „Region: Hungary” egy kártyára rajzolódik, ez a mock túlcsorduló tartalma. Tableten a CTA így a képernyő aljához kerül, nem közvetlenül a rács alá, mert a valós lista hosszabb, mint a 7 kártyás design. (2) A „Tovább” 0 kijelölésnél letiltott (40% átlátszóság), a design ezt nem mutatja; „Kihagyom” ilyenkor is van. (3) A narancs háttérfény a RN `experimental_backgroundImage: radial-gradient(...)` stílusával készült, a sugarak a PNG-ből kiolvasva; ez nem véglegesített RN API.
+**Miért:** (1) olvashatóság és érinthetőség; (2) az üres kijelölés értelmetlen CTA-val folytatna; (3) nincs új könyvtár (`expo-linear-gradient`), a CLAUDE.md tiltja az engedély nélküli bővítést.
+**Alternatíva:** (1) a design szó szerinti átfedése – olvashatatlan szöveg a kártyán; (3) `expo-linear-gradient` – stabil API, de új függőség.
+**Visszavonható?** igen.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
