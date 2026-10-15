@@ -75,6 +75,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-15 – Blu-ray rail: a DE ágon csak a nálunk is megjelent címek (fix)
+
+**Mit:** A felhasználó kérésére (csak olyan megjelenés kell, ami nálunk is megjelenik) a HU → DE fallbackben csak azok a címek maradnak, amelyeknek van magyar `release_dates` bejegyzése (bármilyen típus, pl. mozi). A HU ág változatlan. A szűrő a már lekért `getDetails` adatot használja, nincs új hívás.
+**Fájlok:** hooks/useBlurayReleases.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Az éles függvényen a mai 12 DE jelöltből 6-nak van magyar bejegyzése (curl), így a rail ma kb. 6 címet mutat. Képernyőn / eszközön NEM futott.
+**Nyitva maradt:** (1) A 12 jelöltből a szűrés után kevesebb marad; ha a rail túl rövid, a `CANDIDATE_LIMIT` emelhető. (2) A magyar bejegyzés csak azt mondja, hogy a cím nálunk is megjelent (jellemzően moziban), azt nem, hogy a lemez is kapható itt; a lemez továbbra is a német megjelenés dátuma és formátuma.
+**Commit:** `fix: Blu-ray DE fallback csak a magyar megjelenésű címekre` (D-037)
+
 ## 2026-10-15 – Főoldal: Népszerű Magyarországon, Gyerekeknek, forrásmegjelölés (feature)
 
 **Mit:** A 02 és 10 design PNG-ből mért méretekkel (Pillow, csak a scratchpadben). (1) „Népszerű Magyarországon”: `useTrendingInHungary` (film + sorozat `discover`, népszerűség szerint, `watch_region=HU` + monetizációs típusok, egyesítve, top 9), `TrendingCard`: poszter (109 / 121 px), mögötte nagy üreges sorszám (104 / 116 pt; RN-ben nincs szöveg-körvonal, ezért 8 irányba eltolt körvonal-színű példány + háttérszínű kitöltés), állandó elemszélesség (172 / 201 px). (2) „Gyerekeknek”: `useKidsPicks` (népszerű animációs / családi filmek, DE korhatár ≤ a Beállított korhatár, a jelöltekre `getDetails` a korhatárhoz és a magyar műfajnévhez), `KidsPickCard`: fekvő backdrop-kártya (272 / 288 px, 16 px sarok), rajta a cím, alatta színes pötty + „0+ éveseknek · Animációs”, a pöttyök színe körbeforog (kék, menta, korall, sárga). „Összes” → Gyerek fül. (3) `SourceCredit`: TMDB + JustWatch lábléc. A `PosterRail` kapott `variant` (`poster` / `trending` / `wide`: más méret és helykitöltő) és a `renderCard` harmadik, `index` paramétert. `useSettingsStore` kapott `hasHydrated`-et (mint a providers store), a Gyerek hook megvárja. `pickCertification` kapott országlista paramétert (a gyerek ajánlók csak DE-t kérnek). Új tokenek: `outline` (#48484A), `kidsCoral` (#FD8A80), `trendingLayout`, `wideRailLayout`, `kidsAccents`. `TitleSummary` kapott `popularity`-t.
@@ -592,5 +600,12 @@ Sablon:
 **Miért:** a `discover` nem ad korhatárt és műfajnevet, a `getDetails` a Blu-ray railnél már bevált és magyar műfajnevet is ad, így nincs kézzel vitt műfaj-fordítás (D-032). A korhatár nélküli sorozatok a „korhatár szerint” szűrt polcot hamisítanák. A visszatöltés megvárása elkerüli, hogy az alapérték (6) miatt felesleges, majd a tényleges korhatárral második lekérdezés fusson.
 **Alternatíva:** sorozat is (korhatár nélkül) – megsérti a szűrő értelmét; a felirat a kiválasztott korhatárból („6+ éveseknek” minden kártyán) – nem a cím korhatára, a design is címenként mutat; `useKidsTitles`-nek elnevezett hook – a Gyerek sarok feladat adja meg a végleges alakját, a Főoldal rail egyelőre `useKidsPicks`.
 **Visszavonható?** igen.
+
+## D-037 – Blu-ray DE fallback: csak a magyar megjelenésű címek
+**Dátum:** 2026-10-15
+**Döntés:** a D-006 DE fallbackje csak azokat a címeket tartja meg, amelyeknek a `release_dates`-ében van `HU` bejegyzés (bármilyen típus). A HU ág nem változik.
+**Miért:** a felhasználó csak olyan megjelenést akar látni, ami nálunk is megjelenik; a mai DE jelöltek fele nálunk nem jelent meg. A magyar bejegyzés a már lekért adatlapból ingyen ellenőrizhető.
+**Alternatíva:** a DE fallback törlése – a HU lemezes adat szinte üres, a rail jellemzően üres lenne; a szűrés nélküli DE lista – német-only címeket mutat.
+**Visszavonható?** igen, egy feltétel.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

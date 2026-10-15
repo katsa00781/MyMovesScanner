@@ -24,6 +24,12 @@ function formatFromNote(note: string): string {
   return 'Blu-ray';
 }
 
+// Van magyar megjelenési bejegyzése (bármilyen típus, pl. mozi)? A DE ágon csak az ilyen címek
+// kellenek: ami nálunk nem jelent meg, azt nem mutatjuk (D-037).
+function hasHungarianRelease(details: TitleDetails): boolean {
+  return (details.release_dates?.results ?? []).some((entry) => entry.iso_3166_1 === 'HU');
+}
+
 function physicalRelease(details: TitleDetails, region: BlurayRegion, from: string, to: string) {
   const releases: ReleaseDate[] =
     details.release_dates?.results.find((entry) => entry.iso_3166_1 === region)?.release_dates ??
@@ -68,6 +74,7 @@ async function fetchRegion(region: BlurayRegion): Promise<BlurayTitle[]> {
     const release = physicalRelease(result.value, region, from, to);
     const item = candidates[index];
     if (!release || !item.title) return;
+    if (region === 'DE' && !hasHungarianRelease(result.value)) return;
     titles.push({
       key: `movie:${item.id}`,
       id: item.id,
