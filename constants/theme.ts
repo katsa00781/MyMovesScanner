@@ -107,6 +107,23 @@ export const browseLayout = {
   tablet: { barTop: 27, barHeight: 41, servicesGap: 19, genresGap: 18, countGap: 0, countHeight: 0, gridTop: 20, rowGap: 20 },
 } as const;
 
+/**
+ * Gyerek sarok (04, 12 design): a fejlécsor teteje és magassága (a cím 38 pt), a függőleges
+ * távolságok a sorok között (cím → felnőtt-tartalom badge → korhatár chipek → téma chipek →
+ * szekciócím → rács), az iPad korhatár chipjeinek eltolása a fejléc tetejétől és a badge
+ * szélessége, valamint a kártya-rács (oldalsó margó, oszlopköz, sorköz a felirat alatt).
+ */
+export const kidsLayout = {
+  phone: {
+    barTop: 7, barHeight: 44, badgeGap: 19, badgeWidth: undefined, ageChipsTop: 0, ageChipsGap: 21,
+    themesGap: 19, headingGap: 25, gridTop: 22, inset: 21, gap: 16, rowGap: 21,
+  },
+  tablet: {
+    barTop: 35, barHeight: 44, badgeGap: 23, badgeWidth: 266, ageChipsTop: 52, ageChipsGap: 0,
+    themesGap: 21, headingGap: 28, gridTop: 24, inset: 34, gap: 24, rowGap: 26,
+  },
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

@@ -108,6 +108,14 @@ export type KidsPick = {
   caption: string;
 };
 
+/** Gyerek sarok rács eleme; csak film (D-036). */
+export type KidsTitle = {
+  key: string;
+  id: number;
+  title: string;
+  posterPath: string;
+};
+
 /** Új Blu-ray megjelenés (Főoldal rail); csak film. */
 export type BlurayTitle = {
   key: string;

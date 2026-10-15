@@ -27,11 +27,13 @@
     "card": 12,
     "cardLarge": 16,
     "poster": 14,
+    "kidsCard": 20,
     "button": 16,
     "pill": 9999
   },
   "fontSize": {
     "title": 34,
+    "kidsTitle": 38,
     "section": 22
   },
   "layout": {

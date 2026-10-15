@@ -88,7 +88,14 @@ export const strings = {
   kids: {
     title: 'Gyerek sarok',
     matureHidden: 'Felnőtt tartalom elrejtve',
-    ageChips: ['0+', '6+', '12+'],
+    themes: {
+      animals: 'Állatok',
+      space: 'Világűr',
+      princesses: 'Hercegnők',
+      dinosaurs: 'Dinoszauruszok',
+      music: 'Zene',
+      sports: 'Sport',
+    },
     bigAdventures: 'Nagy kalandok',
     ages: (age: number) => `${age}+ éveseknek`,
   },
