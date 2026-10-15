@@ -12,15 +12,19 @@ export function PosterGrid<T>({
   loading = false,
   keyExtractor,
   renderCard,
+  rowGap: rowGapOverride,
 }: {
   data: T[];
   loading?: boolean;
+  /** A rács sorköze, ha eltér a `gridLayout` értékétől (Böngészés telefonon). */
+  rowGap?: number;
   keyExtractor: (item: T) => string;
   renderCard: (item: T, cardWidth: number) => ReactElement;
 }) {
   const { width } = useWindowDimensions();
   const isTablet = width >= TABLET_MIN_WIDTH;
-  const { inset, gap, rowGap } = gridLayout[isTablet ? 'tablet' : 'phone'];
+  const { inset, gap, rowGap: defaultRowGap } = gridLayout[isTablet ? 'tablet' : 'phone'];
+  const rowGap = rowGapOverride ?? defaultRowGap;
   const columns = gridColumns[isTablet ? 'tablet' : 'phone'].default;
   const available = width - (isTablet ? layout.sidebarWidth : 0);
   // Lefelé kerekítve, hogy a sor a törtpixelek miatt ne törjön új sorba.

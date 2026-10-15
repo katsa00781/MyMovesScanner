@@ -136,3 +136,14 @@ export type WatchlistAvailability = {
   /** Film: `release_date`, sorozat: `first_air_date`; ÉÉÉÉ-HH-NN. */
   releaseDate?: string;
 };
+
+/** Böngészés rács eleme: egy cím a kiválasztott szolgáltatók egyikén (a badge a szolgáltató logója). */
+export type BrowseTitle = {
+  /** `${type}:${id}`, listakulcsnak. */
+  key: string;
+  id: number;
+  type: MediaType;
+  title: string;
+  posterPath: string | null;
+  provider: Provider;
+};

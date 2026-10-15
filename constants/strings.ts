@@ -62,8 +62,27 @@ export const strings = {
     title: 'Böngészés',
     myServices: 'Előfizetéseim',
     count: (titles: number, services: number) =>
-      `${titles} cím a(z) ${services} kínálatában`,
-    sortNewest: 'Legújabb elöl',
+      `${titles.toLocaleString('hu-HU')} cím ${services} szolgáltatódon`,
+    sortTitle: 'Rendezés',
+    sorts: {
+      newest: 'Legújabb elöl',
+      popular: 'Legnépszerűbb',
+      rating: 'Legjobban értékelt',
+    },
+    genres: {
+      all: 'Mind',
+      drama: 'Dráma',
+      comedy: 'Vígjáték',
+      thriller: 'Thriller',
+      scifi: 'Sci-Fi',
+      action: 'Akció',
+      crime: 'Krimi',
+      animation: 'Animáció',
+      horror: 'Horror',
+      documentary: 'Dokumentum',
+      family: 'Családi',
+      romance: 'Romantikus',
+    },
   },
 
   kids: {

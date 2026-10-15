@@ -97,6 +97,16 @@ export const watchlistLayout = {
   gridTop: 20,
 } as const;
 
+/**
+ * Böngészés fejléc (03, 11 design): a fejlécsor teteje és magassága, a függőleges távolságok a
+ * sorok között (fejléc → szolgáltatók → műfaj chipek → találatszám → rács), a találatszám-sor
+ * magassága (telefon) és a rács sorköze (telefonon 2 px-szel nagyobb, mint a Watchlistben).
+ */
+export const browseLayout = {
+  phone: { barTop: 3, barHeight: 42, servicesGap: 18, genresGap: 18, countGap: 17, countHeight: 20, gridTop: 16, rowGap: 17 },
+  tablet: { barTop: 27, barHeight: 41, servicesGap: 19, genresGap: 18, countGap: 0, countHeight: 0, gridTop: 20, rowGap: 20 },
+} as const;
+
 /** Poszter rács oszlopszámok. */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },
