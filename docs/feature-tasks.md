@@ -13,7 +13,7 @@
 - [x] `docs/design/` mappa elhelyezése a projektben (PDF + 16 PNG)
 - [ ] Assets elhelyezése (`assets/images/`: logo, tmdb-logo) + `constants/images.ts`
 - [x] `npm run lint` és `npm run typecheck` scriptek
-- [ ] `app.json`: iPad támogatás (`supportsTablet: true`), minden orientáció
+- [x] `app.json`: iPad támogatás (`supportsTablet: true`), minden orientáció
 - [x] CLAUDE.md és docs/ elhelyezése a projekt gyökerében
 - [ ] Push GitHub-ra
 
@@ -74,6 +74,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-15 – app.json: iPad és orientációk (setup)
+
+**Mit:** `ios.supportsTablet: true`, `orientation: "default"` (portrait + landscape iPhone-on és iPaden).
+**Fájlok:** app.json
+**Tesztelve:** `npm run lint`, `npm run typecheck`; szimulátoron nem.
+**Nyitva maradt:** `bundleIdentifier` még nincs megadva (EAS Build előtt kell); `userInterfaceStyle` még `automatic`, a design sötét – a "Design tokenek" feladatnál `dark`-ra kell állítani.
+**Commit:** `setup: iPad támogatás és minden orientáció`
 
 ## 2026-10-15 – Függőségek (setup)
 
