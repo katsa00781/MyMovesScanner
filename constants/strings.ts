@@ -187,6 +187,22 @@ export const strings = {
   },
 
   account: {
+    title: 'Fiók',
+    signInRow: 'Bejelentkezés',
+    rowNote:
+      'Jelentkezz be, hogy a watchlisted, a szolgáltatóid és a beállításaid minden eszközödön megjelenjenek.',
+    modeSignIn: 'Belépés',
+    modeSignUp: 'Regisztráció',
+    email: 'E-mail',
+    password: 'Jelszó',
+    submitSignIn: 'Belépés',
+    submitSignUp: 'Fiók létrehozása',
+    formNote: 'Fiók nélkül is használható az app: ilyenkor minden csak ezen az eszközön marad.',
+    confirmSent: 'Küldtünk egy megerősítő levelet. Erősítsd meg a címet, utána jelentkezz be.',
+    signedIn: 'Bejelentkezve',
+    signedInNote:
+      'A watchlist, a szolgáltatók és a beállítások szinkronizálódnak azokon az eszközökön, ahol ugyanezzel a fiókkal vagy bejelentkezve.',
+    signOut: 'Kijelentkezés',
     errors: {
       invalidCredentials: 'Hibás e-mail cím vagy jelszó.',
       emailNotConfirmed: 'Az e-mail címet még meg kell erősíteni. Nézd meg a leveleidet.',

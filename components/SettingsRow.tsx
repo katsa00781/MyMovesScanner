@@ -16,10 +16,12 @@ type Props = {
   right?: ReactNode;
   /** Narancs címke, alacsonyabb sor (a „Szolgáltatók szerkesztése”). */
   accent?: boolean;
+  /** Piros címke, nyíl nélkül (a „Kijelentkezés”). */
+  danger?: boolean;
 };
 
 // Egy sor a Beállítások kártyáiban. A koppintható sorban a Pressable-n csak className van (D-026).
-export function SettingsRow({ label, icon, value, onPress, right, accent = false }: Props) {
+export function SettingsRow({ label, icon, value, onPress, right, accent = false, danger = false }: Props) {
   const content = (
     <>
       {icon ? (
@@ -31,11 +33,17 @@ export function SettingsRow({ label, icon, value, onPress, right, accent = false
       ) : null}
       <Text
         numberOfLines={1}
-        className={`flex-1 text-[17px] ${accent ? 'text-accent' : 'text-textPrimary'}`}>
+        className={`flex-1 text-[17px] ${
+          danger ? 'text-danger' : accent ? 'text-accent' : 'text-textPrimary'
+        }`}>
         {label}
       </Text>
-      {value ? <Text className="ml-3 text-[17px] text-textSecondary">{value}</Text> : null}
-      {onPress ? (
+      {value ? (
+        <Text numberOfLines={1} className="ml-3 max-w-[65%] shrink text-[17px] text-textSecondary">
+          {value}
+        </Text>
+      ) : null}
+      {onPress && !danger ? (
         <SymbolView
           name="chevron.right"
           size={13}
@@ -49,7 +57,7 @@ export function SettingsRow({ label, icon, value, onPress, right, accent = false
   );
 
   const height = accent ? 'h-[52px]' : 'h-[54px]';
-  const padding = onPress ? 'pl-[15px] pr-[18px]' : 'px-[15px]';
+  const padding = onPress && !danger ? 'pl-[15px] pr-[18px]' : 'px-[15px]';
   if (!onPress) {
     return <View className={`${height} flex-row items-center ${padding}`}>{content}</View>;
   }

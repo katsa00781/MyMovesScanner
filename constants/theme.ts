@@ -164,6 +164,9 @@ export const settingsLayout = {
   sectionGap: 27,
 } as const;
 
+/** Fiók (bejelentkezés) képernyő: az űrlap legnagyobb szélessége (nincs hozzá design, D-052). */
+export const accountLayout = { maxWidth: 520 } as const;
+
 /** Poszter rács oszlopszámok; `tabletNarrow`: álló iPad (az oldalsáv melletti terület keskeny). */
 export const gridColumns = {
   phone: { default: 3, kids: 2 },

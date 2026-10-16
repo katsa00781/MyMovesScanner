@@ -36,6 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="account" />
         <Stack.Screen name="title/[type]/[id]" />
       </Stack>
       {__DEV__ ? <DevResetButton /> : null}

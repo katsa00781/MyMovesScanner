@@ -11,6 +11,7 @@ import { SettingsSection } from '@/components/SettingsSection';
 import { strings } from '@/constants/strings';
 import { colors, settingsLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
 import { kidsAgeLimits } from '@/data/kidsAgeLimits';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function SettingsScreen() {
@@ -19,6 +20,7 @@ export default function SettingsScreen() {
   const isTablet = width >= TABLET_MIN_WIDTH;
   const layout = settingsLayout[isTablet ? 'tablet' : 'phone'];
 
+  const user = useAuthStore((state) => state.user);
   const ageLimit = useSettingsStore((state) => state.kidsAgeLimit);
   const setAgeLimit = useSettingsStore((state) => state.setKidsAgeLimit);
   const hideMature = useSettingsStore((state) => state.hideMature);
@@ -84,6 +86,16 @@ export default function SettingsScreen() {
       />
     </SettingsSection>
   );
+  const account = (
+    <SettingsSection title={strings.account.title} footnote={user ? undefined : strings.account.rowNote}>
+      <SettingsRow
+        label={user ? strings.account.email : strings.account.signInRow}
+        icon={{ name: 'person.crop.circle', color: colors.settingsBlue }}
+        value={user?.email}
+        onPress={() => router.push('/account')}
+      />
+    </SettingsSection>
+  );
   const about = (
     <SettingsSection title={strings.settings.about}>
       <AboutCard />
@@ -111,6 +123,7 @@ export default function SettingsScreen() {
                   {kidsCorner}
                 </View>
                 <View className="flex-1" style={{ gap: settingsLayout.sectionGap }}>
+                  {account}
                   {about}
                 </View>
               </View>
@@ -119,6 +132,7 @@ export default function SettingsScreen() {
                 {services}
                 {regionLanguage}
                 {kidsCorner}
+                {account}
                 {about}
               </View>
             )}

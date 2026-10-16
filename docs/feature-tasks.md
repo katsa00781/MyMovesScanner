@@ -50,7 +50,7 @@
 - [x] Migráció: `mms.user_data` (felhasználónként egy dokumentum, RLS policy nélkül) — megírva, **alkalmazás csak kérésre**
 - [x] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
 - [x] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
-- [ ] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
+- [x] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
 - [ ] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
 - [ ] Éles bekapcsolás: migráció alkalmazása, függvény deploy, Auth beállítások (felhasználói kérésre), végigpróbálás két eszközön
 
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Fiók képernyő és „Fiók” szekció a Beállításokban (feature)
+
+**Mit:** Új route `app/account.tsx` (gyökér `Stack`): fiók nélkül `AuthForm` (Belépés / Regisztráció szegmens, e-mail + jelszó mező a Beállítások kártya-stílusában, hibaüzenet pirosan, narancs CTA töltésjelzővel, jelszókezelő-barát `textContentType` / `autoComplete`), bejelentkezve `AccountCard` (e-mail, Kijelentkezés). Regisztráció e-mail megerősítéssel: tájékoztató üzenet és vissza a Belépésre. A Beállításokban új „Fiók” szekció (telefonon a Gyerek sarok és a Névjegy között, iPaden a jobb oszlop teteje): fiók nélkül „Bejelentkezés” + magyarázó lábjegyzet, bejelentkezve „E-mail” + a cím. `SettingsBackLink` kapott `label` paramétert (alapérték: Főoldal), `SettingsRow` kapott `danger` változatot, és a hosszú érték (e-mail) csonkul.
+**Fájlok:** app/{account,settings,_layout}.tsx, components/{AuthForm,AccountCard,SettingsRow,SettingsBackLink}.tsx, constants/{strings,theme}.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul). **Képernyőn és eszközön NEM nézve** (se szimulátor, se web), és a bejelentkezés élesben sem futott (Auth beállítások és migráció hiányában): a kinézet, a billentyűzet viselkedése (`automaticallyAdjustKeyboardInsets`), a jelszókezelő felajánlása eszközön ellenőrizendő.
+**Nyitva maradt:** (1) **Nincs design** a képernyőhöz, jóváhagyásra (D-052). (2) Az iPad kinézete nincs mérve; az űrlap 520 px széles, középre igazított. (3) Szövegek jóváhagyásra (az `account` blokk a `strings.ts`-ben). (4) Nincs „elfelejtett jelszó” és jelszócsere (a levélsablon a familyBudgettel közös, D-051). (5) A szinkron a következő sor; addig a bejelentkezés nem csinál mást, mint azonosít.
+**Commit:** `feat: bejelentkezés képernyő és fiók a beállításokban` (D-052)
 
 ## 2026-10-16 – Kliens: tartós munkamenet, `useAuthStore`, `lib/auth.ts` (feature)
 
@@ -846,5 +854,12 @@ Sablon:
 **Alternatíva:** (1) kötelező bejelentkezés – nincs net → nincs app; (2) táblák watchlistre / szolgáltatókra / beállításokra külön – több migráció és több hívás, ugyanez az eredmény; (3) külön Supabase projekt az mms-nek – teljes elkülönítés, de eltér a D-003-tól; Sign in with Apple – új könyvtár, Apple Developer beállítás; magic link – a levélsablon a familyBudgettel közös.
 **Ismert kockázat:** (a) A Supabase Auth felhasználók projekt-szintűek: az mms regisztrációja a familyBudget projektben is `authenticated` felhasználót hoz létre, és ugyanaz az e-mail ugyanaz a fiók. A nyilvános anon kulccsal bárki regisztrálhat; ha a familyBudget bármely táblájának policy-ja az `authenticated` szerepkörnek széles hozzáférést ad, az kiszivároghat. **Élesítés (regisztráció megnyitása) előtt a familyBudget RLS policy-jait read-only át kell nézni**; ha bizonytalan, a regisztráció zárható a Supabase Auth beállításokban és a fiókok kézzel vehetők fel. (b) A fiók törlése az appból nincs kész: a közös pool miatt egy törlés a familyBudget fiókot is törölné, ezért külön döntés (Ship előtti sor). (c) Utolsó írás nyer: két eszköz egyidejű módosításánál az egyik elveszhet.
 **Visszavonható?** igen — a kliens oldali réteg kikapcsolható (a Fiók szekció elrejtése), az `mms.user_data` és az `mms-sync` additív, `mms` alatt él.
+
+## D-052 – Fiók képernyő: design nélkül, Beállítások-stílusban; kijelentkezéskor a helyi adat marad; `danger` szín
+**Dátum:** 2026-10-16
+**Döntés:** (1) A bejelentkezés / regisztráció képernyőnek nincs designja: a Beállítások kártya-stílusát (felület, 14 px sarok, 54 px sorok), a szegmens-vezérlőt és az onboarding CTA gombját használja, tokenekkel; ez jóváhagyásra vár. (2) A Fiók a Beállításokból nyílik (nem az onboardingból, nem tabról). (3) Kijelentkezéskor a watchlist, a szolgáltatók és a beállítások az eszközön maradnak. (4) Új szín token: `danger` (#FF453A) a hibaszövegnek és a Kijelentkezés sornak.
+**Miért:** (1) a CLAUDE.md szerint ütközésnél nem találok ki új UI-t; itt nincs minta, a legkisebb eltérés a már jóváhagyott elemek újrahasznosítása. (2) a bejelentkezés opcionális (D-051), nem szabad az első indítást akadályoznia. (3) a kijelentkezés nem törlés; fiók nélkül az app helyi adattal működik, és így nem vész el semmi. (4) a tokenek között nincs hibaszín, a hardcode-olás tilos.
+**Alternatíva:** (1) a képernyő designjának megvárása – leállítaná a funkciót; (3) kijelentkezéskor törölni a helyi adatot – közös eszközön tisztább, de adatvesztés és meglepetés; a másik fiókkal belépve a watchlist egyesülne (lásd a szinkron sort); (4) a `kidsCoral` használata hibához – a Gyerek sarok akcentusa, más jelentés.
+**Visszavonható?** igen, egy route és két komponens.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
