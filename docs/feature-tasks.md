@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-16 – Élesítés 1/2: `mms.user_data` migráció alkalmazva (db)
+
+**Mit:** A felhasználó kérésére (`mehet`) alkalmaztam a `202610161000_mms_user_data.sql` tartalmát a familyBudget Supabase projekten (`eguhipjgnhbajbmnrskm`, MCP `apply_migration`, név: `mms_user_data`). Előtte read-only ellenőriztem: az `mms` sémában csak a `tmdb_cache` volt, az `mms.user_data` nem létezett.
+**Fájlok:** docs/feature-tasks.md
+**Tesztelve:** Utólag lekérdezve: az `mms` sémában `tmdb_cache` és `user_data`, mindkettőn RLS be, policy 0, `anon` és `authenticated` nem olvashat, `service_role` igen. Más séma / tábla nem változott.
+**Nyitva maradt:** (1) **Az `mms-sync` deploy NINCS meg:** a `supabase functions deploy mms-sync --project-ref eguhipjgnhbajbmnrskm` parancsot a Claude Code jogosultság-ellenőrzője production deployként letiltotta; a felhasználónak kell futtatnia (vagy engedélyszabályt adnia). Deploy nélkül az app szinkronja „Nem sikerült, újra” állapotba kerül. (2) Auth beállítások a dashboardon (e-mail megerősítés), a familyBudget RLS policy-k read-only átnézése a regisztráció megnyitása előtt (D-051), kétkészülékes próba.
+**Commit:** `docs: user_data migráció alkalmazva, mms-sync deploy vár`
+
 ## 2026-10-16 – Szinkron: letöltés, egyesítés, feltöltés (feature)
 
 **Mit:** Bejelentkezve a watchlist, a szolgáltatók (+ `onboardingDone`), a korhatár és a `hideMature` egy dokumentumként szinkronizálódik. `lib/syncApi.ts`: `fetchUserData` / `saveUserData` az `mms-sync`-re. `lib/sync.ts`: `startSync(userId)` azonnal letölt, a store-ok módosítása után 1,5 mp késleltetéssel feltölt, az app előtérbe kerülésekor letölt; a műveletek sorban futnak. Szabályok: ha az eszközön még nem volt fiók, a watchlist egyesül (típus + azonosító szerint), a többi a szerveré; ha másik fiók adata volt az eszközön, a szerver felülír (nincs szerver adat → üres lap), így a fiókok adata nem keveredik; ugyanaz a fiók: el nem küldött helyi változásnál (`dirty`) a helyi nyer, egyébként a szerver. `useSyncStore` (`status`, `dirty`, `lastUserId`; a `dirty` és a `lastUserId` perzisztált). `useAccountSync` hook a gyökér layoutban megvárja az összes érintett store visszatöltését. A Fiók képernyőn „Szinkron” sor (Naprakész / Folyamatban… / Nem sikerült, újra; hibánál koppintásra újrapróbál).
