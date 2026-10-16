@@ -43,7 +43,19 @@
 - [x] Beállítások: My services + Edit, Region & language, Kids corner, About (Notifications rejtve — D-013) — design: 08, 16
 - [x] iPad finomhangolás: rács oszlopszámok, kétoszlopos adatlap, portrait/landscape ellenőrzés a designnal összevetve
 
+### Fiók és szinkron (D-051) — minden sor külön commit
+> Nincs design a bejelentkezés / regisztráció képernyőhöz: a design tokenjeivel és a Beállítások kártya-stílusában készül (jóváhagyásra).
+
+- [x] Döntés és dokumentáció: D-051, CLAUDE.md auth szakaszai, feladatlista
+- [ ] Migráció: `mms.user_data` (felhasználónként egy dokumentum, RLS policy nélkül) — megírva, **alkalmazás csak kérésre**
+- [ ] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
+- [ ] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
+- [ ] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
+- [ ] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
+- [ ] Éles bekapcsolás: migráció alkalmazása, függvény deploy, Auth beállítások (felhasználói kérésre), végigpróbálás két eszközön
+
 ### Ship előtt
+- [ ] Fiók törlése az appból (App Store 5.1.1(v) előírás, ha az app fiókot hoz létre; a közös user-pool miatt külön döntés kell, D-051)
 - [ ] Teljes flow tesztelése iPhone-on és iPaden
 - [ ] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
 - [ ] Lint + typecheck hibák nélkül
@@ -74,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Fiók és szinkron: döntés és dokumentáció (docs)
+
+**Mit:** A felhasználó kérésére bejön az authentikáció. Egyeztetett döntések: cél = szinkron a családtagok / eszközök között, mód = Supabase Auth e-mail + jelszó, a user-pool közös a familyBudgettel (az mms csak a saját `mms` táblát használja), a bejelentkezés opcionális (Beállítások). Felülírja a D-002-t. A CLAUDE.md auth szakaszai, store-listája és a feladatlista („Fiók és szinkron”) frissítve.
+**Fájlok:** CLAUDE.md, docs/feature-tasks.md
+**Tesztelve:** – (dokumentáció)
+**Nyitva maradt:** lásd D-051 „Ismert kockázat”: a közös user-pool miatt a nyilvános regisztráció a familyBudget projektben is `authenticated` felhasználót hoz létre; élesítés előtt a familyBudget RLS policy-jait át kell nézni.
+**Commit:** `docs: fiók és szinkron döntése (D-051)`
 
 ## 2026-10-15 – iPad finomhangolás: címméretek, álló iPad oszlopok és fejlécek (feature)
 
@@ -794,5 +814,13 @@ Sablon:
 **Miért:** (1) a design iPad PNG-in mért betűmagasság (28 px a telefon 24 px-éhez, Kids 33–36 a 29-hez). (2) a design csak fekvő iPadet mutat; álló nézetben a 6 oszlop ~70 px-es poszter, a 4 oszlop Kids 106 px-es kártya csonkolt címekkel, a 40 pt-os cím + vezérlő pedig nem fér egy sorba. (3) négy képernyő használja, ismétlés.
 **Alternatíva:** (2) a 6 / 4 oszlop megtartása és kisebb kártya – olvashatatlan poszterek; a telefon elrendezése álló iPaden – a design iPad-érzete elvész; (1) 34 pt marad – a designtól eltér.
 **Visszavonható?** igen, tokenek és egy küszöb.
+
+## D-051 – Fiók és szinkron: Supabase Auth (e-mail + jelszó), opcionális, közös user-pool
+**Dátum:** 2026-10-16
+**Döntés:** (1) Felülírja a D-002-t és a D-009 „fiók/szinkron” pontját. Supabase Auth, e-mail + jelszó; a bejelentkezés **opcionális** (Beállítások → Fiók), fiók nélkül az app a mai módon működik. (2) Bejelentkezve a watchlist, a szolgáltatók (+ `onboardingDone`), a korhatár és a `hideMature` **egy dokumentumként** szinkronizálódik: `mms.user_data (user_id, data jsonb, updated_at)`, felhasználónként egy sor, utolsó írás nyer. (3) A kliens táblát továbbra sem ér: új Edge Function `mms-sync` (`get` / `put`), a felhasználót a JWT-ből azonosítja; az `mms-tmdb` névtelen marad. (4) Konfliktus: belépéskor a watchlist egyesítése (egyik eszköz adata sem vész el), a többi mező a szerveré; később előtérbe kerüléskor a szerver felülír, kivéve ha van el nem küldött helyi változás (`dirty`), ekkor a helyi nyer. (5) Nincs új könyvtár (supabase-js és AsyncStorage már a projektben van). (6) A bejelentkezés / regisztráció képernyőnek nincs designja: a tokenekkel és a Beállítások kártya-stílusában készül.
+**Miért:** (1) a család több eszközön használja ugyanazt a listát; opcionális, hogy a meglévő, helyi működés és az offline használat ne sérüljön. (2) egy dokumentum sokkal egyszerűbb, mint három tábla, és a közös állapot kicsi (watchlist + pár szám). (3) a CLAUDE.md szabálya: az `mms` séma nincs kitéve a PostgREST-nek, a kliens csak Edge Functiont hív. (4) a pusztán „szerver nyer” elvesztené az első belépés előtti helyi watchlistet, a pusztán „helyi nyer” a más eszközön végzett törlést; a `dirty` jelző a kettő között dönt. (5) a kérdésre nem kell külső könyvtár.
+**Alternatíva:** (1) kötelező bejelentkezés – nincs net → nincs app; (2) táblák watchlistre / szolgáltatókra / beállításokra külön – több migráció és több hívás, ugyanez az eredmény; (3) külön Supabase projekt az mms-nek – teljes elkülönítés, de eltér a D-003-tól; Sign in with Apple – új könyvtár, Apple Developer beállítás; magic link – a levélsablon a familyBudgettel közös.
+**Ismert kockázat:** (a) A Supabase Auth felhasználók projekt-szintűek: az mms regisztrációja a familyBudget projektben is `authenticated` felhasználót hoz létre, és ugyanaz az e-mail ugyanaz a fiók. A nyilvános anon kulccsal bárki regisztrálhat; ha a familyBudget bármely táblájának policy-ja az `authenticated` szerepkörnek széles hozzáférést ad, az kiszivároghat. **Élesítés (regisztráció megnyitása) előtt a familyBudget RLS policy-jait read-only át kell nézni**; ha bizonytalan, a regisztráció zárható a Supabase Auth beállításokban és a fiókok kézzel vehetők fel. (b) A fiók törlése az appból nincs kész: a közös pool miatt egy törlés a familyBudget fiókot is törölné, ezért külön döntés (Ship előtti sor). (c) Utolsó írás nyer: két eszköz egyidejű módosításánál az egyik elveszhet.
+**Visszavonható?** igen — a kliens oldali réteg kikapcsolható (a Fiók szekció elrejtése), az `mms.user_data` és az `mms-sync` additív, `mms` alatt él.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

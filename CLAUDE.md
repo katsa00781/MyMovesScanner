@@ -17,10 +17,10 @@ Az app a következőket tartalmazza:
 - Gyerek sarok: mesék korhatár szerint (0+, 6+, 12+)
 - Keresés
 - Film/sorozat adatlap: hol nézhető, előzetes, értékelés, szereplők, Blu-ray dátum
-- Watchlist (eszközönként, helyben tárolva)
+- Watchlist (helyben tárolva; bejelentkezve szinkronizált, D-051)
 - Beállítások (szolgáltatók, régió, nyelv, forrásmegjelölés)
 
-Felhasználók: a család. Nincs bejelentkezés, nincs fiók.
+Felhasználók: a család. Bejelentkezés opcionális (e-mail + jelszó, Beállítások → Fiók), fiók nélkül is működik (D-051).
 
 ---
 
@@ -35,8 +35,10 @@ Felhasználók: a család. Nincs bejelentkezés, nincs fiók.
 - Supabase – a **familyBudget** projekt, kizárólag:
   - `mms` séma (cache tábla)
   - `mms-tmdb` Edge Function (TMDB proxy)
+  - `mms.user_data` tábla + `mms-sync` Edge Function (fiók szinkron, D-051)
+  - Supabase Auth (e-mail + jelszó)
 - Adatforrás: TMDB API (`language=hu-HU`, `watch_region=HU`)
-- Auth: nincs
+- Auth: Supabase Auth, e-mail + jelszó, opcionális (D-051)
 
 Új könyvtárat ne adj hozzá engedély nélkül. Ha indokolt lenne, javasold és kérdezz rá.
 
@@ -132,6 +134,8 @@ Példák: `PosterCard`, `PosterRail`, `HeroCarousel`, `ProviderBadge`, `AgeChip`
 - `useWatchlistStore`: `items: WatchlistItem[]` (id, type, title, posterPath, addedAt)
 - `useSettingsStore`: `region: 'HU'`, `language: 'hu-HU'`, `kidsAgeLimit: 0 | 6 | 12`, `hideMature: boolean`
 - `useSearchStore`: `recentSearches: string[]` (max 10)
+- `useAuthStore`: `user: { id, email } | null` (a munkamenetet a supabase-js tárolja)
+- `useSyncStore`: `status`, `dirty: boolean` (el nem küldött helyi változás)
 
 **lib/** – `supabase.ts` (kliens), `api.ts` (típusos hívások az `mms-tmdb` függvényre), `tmdbImage.ts`. Titkos kulcsot soha ne tárolj itt.
 
@@ -346,8 +350,12 @@ futtasd a `git status`-t. Ha van commitolatlan változás, előbb jelezd nekem.
 
 ---
 
-## Autentikáció
-Nincs auth az MVP-ben. Minden felhasználói adat eszközönként, AsyncStorage-ban.
+## Autentikáció (D-051)
+- Supabase Auth, e-mail + jelszó, **opcionális**: fiók nélkül minden felhasználói adat eszközönként, AsyncStorage-ban.
+- Bejelentkezve a watchlist, a szolgáltatók, a korhatár és a `hideMature` egy dokumentumként szinkronizálódik (`mms.user_data`, utolsó írás nyer).
+- A kliens a szinkronhoz is csak Edge Functiont hív (`mms-sync`), táblát nem ér el. A függvény a felhasználót a JWT-ből azonosítja, a kliens `user_id`-ját nem hiszi el.
+- A Supabase Auth felhasználói közösek a familyBudgettel (egy projekt). A familyBudget auth objektumaihoz, beállításaihoz és felhasználóihoz nem nyúlok; a felhasználó törlése és az Auth dashboard beállítások csak kifejezett kérésre.
+- A munkamenetet a supabase-js tárolja AsyncStorage-ban (`mms-auth` kulcs), jelszót az app nem tárol.
 
 ---
 
