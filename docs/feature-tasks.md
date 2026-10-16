@@ -62,7 +62,7 @@
 - [ ] CodeRabbit code review az AI által írt feature-ökhöz
 - [ ] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
 - [x] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
-- [ ] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
+- [x] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
 - [ ] EAS Build + TestFlight a családi eszközökre
 
 ---
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Ship előtt: familyBudget érintetlenségének ellenőrzése (docs)
+
+**Mit:** Read-only lekérdezések a familyBudget Supabase projekten (`eguhipjgnhbajbmnrskm`, MCP `list_migrations`, `list_edge_functions`, `execute_sql` csak `select`). (1) **Migrációk:** 32 db, ebből az mms-é pontosan kettő (`mms_schema_and_tmdb_cache`, `mms_user_data`); az összes többi a familyBudget / mybillingo / breathing korábbi, nem általam írt migrációja, az mms előtti dátummal. (2) **Függvények:** az `mms-tmdb` az egyetlen mms függvény, a többi (ocr-receipt, wallet-*, send-e-receipt) verziója és dátuma korábbi. **Az `mms-sync` NINCS deployolva** (nem szerepel a listán). (3) **Sémák:** `mms` 2 tábla, mindkettő RLS be; `public` 35 tábla, mind RLS be. (4) **Policy-k a D-051 kockázathoz:** a `public` összes policy-ja felhasználóhoz kötött (`qual` nem nyitott; az INSERT-ek üres `qual`-ja a `with check` miatt normális), egyetlen kivétellel: `investment_price_history` `SELECT` az `authenticated` szerepkörnek, feltétel nélkül. Egy mms-regisztrált felhasználó így olvashatja a befektetési árfolyam-előzményeket (közös piaci adat, felhasználói azonosító nélkül, de a familyBudget adata).
+**Fájlok:** docs/feature-tasks.md
+**Tesztelve:** csak olvasás, semmit nem módosítottam. Nem vizsgáltam a policy-k kifejezéseit soronként (csak hogy nyitottak-e), a `storage` policy-kat és az RPC / függvény jogosultságokat.
+**Nyitva maradt:** (1) **Döntés kell:** a `investment_price_history` olvashatóság elfogadható-e, vagy a regisztrációt zárni kell / a policy-t a familyBudget oldalon szűkíteni (az utóbbit csak te kérheted, a familyBudget objektumaihoz nem nyúlok). (2) `mms-sync` deploy továbbra is vár. (3) A `storage` policy-k és a függvényjogosultságok átnézése, ha a regisztráció nyilvános marad.
+**Commit:** `docs: familyBudget érintetlenségének ellenőrzése`
 
 ## 2026-10-16 – Ship előtt: secrets ellenőrzése (docs)
 
