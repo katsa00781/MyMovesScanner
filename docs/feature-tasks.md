@@ -49,7 +49,7 @@
 - [x] Döntés és dokumentáció: D-051, CLAUDE.md auth szakaszai, feladatlista
 - [x] Migráció: `mms.user_data` (felhasználónként egy dokumentum, RLS policy nélkül) — megírva, **alkalmazás csak kérésre**
 - [x] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
-- [ ] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
+- [x] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
 - [ ] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
 - [ ] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
 - [ ] Éles bekapcsolás: migráció alkalmazása, függvény deploy, Auth beállítások (felhasználói kérésre), végigpróbálás két eszközön
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Kliens: tartós munkamenet, `useAuthStore`, `lib/auth.ts` (feature)
+
+**Mit:** A `lib/supabase.ts` a munkamenetet AsyncStorage-ban tárolja (`mms-auth` kulcs, automatikus tokenfrissítés, a háttérben leállítva `AppState`-tel). Új `lib/auth.ts`: `startAuthListener` (mentett munkamenet betöltése + változáskövetés), `signIn`, `signUp`, `signOut`; a Supabase hibakódjai magyar szövegre képezve (`strings.account.errors`), hálózati hiba külön üzenettel; már regisztrált címnél (e-mail megerősítésnél üres `identities`) „már van fiók” hiba. Új `store/useAuthStore.ts` (`user`, `hasHydrated`, nem perzisztált: a munkamenetet a supabase-js tárolja). A gyökér layout elindítja a figyelőt, de nem várja meg: az app fiók nélkül is azonnal indul. Új szín token: `danger` (#FF453A, hibaszöveghez).
+**Fájlok:** lib/supabase.ts, lib/auth.ts, store/useAuthStore.ts, app/_layout.tsx, constants/{strings.ts,theme.json}, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. A tényleges bejelentkezés még nem futott: ehhez az élesítési lépés kell (Auth beállítások a dashboardon), és a képernyő a következő sor.
+**Nyitva maradt:** (1) A `danger` szín nincs a designban (a design nem mutat hibaszöveget), az iOS rendszerpiros. (2) Kijelentkezéskor a helyi adat az eszközön marad (lásd a következő sor döntése). (3) Eszközön ellenőrizendő: az `AppState` alapú tokenfrissítés és a munkamenet megmaradása újraindítás után.
+**Commit:** `feat: tartós munkamenet és auth store`
 
 ## 2026-10-16 – Edge Function: `mms-sync` (fn)
 

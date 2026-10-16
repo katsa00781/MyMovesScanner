@@ -186,6 +186,20 @@ export const strings = {
     empty: 'A watchlist még üres.',
   },
 
+  account: {
+    errors: {
+      invalidCredentials: 'Hibás e-mail cím vagy jelszó.',
+      emailNotConfirmed: 'Az e-mail címet még meg kell erősíteni. Nézd meg a leveleidet.',
+      userExists: 'Ezzel az e-mail címmel már van fiók. Jelentkezz be.',
+      weakPassword: 'A jelszó túl gyenge. Legalább 6 karakter kell.',
+      invalidEmail: 'Ez az e-mail cím nem érvényes.',
+      signupDisabled: 'Új regisztráció jelenleg nem lehetséges.',
+      rateLimit: 'Túl sok próbálkozás. Várj egy kicsit, és próbáld újra.',
+      network: 'Nincs kapcsolat. Ellenőrizd az internetet, és próbáld újra.',
+      generic: 'Valami hiba történt. Próbáld újra.',
+    },
+  },
+
   settings: {
     title: 'Beállítások',
     myServices: 'Szolgáltatóim',

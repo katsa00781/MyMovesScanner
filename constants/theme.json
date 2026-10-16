@@ -26,7 +26,8 @@
     "settingsGreen": "#31D64B",
     "chevron": "#5F5F61",
     "tabBar": "#0F0F0F",
-    "separator": "#262626"
+    "separator": "#262626",
+    "danger": "#FF453A"
   },
   "radius": {
     "card": 12,

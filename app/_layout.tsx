@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 
 import { DevResetButton } from '@/components/DevResetButton';
 import { colors } from '@/constants/theme';
+import { startAuthListener } from '@/lib/auth';
 import { useProvidersStore } from '@/store/useProvidersStore';
 
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +19,9 @@ const navigationTheme = {
 export default function RootLayout() {
   // Az onboarding-döntéshez a mentett állapotnak be kell töltődnie.
   const ready = useProvidersStore((state) => state.hasHydrated);
+
+  // Az auth nem blokkolja az indulást: fiók nélkül is használható az app (D-051).
+  useEffect(() => startAuthListener(), []);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
