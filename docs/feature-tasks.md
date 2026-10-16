@@ -48,7 +48,7 @@
 
 - [x] Döntés és dokumentáció: D-051, CLAUDE.md auth szakaszai, feladatlista
 - [x] Migráció: `mms.user_data` (felhasználónként egy dokumentum, RLS policy nélkül) — megírva, **alkalmazás csak kérésre**
-- [ ] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
+- [x] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
 - [ ] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
 - [ ] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
 - [ ] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Edge Function: `mms-sync` (fn)
+
+**Mit:** Új függvény: `POST { action: 'get' }` a felhasználó dokumentumát adja (vagy `null`), `POST { action: 'put', data }` elmenti. A felhasználót a JWT-ből azonosítja (`auth.getUser`), az anon kulcs mint token 401-et kap; a kliens azonosítót nem fogad el. A `put` a dokumentumot mezőnként ellenőrzi és csak az ismert mezőket menti (`v: 1`, szolgáltatók ≤ 100, watchlist ≤ 500, korhatár 0/6/12), a törzs ≤ 200 KB. Az `mms-tmdb` nem változott.
+**Fájlok:** supabase/functions/mms-sync/index.ts, docs/feature-tasks.md
+**Tesztelve:** – Nem futott: a gépen nincs `deno`, és a függvény a `supabase/functions` kizárása miatt a `typecheck`-be sem tartozik; a migráció sincs alkalmazva, a függvény nincs deployolva. Az első valós próba az élesítési lépésben lesz.
+**Nyitva maradt:** deploy (`supabase functions deploy mms-sync`) és a migráció alkalmazása csak a felhasználó kérésére. A `SUPABASE_ANON_KEY` környezeti változót a platform adja a függvénynek; ha az új publishable kulcsokkal nem érhető el, a deploykor derül ki.
+**Commit:** `fn: mms-sync Edge Function a fiók szinkronhoz`
 
 ## 2026-10-16 – Migráció: `mms.user_data` (db)
 
