@@ -61,7 +61,7 @@
 - [ ] Lint + typecheck hibák nélkül
 - [ ] CodeRabbit code review az AI által írt feature-ökhöz
 - [ ] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
-- [ ] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
+- [x] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
 - [ ] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
 - [ ] EAS Build + TestFlight a családi eszközökre
 
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Ship előtt: secrets ellenőrzése (docs)
+
+**Mit:** Read-only átvizsgálás. (1) Git: csak a `.env.example` követett (üres értékek), a `.env` soha nem került a historyba; a követett fájlokban és a teljes historyban nincs JWT-szerű token, `sb_secret_` kulcs, 32 hexa kulcs; a `service_role` / `TMDB_API_KEY` csak a migrációk és az `mms-tmdb` kommentjeiben / `Deno.env.get`-ben szerepel. (2) Kliens bundle (`expo export --platform ios`, Hermes bytecode): `service_role`, `TMDB_API_KEY`, `api.themoviedb.org`, `api_key=` 0 találat (a TMDB-t a kliens sosem éri el közvetlenül); az egyetlen JWT a bundle-ben `role = anon` (várt, EXPO_PUBLIC). A két gyanús minta ártalmatlan: az `sb_secret_` a supabase-js saját szövegtáblájából való (szomszédos sztringekkel egybe olvasva), a 32 hexás egy React Native belső konstans.
+**Fájlok:** docs/feature-tasks.md
+**Tesztelve:** git grep + `git log -G` a teljes historyn; bundle `grep -a`; a JWT-ből csak a `role` claimet dekódoltam, a kulcsot nem írtam ki. Az export a scratchpadbe ment, a projektbe nem.
+**Nyitva maradt:** A TMDB kulcs értékét nem ismerem (Supabase secret), ezért a bundle-ben mintára (api_key=, themoviedb host, 32 hexa) kerestem, nem az értékére.
+**Commit:** `docs: secrets ellenőrzés kliens bundle-ben és historyban`
 
 ## 2026-10-16 – Élesítés 1/2: `mms.user_data` migráció alkalmazva (db)
 
