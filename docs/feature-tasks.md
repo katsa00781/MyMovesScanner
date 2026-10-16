@@ -47,7 +47,7 @@
 > Nincs design a bejelentkezés / regisztráció képernyőhöz: a design tokenjeivel és a Beállítások kártya-stílusában készül (jóváhagyásra).
 
 - [x] Döntés és dokumentáció: D-051, CLAUDE.md auth szakaszai, feladatlista
-- [ ] Migráció: `mms.user_data` (felhasználónként egy dokumentum, RLS policy nélkül) — megírva, **alkalmazás csak kérésre**
+- [x] Migráció: `mms.user_data` (felhasználónként egy dokumentum, RLS policy nélkül) — megírva, **alkalmazás csak kérésre**
 - [ ] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
 - [ ] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
 - [ ] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Migráció: `mms.user_data` (db)
+
+**Mit:** `mms.user_data (user_id uuid pk → auth.users on delete cascade, data jsonb, updated_at)`. RLS be, policy nincs, jogok elvéve `public/anon/authenticated`-től, `service_role`-nak megadva (mint a `tmdb_cache`). Csak `if not exists`, nincs drop.
+**Fájlok:** supabase/migrations/202610161000_mms_user_data.sql, docs/feature-tasks.md
+**Tesztelve:** – A migráció **nincs alkalmazva** az éles (familyBudget) adatbázison, csak a fájl készült el; az alkalmazás a felhasználó kifejezett kérésére történik.
+**Nyitva maradt:** alkalmazás (utolsó sor a „Fiók és szinkron” listán). Az `auth.users`-re mutató külső kulcs miatt a felhasználó törlése (az Auth-ban) törli az mms adatát is.
+**Commit:** `db: mms.user_data tábla a fiók szinkronhoz`
 
 ## 2026-10-16 – Fiók és szinkron: döntés és dokumentáció (docs)
 
