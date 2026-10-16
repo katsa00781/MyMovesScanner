@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 
 import { DevResetButton } from '@/components/DevResetButton';
 import { colors } from '@/constants/theme';
+import { useAccountSync } from '@/hooks/useAccountSync';
 import { startAuthListener } from '@/lib/auth';
 import { useProvidersStore } from '@/store/useProvidersStore';
 
@@ -22,6 +23,7 @@ export default function RootLayout() {
 
   // Az auth nem blokkolja az indulást: fiók nélkül is használható az app (D-051).
   useEffect(() => startAuthListener(), []);
+  useAccountSync();
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();

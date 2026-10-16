@@ -51,7 +51,7 @@
 - [x] Edge Function `mms-sync`: JWT-ből azonosít, `get` / `put`, méret- és alakellenőrzés — megírva, **deploy csak kérésre**
 - [x] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
 - [x] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
-- [ ] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
+- [x] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
 - [ ] Éles bekapcsolás: migráció alkalmazása, függvény deploy, Auth beállítások (felhasználói kérésre), végigpróbálás két eszközön
 
 ### Ship előtt
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-16 – Szinkron: letöltés, egyesítés, feltöltés (feature)
+
+**Mit:** Bejelentkezve a watchlist, a szolgáltatók (+ `onboardingDone`), a korhatár és a `hideMature` egy dokumentumként szinkronizálódik. `lib/syncApi.ts`: `fetchUserData` / `saveUserData` az `mms-sync`-re. `lib/sync.ts`: `startSync(userId)` azonnal letölt, a store-ok módosítása után 1,5 mp késleltetéssel feltölt, az app előtérbe kerülésekor letölt; a műveletek sorban futnak. Szabályok: ha az eszközön még nem volt fiók, a watchlist egyesül (típus + azonosító szerint), a többi a szerveré; ha másik fiók adata volt az eszközön, a szerver felülír (nincs szerver adat → üres lap), így a fiókok adata nem keveredik; ugyanaz a fiók: el nem küldött helyi változásnál (`dirty`) a helyi nyer, egyébként a szerver. `useSyncStore` (`status`, `dirty`, `lastUserId`; a `dirty` és a `lastUserId` perzisztált). `useAccountSync` hook a gyökér layoutban megvárja az összes érintett store visszatöltését. A Fiók képernyőn „Szinkron” sor (Naprakész / Folyamatban… / Nem sikerült, újra; hibánál koppintásra újrapróbál).
+**Fájlok:** lib/{sync,syncApi}.ts, store/useSyncStore.ts, hooks/useAccountSync.ts, components/AccountCard.tsx, app/_layout.tsx, constants/strings.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`, `expo export --platform ios` (lefordul); az egyesítés (`mergeWatchlists`) Node-dal: ismétlődő cím egyszer, legújabb elöl. **A szinkron végig NEM futott**: a migráció nincs alkalmazva és az `mms-sync` nincs deployolva, így nincs mivel beszélnie; a letöltés / feltöltés / konfliktus-ágak csak kód szinten ellenőrzöttek.
+**Nyitva maradt:** (1) **Élesítés** (utolsó sor a listán): migráció, deploy, Auth beállítások, kétkészülékes próba. (2) Az el nem küldött helyi változás elvész, ha kijelentkezés után másik fiókkal lépnek be az eszközön (a másik fiók adata felülír). (3) Utolsó írás nyer: két eszköz egyidejű módosításánál az egyik elveszhet, D-051. (4) A watchlist státuszai (`useWatchlist`) a szinkron után az új elemekre a következő megjelenítéskor kérnek adatot (a meglévő viselkedés). (5) A Szinkron sor hibánál nem mondja meg az okát (pl. nincs net vs. nincs deploy); a konzolban sincs napló.
+**Commit:** `feat: fiók szinkron watchlist, szolgáltatók és beállítások`
 
 ## 2026-10-16 – Fiók képernyő és „Fiók” szekció a Beállításokban (feature)
 

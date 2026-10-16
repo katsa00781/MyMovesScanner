@@ -202,6 +202,10 @@ export const strings = {
     signedIn: 'Bejelentkezve',
     signedInNote:
       'A watchlist, a szolgáltatók és a beállítások szinkronizálódnak azokon az eszközökön, ahol ugyanezzel a fiókkal vagy bejelentkezve.',
+    sync: 'Szinkron',
+    syncUpToDate: 'Naprakész',
+    syncing: 'Folyamatban…',
+    syncFailed: 'Nem sikerült, újra',
     signOut: 'Kijelentkezés',
     errors: {
       invalidCredentials: 'Hibás e-mail cím vagy jelszó.',
