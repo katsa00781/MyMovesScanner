@@ -351,6 +351,8 @@ futtasd a `git status`-t. Ha van commitolatlan változás, előbb jelezd nekem.
 ---
 
 ## Autentikáció (D-051)
+**A v1-ben kikapcsolva (D-055):** `constants/features.ts` → `accountEnabled = false`. A kód kész, de a Fiók szekció rejtett, az auth-figyelő nem indul, az `mms-sync` nincs deployolva, a Supabase regisztráció zárt. Az `mms-tmdb` névtelen (anon kulcs) marad. Bekapcsolás előtt: lásd D-055.
+
 - Supabase Auth, e-mail + jelszó, **opcionális**: fiók nélkül minden felhasználói adat eszközönként, AsyncStorage-ban.
 - Bejelentkezve a watchlist, a szolgáltatók, a korhatár és a `hideMature` egy dokumentumként szinkronizálódik (`mms.user_data`, utolsó írás nyer).
 - A kliens a szinkronhoz is csak Edge Functiont hív (`mms-sync`), táblát nem ér el. A függvény a felhasználót a JWT-ből azonosítja, a kliens `user_id`-ját nem hiszi el.

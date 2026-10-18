@@ -9,6 +9,7 @@ import { SettingsBackLink } from '@/components/SettingsBackLink';
 import { SettingsRow, SettingsSeparator } from '@/components/SettingsRow';
 import { SettingsSection } from '@/components/SettingsSection';
 import { strings } from '@/constants/strings';
+import { accountEnabled } from '@/constants/features';
 import { colors, settingsLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
 import { kidsAgeLimits } from '@/data/kidsAgeLimits';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -123,7 +124,7 @@ export default function SettingsScreen() {
                   {kidsCorner}
                 </View>
                 <View className="flex-1" style={{ gap: settingsLayout.sectionGap }}>
-                  {account}
+                  {accountEnabled ? account : null}
                   {about}
                 </View>
               </View>
@@ -132,7 +133,7 @@ export default function SettingsScreen() {
                 {services}
                 {regionLanguage}
                 {kidsCorner}
-                {account}
+                {accountEnabled ? account : null}
                 {about}
               </View>
             )}

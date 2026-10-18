@@ -52,10 +52,10 @@
 - [x] Kliens: tartós munkamenet (`lib/supabase.ts`), `useAuthStore`, `lib/auth.ts`
 - [x] Bejelentkezés / regisztráció képernyő + „Fiók” szekció a Beállításokban
 - [x] Szinkron: `lib/syncApi.ts`, `useSyncStore`, belépéskori egyesítés, módosítás utáni feltöltés, előtérbe kerüléskori letöltés
-- [ ] Éles bekapcsolás: migráció alkalmazása, függvény deploy, Auth beállítások (felhasználói kérésre), végigpróbálás két eszközön
+- [ ] Éles bekapcsolás: migráció alkalmazása, függvény deploy, Auth beállítások (felhasználói kérésre), végigpróbálás két eszközön — **elhalasztva (D-055)**; a migráció már alkalmazva, a `mms-sync` nincs deployolva
 
 ### Ship előtt
-- [ ] Fiók törlése az appból (App Store 5.1.1(v) előírás, ha az app fiókot hoz létre; a közös user-pool miatt külön döntés kell, D-051)
+- [x] Fiók törlése az appból — **nem szükséges a v1-ben**: a fiók-létrehozás ki van kapcsolva (D-055), így az App Store 5.1.1(v) nem érvényes; a funkció bekapcsolásakor újra kell nyitni
 - [ ] Teljes flow tesztelése iPhone-on és iPaden
 - [x] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
 - [x] Lint + typecheck hibák nélkül
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-18 – Fiók és szinkron kikapcsolása a v1-ben (config)
+
+**Mit:** A felhasználó döntése: auth nem kell a v1-ben, a regisztrációt zárja, a családi összekötés később. Új `constants/features.ts` (`accountEnabled = false`): a Beállítások „Fiók” szekciója rejtett, az auth-figyelő nem indul. A kód megmaradt. A CLAUDE.md Autentikáció szakasza jelzi a kikapcsolást. A „Fiók törlése” sor tárgytalan (nincs fiók-létrehozás), az „Éles bekapcsolás” elhalasztva. D-055.
+**Fájlok:** constants/features.ts, app/settings.tsx, app/_layout.tsx, CLAUDE.md, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Képernyőn nem néztem (a Beállítások most Szolgáltatóim, Régió és nyelv, Gyerek sarok, Névjegy; iPaden a jobb oszlopban csak a Névjegy).
+**Nyitva maradt:** (1) **A Supabase regisztráció zárása a dashboardon (Authentication → Sign In / Providers → „Allow new users to sign up” ki) a te lépésed**, az Auth beállításokhoz kifejezett kérés nélkül nem nyúlok (D-051). Amíg nyitva van, az anon kulccsal bárki regisztrálhat a közös projektben. (2) Az `app/account.tsx` route kódban megvan, de nincs belépési pont. (3) A `useAccountSync` és a store-ok futnak, de felhasználó nélkül nem csinálnak semmit. (4) Az `mms.user_data` tábla az éles adatbázisban megmaradt (üres, `mms` alatt).
+**Commit:** `config: fiók és szinkron kikapcsolása a v1-ben` (D-055)
 
 ## 2026-10-18 – `mms-tmdb`: lejárt cache sorok törlése íráskor (fn)
 
@@ -947,5 +955,13 @@ Sablon:
 **Miért:** a lista helyi adat; net nélkül a felhasználó eddig a saját mentett címeit sem látta. A státusz csak kiegészítés. A felhasználó jóváhagyta (2026-10-18).
 **Alternatíva:** a skeleton + teljes hiba megtartása (tiszta design-egyezés, de offline használhatatlan); a státuszok helyi tárolása – új perzisztált adat, elavulhat, fölösleges.
 **Visszavonható?** igen, a `useWatchlist` `loading` sora és a hibasor a képernyőn.
+
+## D-055 – Fiók és szinkron kikapcsolva a v1-ben
+**Dátum:** 2026-10-18
+**Döntés:** A bejelentkezés és a szinkron (D-051) a v1-ben ki van kapcsolva: `constants/features.ts` `accountEnabled = false`. Ennek hatása: a Beállítások „Fiók” szekciója rejtett, az auth-figyelő (`startAuthListener`) nem indul. A kód (account képernyő, `lib/auth.ts`, `lib/sync.ts`, `mms-sync`) megmarad. Az `mms-sync` nincs deployolva, a Supabase regisztrációt a felhasználó a dashboardon zárja. A „Fiók törlése” Ship előtti sor ezzel tárgytalan. A családi összekötés később, ha szükséges.
+**Miért:** a v1 a családi használathoz auth nélkül is teljes, a watchlist és a beállítások eszközönként AsyncStorage-ban vannak. Az `mms-tmdb` biztonságát az auth nem növeli (az anon kulcs nyilvános, nyitott regisztrációval bárki kap JWT-t); a védelem a whitelist, a paraméter-ellenőrzés, a szerver oldali TMDB kulcs és az RLS. A közös user-pool miatt a nyitott regisztráció viszont új felületet adna: a familyBudget `investment_price_history` táblája feltétel nélkül olvasható bármely `authenticated` felhasználónak.
+**Alternatíva:** a kód törlése – elveszne a kész munka, a későbbi bekapcsoláshoz újra kellene írni; a Fiók szekció nyitva hagyása zárt regisztrációval – használhatatlan sor; külön Supabase projekt az mms-nek – teljes elkülönítés, de eltér a D-003-tól, és most nincs rá szükség.
+**Bekapcsolás előtt:** a regisztráció megnyitása, a `investment_price_history` policy átnézése (familyBudget oldal, csak a felhasználó kérésére), `mms-sync` deploy, kétkészülékes próba, és a „Fiók törlése” (App Store 5.1.1(v)) újranyitása.
+**Visszavonható?** igen, egy konstans.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

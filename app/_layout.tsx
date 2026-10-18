@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { accountEnabled } from '@/constants/features';
 import { colors } from '@/constants/theme';
 import { useAccountSync } from '@/hooks/useAccountSync';
 import { startAuthListener } from '@/lib/auth';
@@ -21,7 +22,7 @@ export default function RootLayout() {
   const ready = useProvidersStore((state) => state.hasHydrated);
 
   // Az auth nem blokkolja az indulást: fiók nélkül is használható az app (D-051).
-  useEffect(() => startAuthListener(), []);
+  useEffect(() => (accountEnabled ? startAuthListener() : undefined), []);
   useAccountSync();
 
   useEffect(() => {
