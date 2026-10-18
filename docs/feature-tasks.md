@@ -64,7 +64,7 @@
 - [x] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
 - [x] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
 - [x] iOS build konfig: bundle ID, buildNumber, exportálási nyilatkozat, `ios.icon` az `icon.png`-re (D-060)
-- [ ] Ikon javítása: az `icon.png`-be kockás háttér van beleégetve, alfa nélkül — **jóváhagyásra vár** (D-060)
+- [x] Ikon javítása: az `icon.png`-be kockás háttér volt beleégetve; a sarkok feketére festve, 1024×1024, alfa nélkül (D-060)
 - [ ] Xcode Archive + TestFlight a családi eszközökre (`npx expo prebuild --platform ios`, Xcode-ból feltöltve; EAS nincs, D-060)
 
 ---
@@ -88,6 +88,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-18 – App ikon: beégetett kockás háttér javítása (fix)
+
+**Mit:** A felhasználó jóváhagyásával az `assets/images/icon.png` a javított változatra cserélve: a lekerekített ikon körüli beégetett kockás háttér a sarkokból elárasztással, 2 px-es tágítással feketére (`#0A0A0B`) festve, a kép 1024×1024-re méretezve, RGB, alfa nélkül (App Store Connect követelmény). Az ikon a repóban eddig csak a sablon volt commitolva; a felhasználó saját ikonja (1254×1254) most kerül először a historyba, a javított változattal együtt. D-060.
+**Fájlok:** assets/images/icon.png, docs/feature-tasks.md
+**Tesztelve:** `sips` + `pngjs`: 1024×1024, nincs alfa csatorna, a négy sarok `[10,10,11]`, a közép `[9,9,10]`. Megnéztem a képet. Xcode-ban az ikon megjelenését (AppIcon az `ios/`-ban `prebuild` után) még nem ellenőriztem.
+**Nyitva maradt:** (1) A belső négyzet kicsit világosabb a fekete keretnél; tisztább a teljes felületű export az eredeti forrásból (az új fájl egyszerűen felülírhatja). (2) A splash és az Android ikonok még sablonok (splash jóváhagyásra). (3) A `favicon.png` a webhez még sablon, a v1 nem web.
+**Commit:** `fix: app ikon beégetett kockás háttér nélkül` (D-060)
 
 ## 2026-10-18 – iOS build konfig az Xcode-os feltöltéshez (setup)
 
@@ -1065,7 +1073,7 @@ Sablon:
 **Dátum:** 2026-10-18
 **Döntés:** A TestFlight feltöltés a felhasználó gépéről, Xcode-ból megy (`npx expo prebuild --platform ios`, majd Product → Archive → Distribute App). Nincs `eas.json`. A natív `ios/` mappa generált és a `.gitignore` szerint nem kerül commitba; az igazság forrása az `app.json`. Bundle ID: `com.kacsorzsolt.mymoviescanner`, `buildNumber: "1"`, `ios.config.usesNonExemptEncryption: false` (nincs saját titkosítás, az App Store Connect így nem kér exportnyilatkozatot minden feltöltésnél). Az `ios.icon` az `expo.icon` sablon-csomagról az `assets/images/icon.png`-re váltott, különben a sablonikon felülírta volna az appét.
 **Miért:** a felhasználó döntése; egy családi appnál az EAS fiók és a felhőbuild felesleges, a build helyben, ismert eszközökkel fut. Az `app.json` a konfiguráció egyetlen helye, a `prebuild` bármikor újragenerálja az `ios/`-t.
-**Ismert gond:** az `icon.png` (1254×1254, alfa nélkül) a lekerekített ikon mögött beleégetett kockás „átlátszó” hátteret tartalmaz (sarokpixelek 254 / 224 szürkék). Az iOS maga kerekít, így a sarkokban a kockás minta látszana. Javítási jelölt (a sarkok feketére festve, 1024×1024, RGB) elkészült, de **nincs becserélve**: jóváhagyásra vár. A jelölt belső lekerekített négyzete kicsit világosabb (#18) a fekete keretnél, ezért a tiszta megoldás egy teljes felületű (full-bleed) négyzet exportja az eredeti forrásból.
+**Ismert gond:** az `icon.png` (1254×1254, alfa nélkül) a lekerekített ikon mögött beleégetett kockás „átlátszó” hátteret tartalmaz (sarokpixelek 254 / 224 szürkék). Az iOS maga kerekít, így a sarkokban a kockás minta látszana. A felhasználó jóváhagyásával a javított változat (a sarkok a sarkokból elárasztással feketére festve `#0A0A0B`, 1024×1024, RGB) lett az `assets/images/icon.png`; az eredeti 1254×1254-es fájl a git historyban megvan. A belső lekerekített négyzet kicsit világosabb (#18) a fekete keretnél („ikon az ikonban” hatás), ezért a tiszta megoldás később egy teljes felületű (full-bleed) négyzet exportja az eredeti forrásból.
 **Alternatíva:** EAS Build (`eas.json`, felhőbuild, Expo fiók); a natív `ios/` verziókövetése (a prebuild utáni kézi Xcode-módosítások megmaradnának, de a konfiguráció két helyen élne).
 **Visszavonható?** igen: `eas.json` bármikor hozzáadható, a bundle ID viszont az App Store Connecttel egyezik, feltöltés után nem módosítható.
 
