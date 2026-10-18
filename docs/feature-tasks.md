@@ -89,6 +89,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Splash screen: fekete háttér, az app ikonja (setup)
+
+**Mit:** A felhasználó kérésére a splash a sablon helyett az app arculatát kapja: háttér `#000000`, kép az ikon átlátszó sarkokkal (a javított ikonból, a sarkok `#0A0A0B` területéből elárasztással átlátszóvá téve, 1024×1024 RGBA), `imageWidth` 200. D-060 kiegészítése.
+**Fájlok:** app.json, assets/images/splash-icon.png, docs/feature-tasks.md
+**Tesztelve:** `npx expo config --type public`: a splash plugin az új értékekkel. A kép megnézve fekete háttéren (a flood nem szivárgott a belső részbe: 474 338 átlátszó pixel, a sarkok alfa 0, a közép 255). Eszközön / szimulátoron a splash megjelenését NEM láttam (`prebuild` nem futott).
+**Nyitva maradt:** (1) A belső négyzet kicsit világosabb a fekete háttérnél (#18 vs #000), így a splash egy sötét lekerekített csempeként látszik; a teljes felületű ikon-forrásból ez tisztább lehetne. (2) A `expo-splash-screen` háttér csak világos / sötét módban azonos: az app `userInterfaceStyle` értéke `dark`, külön sötét változat nem kell. (3) Az Android splash / ikonok és a web `favicon.png` sablonok, a v1 csak iOS.
+**Commit:** `setup: splash fekete háttérrel és az app ikonjával` (D-060)
+
 ## 2026-10-18 – App ikon: beégetett kockás háttér javítása (fix)
 
 **Mit:** A felhasználó jóváhagyásával az `assets/images/icon.png` a javított változatra cserélve: a lekerekített ikon körüli beégetett kockás háttér a sarkokból elárasztással, 2 px-es tágítással feketére (`#0A0A0B`) festve, a kép 1024×1024-re méretezve, RGB, alfa nélkül (App Store Connect követelmény). A repóban eddig a sablonikon volt commitolva; csak a javított változat került a historyba, az eredeti 1254×1254-es fájl nem (a felhasználó őrzi az eredeti forrást). D-060.
@@ -1074,6 +1082,7 @@ Sablon:
 **Döntés:** A TestFlight feltöltés a felhasználó gépéről, Xcode-ból megy (`npx expo prebuild --platform ios`, majd Product → Archive → Distribute App). Nincs `eas.json`. A natív `ios/` mappa generált és a `.gitignore` szerint nem kerül commitba; az igazság forrása az `app.json`. Bundle ID: `com.kacsorzsolt.mymoviescanner`, `buildNumber: "1"`, `ios.config.usesNonExemptEncryption: false` (nincs saját titkosítás, az App Store Connect így nem kér exportnyilatkozatot minden feltöltésnél). Az `ios.icon` az `expo.icon` sablon-csomagról az `assets/images/icon.png`-re váltott, különben a sablonikon felülírta volna az appét.
 **Miért:** a felhasználó döntése; egy családi appnál az EAS fiók és a felhőbuild felesleges, a build helyben, ismert eszközökkel fut. Az `app.json` a konfiguráció egyetlen helye, a `prebuild` bármikor újragenerálja az `ios/`-t.
 **Ismert gond:** az `icon.png` (1254×1254, alfa nélkül) a lekerekített ikon mögött beleégetett kockás „átlátszó” hátteret tartalmaz (sarokpixelek 254 / 224 szürkék). Az iOS maga kerekít, így a sarkokban a kockás minta látszana. A felhasználó jóváhagyásával a javított változat (a sarkok a sarkokból elárasztással feketére festve `#0A0A0B`, 1024×1024, RGB) lett az `assets/images/icon.png`; az eredeti 1254×1254-es fájl **nincs** a git historyban (csak a sablonikon volt commitolva), az eredeti forrást a felhasználó őrzi. A belső lekerekített négyzet kicsit világosabb (#18) a fekete keretnél („ikon az ikonban” hatás), ezért a tiszta megoldás később egy teljes felületű (full-bleed) négyzet exportja az eredeti forrásból.
+**Kiegészítés – splash (2026-10-18):** a splash háttere `#000000` (a design háttere) a sablon kék `#208AEF` helyett, a kép az app ikonja átlátszó sarkokkal (`assets/images/splash-icon.png`, 1024×1024, RGBA), `imageWidth` 200 (a sablon 76-ja az ikonnál aprónak hatott volna). A designban nincs splash, ezért ez eltérés / új elem, a felhasználó kérésére.
 **Alternatíva:** EAS Build (`eas.json`, felhőbuild, Expo fiók); a natív `ios/` verziókövetése (a prebuild utáni kézi Xcode-módosítások megmaradnának, de a konfiguráció két helyen élne).
 **Visszavonható?** igen: `eas.json` bármikor hozzáadható, a bundle ID viszont az App Store Connecttel egyezik, feltöltés után nem módosítható.
 
