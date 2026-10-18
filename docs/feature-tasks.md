@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – `mms-tmdb`: lejárt cache sorok törlése íráskor (fn)
+
+**Mit:** A függvény minden cache-írás (tévesztés) után törli az `mms.tmdb_cache` lejárt sorait (`delete … where expires_at < now()`, az `expires_at` indexen). Az ok: a lejárt sorokat csak ugyanaz a kulcs írta felül, a keresés bármilyen szöveggel új kulcsot hoz; az éles tábla 453 sorából 166 lejárt (5,6 MB). A törlés hibája ugyanabban a `try`-ban a meglévő „cache write failed” naplóba megy, a válaszra nincs hatása.
+**Fájlok:** supabase/functions/mms-tmdb/index.ts, docs/feature-tasks.md
+**Tesztelve:** – **Nem futott**: a gépen nincs `deno`, a függvény a `typecheck`-be sem tartozik, **nincs deployolva**. A kód egy soros, a meglévő `sql` hívások mintájára.
+**Nyitva maradt:** (1) **Deploy csak kérésre:** `supabase functions deploy mms-tmdb --project-ref eguhipjgnhbajbmnrskm` (a Claude Code jogosultság-ellenőrzője az éles deployt korábban letiltotta, ezért neked kell futtatnod). Addig az éles függvény a régit futtatja. (2) A már lejárt 166 sor a deploy után az első cache-íráskor törlődik, külön adatbázis-művelet nem kell. (3) Ha a párhuzamos kérések sok törlést okoznának, az ütemezett törlés (pg_cron) a másik út; ennél a forgalomnál nem indokolt.
+**Commit:** `fn: mms-tmdb törli a lejárt cache sorokat`
+
 ## 2026-10-18 – Watchlist net nélkül (fix)
 
 **Mit:** A Watchlist a visszatöltés után azonnal mutatja a helyi címeket, státusz nélkül; ha minden státusz-lekérés elbukik, a rács fölött egy hibasor + „Újra” áll a teljes képernyős hiba helyett. D-054.

@@ -95,6 +95,9 @@ Deno.serve(async (req) => {
       on conflict (key) do update
         set payload = excluded.payload, expires_at = excluded.expires_at
     `;
+    // Takarítás: a lejárt sorokat csak ugyanaz a kulcs írná felül, a keresés pedig bármilyen
+    // szöveggel új kulcsot hoz. A törlés az `expires_at` indexet használja, és csak cache-tévesztésnél (íráskor) fut.
+    await sql`delete from mms.tmdb_cache where expires_at < now()`;
   } catch (error) {
     console.error('cache write failed', error instanceof Error ? error.message : 'unknown');
   }
