@@ -128,6 +128,28 @@ export const strings = {
       themeHint: 'Egy téma választható.',
       done: 'Kész',
     },
+    // A találati lista szűrői (D-057).
+    filters: {
+      availability: {
+        title: 'Elérhetőség',
+        hint: 'Alapból csak a Magyarországon nézhető címek látszanak (előfizetéssel, kölcsönözve vagy megvásárolva).',
+        hu: 'Magyarországon',
+        mine: 'A szolgáltatóimon',
+        all: 'Minden találat',
+      },
+      rating: {
+        title: 'Értékelés',
+        hint: 'Legalább ennyi TMDB értékelésű címek (0–10).',
+        any: 'Bármilyen',
+      },
+      since: {
+        title: 'Megjelenés',
+        hint: 'Az ennyi időn belül megjelent címek.',
+        any: 'Bármikor',
+        years: (n: number) => `Elmúlt ${n} év`,
+      },
+      noResults: 'Nincs találat ezekkel a szűrőkkel.',
+    },
     // Kategóriák (data/searchCategories.ts): a chip felirata és a „Találatok” fejléc.
     categories: {
       disaster: 'Katasztrófafilmek',

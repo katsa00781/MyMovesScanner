@@ -6,19 +6,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { RecentChips, RecentList } from '@/components/RecentSearches';
-import { CategorySelect } from '@/components/CategorySelect';
 import { SearchCategoryChips } from '@/components/SearchCategoryChips';
 import { SearchField } from '@/components/SearchField';
+import { SearchSelects } from '@/components/SearchSelects';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { SearchFilterChips } from '@/components/SearchFilterChips';
 import { SearchResultRow, SearchResultSkeleton } from '@/components/SearchResultRow';
 import { strings } from '@/constants/strings';
 import { browseLayout, layout, searchLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
-import { searchCategories, type SearchCategory } from '@/data/searchCategories';
+import { defaultResultFilters, noResultFilters, type ResultFilters } from '@/data/resultFilters';
+import type { SearchCategory } from '@/data/searchCategories';
 import type { SearchFilter } from '@/data/searchFilters';
 import { useSearch } from '@/hooks/useSearch';
+import { isNarrowed, resolveFilters } from '@/lib/resultFilters';
 import { titleHref } from '@/lib/routes';
 import { isTheme, matchCategories, noSelection, type CategorySelection } from '@/lib/searchCategories';
+import { useProvidersStore } from '@/store/useProvidersStore';
 import { useSearchStore } from '@/store/useSearchStore';
 import type { SearchResult } from '@/types/app';
 
@@ -45,7 +48,15 @@ export default function SearchScreen() {
     () => (filter === 'people' ? noSelection : { genres, theme }),
     [filter, genres, theme],
   );
-  const search = useSearch(query, filter, selection);
+  // A találati lista szűrői (D-057); a Személyek szűrőnél nincs szűrés. Az elérhetőség az éppen
+  // kiválasztott szolgáltatókhoz igazodik (a Beállításokban módosíthatók).
+  const [pickedFilters, setPickedFilters] = useState<ResultFilters>(defaultResultFilters);
+  const providerIds = useProvidersStore((state) => state.selectedProviderIds);
+  const filters = useMemo(
+    () => (filter === 'people' ? noResultFilters : resolveFilters(pickedFilters, providerIds)),
+    [filter, pickedFilters, providerIds],
+  );
+  const search = useSearch(query, filter, selection, filters);
   const { recentSearches, add, remove, clear } = useSearchStore();
   const selectedKeys = [...selection.genres, ...(selection.theme ? [selection.theme] : [])].map(
     (category) => category.key,
@@ -98,7 +109,7 @@ export default function SearchScreen() {
       <SearchResultSkeleton key={i} isTablet={isTablet} />
     ));
   } else if (search.empty) {
-    results = <EmptyState />;
+    results = <EmptyState message={isNarrowed(filters) ? strings.search.filters.noResults : undefined} />;
   } else {
     results = search.rows.map((row, index) => (
       <SearchResultRow
@@ -113,29 +124,19 @@ export default function SearchScreen() {
 
   const hasRecent = recentSearches.length > 0;
 
-  // Műfaj / Téma select (D-056): a Személyek szűrőnél nincs kategória, ezért rejtett.
-  const selects =
+  // Select sor (D-056, D-057): a Személyek szűrőnél nincs kategória és szűrés, ezért rejtett.
+  const selects = (inset: number) =>
     filter === 'people' ? null : (
-      <View className="flex-row gap-2">
-        <CategorySelect
-          title={strings.search.select.genre}
-          hint={strings.search.select.genreHint}
-          options={searchCategories.filter((category) => !isTheme(category))}
-          selected={genres}
-          multiple
-          onChange={setGenres}
-          isTablet={isTablet}
-        />
-        <CategorySelect
-          title={strings.search.select.theme}
-          hint={strings.search.select.themeHint}
-          options={searchCategories.filter(isTheme)}
-          selected={theme ? [theme] : []}
-          multiple={false}
-          onChange={(next) => setTheme(next[0])}
-          isTablet={isTablet}
-        />
-      </View>
+      <SearchSelects
+        genres={genres}
+        onGenres={setGenres}
+        theme={theme}
+        onTheme={setTheme}
+        filters={filters}
+        onFilters={setPickedFilters}
+        isTablet={isTablet}
+        inset={inset}
+      />
     );
 
   return (
@@ -190,9 +191,9 @@ export default function SearchScreen() {
                   <SearchFilterChips value={filter} onChange={setFilter} isTablet={isTablet} />
                 </View>
               </View>
-              {selects ? (
-                <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>{selects}</View>
-              ) : null}
+              {filter === 'people' ? null : (
+                <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>{selects(0)}</View>
+              )}
               {matches.length > 0 ? (
                 <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>
                   <SearchCategoryChips
@@ -236,9 +237,9 @@ export default function SearchScreen() {
               contentContainerStyle={{ paddingHorizontal: spec.inset }}>
               <SearchFilterChips value={filter} onChange={setFilter} isTablet={isTablet} />
             </ScrollView>
-            {selects ? (
-              <View style={{ marginTop: spec.selectTop, paddingHorizontal: spec.inset }}>{selects}</View>
-            ) : null}
+            {filter === 'people' ? null : (
+              <View style={{ marginTop: spec.selectTop }}>{selects(spec.inset)}</View>
+            )}
             <View style={{ marginTop: spec.resultsTop, paddingHorizontal: spec.inset }}>{results}</View>
           </>
         )}

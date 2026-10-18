@@ -130,6 +130,9 @@ export type SearchResult = {
   imagePath: string | null;
   /** Megjelenés éve; személynél nincs. */
   year?: string;
+  /** Megjelenés napja (ÉÉÉÉ-HH-NN) és TMDB értékelés (0–10) a szűréshez; személynél nincs. */
+  date?: string;
+  rating?: number;
   /** Személynél a szakma magyarul („Színész”); címnél nincs. */
   role?: string;
 };

@@ -41,6 +41,8 @@ export function toSearchResults(hits: SearchHit[], filter: SearchFilter): Search
         title,
         imagePath: hit.poster_path,
         year: (hit.release_date || hit.first_air_date)?.slice(0, 4) || undefined,
+        date: hit.release_date || hit.first_air_date || undefined,
+        rating: hit.vote_average,
       },
     ];
   });
