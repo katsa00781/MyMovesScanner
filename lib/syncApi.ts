@@ -2,6 +2,7 @@
 // a függvény a felhasználót a tokenből azonosítja. A dokumentum alakja tükör:
 // supabase/functions/mms-sync/index.ts (SyncData).
 import type { KidsAgeLimit } from '@/data/kidsAgeLimits';
+import { REQUEST_TIMEOUT_MS } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import type { WatchlistItem } from '@/types/app';
 
@@ -16,7 +17,10 @@ export type SyncData = {
 };
 
 async function call<T>(body: { action: 'get' } | { action: 'put'; data: SyncData }): Promise<T> {
-  const { data, error } = await supabase.functions.invoke<T>('mms-sync', { body });
+  const { data, error } = await supabase.functions.invoke<T>('mms-sync', {
+    body,
+    timeout: REQUEST_TIMEOUT_MS,
+  });
   if (error || data === null) {
     throw new Error(error?.message ?? 'Üres válasz az mms-sync függvénytől.');
   }

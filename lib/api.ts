@@ -16,9 +16,13 @@ export const REGION = 'HU';
 
 type Params = Record<string, string | number | boolean>;
 
+/** Lassú vagy megszakadt hálózaton a hívás ennyi idő után hibával tér vissza (hiba + újra állapot). */
+export const REQUEST_TIMEOUT_MS = 20_000;
+
 async function tmdb<T>(path: string, params: Params = {}): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>('mms-tmdb', {
     body: { path, params },
+    timeout: REQUEST_TIMEOUT_MS,
   });
   if (error || data === null) {
     throw new Error(error?.message ?? 'Üres válasz az mms-tmdb függvénytől.');

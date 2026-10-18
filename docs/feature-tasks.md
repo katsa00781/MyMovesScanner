@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Ship előtt: edge case-ek 1/2, függvényhívások időkorlátja (fix)
+
+**Mit:** Az edge case-ek átvizsgálása során (lásd a következő bejegyzést a teljes listáért) kiderült, hogy a függvényhívásoknak nincs időkorlátja: lassú neten a skeleton a 60 mp-es iOS-alapértelmezésig áll. Az `mms-tmdb` és `mms-sync` hívások most 20 mp után hibával térnek vissza (hiba + „Újra”). D-053.
+**Fájlok:** lib/api.ts, lib/syncApi.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`; a `timeout` opció helyi, soha nem válaszoló szerverrel (Node, supabase-js): 1,5 mp-es korláttal 1508 ms után `FunctionsFetchError`. Eszközön, valódi lassú hálózaton nem próbáltam.
+**Nyitva maradt:** a Supabase Auth hívásokon (belépés) nincs saját korlát (D-053).
+**Commit:** `fix: időkorlát a függvényhívásokon` (D-053)
+
 ## 2026-10-16 – Ship előtt: familyBudget érintetlenségének ellenőrzése (docs)
 
 **Mit:** Read-only lekérdezések a familyBudget Supabase projekten (`eguhipjgnhbajbmnrskm`, MCP `list_migrations`, `list_edge_functions`, `execute_sql` csak `select`). (1) **Migrációk:** 32 db, ebből az mms-é pontosan kettő (`mms_schema_and_tmdb_cache`, `mms_user_data`); az összes többi a familyBudget / mybillingo / breathing korábbi, nem általam írt migrációja, az mms előtti dátummal. (2) **Függvények:** az `mms-tmdb` az egyetlen mms függvény, a többi (ocr-receipt, wallet-*, send-e-receipt) verziója és dátuma korábbi. **Az `mms-sync` NINCS deployolva** (nem szerepel a listán). (3) **Sémák:** `mms` 2 tábla, mindkettő RLS be; `public` 35 tábla, mind RLS be. (4) **Policy-k a D-051 kockázathoz:** a `public` összes policy-ja felhasználóhoz kötött (`qual` nem nyitott; az INSERT-ek üres `qual`-ja a `with check` miatt normális), egyetlen kivétellel: `investment_price_history` `SELECT` az `authenticated` szerepkörnek, feltétel nélkül. Egy mms-regisztrált felhasználó így olvashatja a befektetési árfolyam-előzményeket (közös piaci adat, felhasználói azonosító nélkül, de a familyBudget adata).
@@ -893,5 +901,12 @@ Sablon:
 **Miért:** (1) a CLAUDE.md szerint ütközésnél nem találok ki új UI-t; itt nincs minta, a legkisebb eltérés a már jóváhagyott elemek újrahasznosítása. (2) a bejelentkezés opcionális (D-051), nem szabad az első indítást akadályoznia. (3) a kijelentkezés nem törlés; fiók nélkül az app helyi adattal működik, és így nem vész el semmi. (4) a tokenek között nincs hibaszín, a hardcode-olás tilos.
 **Alternatíva:** (1) a képernyő designjának megvárása – leállítaná a funkciót; (3) kijelentkezéskor törölni a helyi adatot – közös eszközön tisztább, de adatvesztés és meglepetés; a másik fiókkal belépve a watchlist egyesülne (lásd a szinkron sort); (4) a `kidsCoral` használata hibához – a Gyerek sarok akcentusa, más jelentés.
 **Visszavonható?** igen, egy route és két komponens.
+
+## D-053 – Függvényhívások időkorlátja: 20 mp
+**Dátum:** 2026-10-18
+**Döntés:** Az `mms-tmdb` és `mms-sync` hívások 20 mp után megszakadnak (`supabase.functions.invoke` `timeout` opció, `REQUEST_TIMEOUT_MS` a `lib/api.ts`-ben), és a megszokott hiba + „Újra” állapotba kerülnek. A Supabase Auth hívásokon (belépés, regisztráció) nincs saját korlát.
+**Miért:** időkorlát nélkül lassú vagy félig megszakadt hálózaton a skeleton addig áll, amíg az iOS 60 mp-es alapértelmezett kérés-időkorlátja le nem jár; a 20 mp bőven elég a hideg függvényindításnak és a cache-hiányos TMDB hívásnak, de a felhasználó nem néz egy percig töltőképernyőt. Működését helyi, soha nem válaszoló szerverrel ellenőriztem (1,5 mp-es teszt-időkorláttal 1508 ms után `FunctionsFetchError`).
+**Alternatíva:** nincs saját korlát (iOS 60 mp) – túl hosszú; 8–10 mp – hideg indításnál a lassú, de működő hálózaton fölösleges hibát adna; Auth-hívások köré saját `AbortController` – a belépés ritka és a hiba azonnal látszik a gombon, nem éri meg a külön kód.
+**Visszavonható?** igen, egy konstans és két `timeout` sor.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
