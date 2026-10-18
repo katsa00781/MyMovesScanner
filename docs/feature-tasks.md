@@ -15,7 +15,7 @@
 - [x] `npm run lint` és `npm run typecheck` scriptek
 - [x] `app.json`: iPad támogatás (`supportsTablet: true`), minden orientáció
 - [x] CLAUDE.md és docs/ elhelyezése a projekt gyökerében
-- [ ] Push GitHub-ra
+- [x] Push GitHub-ra (origin: katsa00781/MyMovesScanner, a `master` naprakész)
 
 ### Backend (familyBudget Supabase, `mms` séma) — minden sor külön commit
 - [x] Migráció: `mms` séma + `mms.tmdb_cache` tábla + index `expires_at`-ra
@@ -56,7 +56,7 @@
 
 ### Ship előtt
 - [x] Fiók törlése az appból — **nem szükséges a v1-ben**: a fiók-létrehozás ki van kapcsolva (D-055), így az App Store 5.1.1(v) nem érvényes; a funkció bekapcsolásakor újra kell nyitni
-- [ ] Teljes flow tesztelése iPhone-on és iPaden
+- [x] Teljes flow tesztelése iPhone-on és iPaden — a felhasználó jelezte: rendben (2026-10-18)
 - [x] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
 - [x] Lint + typecheck hibák nélkül
 - [ ] CodeRabbit code review az AI által írt feature-ökhöz
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-18 – Ship előtti állapotfelmérés: flow rendben, `mms-tmdb` deploy megvan (docs)
+
+**Mit:** A felhasználó jelezte, hogy a teljes flow rendben van (iPhone + iPad), a „Teljes flow tesztelése” sor pipálva. Read-only ellenőrzés a Supabase projekten: az `mms-tmdb` éles verziója 2, a forrása tartalmazza a lejárt cache sorok törlését, tehát az `fn: mms-tmdb törli a lejárt cache sorokat` változtatás **ki van deployolva** (a korábbi bejegyzés „Deploy csak kérésre” pontja ezzel lezárt). `mms-sync` továbbra sincs deployolva (D-055, szándékos). `npm run lint`, `npm run typecheck`: hibamentes.
+**Fájlok:** docs/feature-tasks.md
+**Tesztelve:** csak olvasás (`list_edge_functions`, `get_edge_function`), semmit nem módosítottam.
+**Nyitva maradt (build / TestFlight előtt):** (1) `eas.json` nincs, `app.json`-ból hiányzik az `ios.bundleIdentifier`; (2) az ikon (`assets/expo.icon`, `assets/images/icon.png`) és a splash (`#208AEF` háttér) az Expo sablon alapértelmezése; (3) Supabase regisztráció zárása a dashboardon (D-055, a te lépésed); (4) CodeRabbit review. A GitHub push megvan (a helyi `master` és az `origin/master` megegyezik), a Setup sor pipálva.
+**Commit:** `docs: ship előtti állapot, flow rendben, mms-tmdb deploy megerősítve`
 
 ## 2026-10-18 – Főoldal: talk show-k kiszűrése a népszerű sorozatok közül (fix)
 
