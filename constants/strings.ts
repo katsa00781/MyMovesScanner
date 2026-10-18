@@ -50,7 +50,8 @@ export const strings = {
     newOnServices: 'Újdonságok a szolgáltatóidon',
     noServices: 'Nincs kiválasztott előfizetés.',
     newBluray: 'Új Blu-ray megjelenések',
-    trending: 'Népszerű Magyarországon',
+    trendingMovies: 'Népszerű filmek Magyarországon',
+    trendingSeries: 'Népszerű sorozatok Magyarországon',
     kidsPicks: 'Gyerekeknek',
     germanRelease: 'Német megjelenés',
     tmdbCredit:

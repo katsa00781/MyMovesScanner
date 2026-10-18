@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Főoldal: népszerű filmek és népszerű sorozatok külön (feature)
+
+**Mit:** A felhasználó kérésére a vegyes „Népszerű Magyarországon” rail kettévált: **Népszerű filmek Magyarországon** és **Népszerű sorozatok Magyarországon**, mindkettő a sorszámos kártyákkal, top 9. A `useTrendingInHungary` típust kap (`'movie' | 'tv'`), egy `discover` hívással, népszerűség szerint; a film- és sorozatlista egyesítése és a közös rendezés megszűnt. A Főoldalon egy helyi `trendingRail` függvény rakja ki a két railt. D-059.
+**Fájlok:** hooks/useTrendingInHungary.ts, app/(tabs)/index.tsx, constants/strings.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Képernyőn / eszközön és élő adattal NEM néztem (a két rail egymás alatti elhelyezése iPhone-on és iPaden, a találatok minősége).
+**Nyitva maradt:** (1) **Nincs design** a második sorszámos railhez: ugyanaz a stílus és térköz, mint az eddigi railé; szövegek jóváhagyásra („Népszerű filmek Magyarországon”, „Népszerű sorozatok Magyarországon”). (2) A sorozatlistán a TMDB népszerűsége szerint talk show-k is előfordulhatnak (korábbi észrevétel, lásd a Főoldal „Népszerű” bejegyzés 4. pontját); ha zavar, `without_genres=10763,10767` egy sor. (3) A két rail nem szűr a kiválasztott szolgáltatókra (D-035). (4) Két rail = két `discover` hívás indul a Főoldal megnyitásakor (korábban kettő is volt, film + sorozat): a hívások száma nem változott.
+**Commit:** `feat: főoldal népszerű filmek és sorozatok külön` (D-059)
+
 ## 2026-10-18 – Böngészés: az „Előfizetéseim” gomb a szolgáltatók szerkesztését nyitja (fix)
 
 **Mit:** A felhasználó jelezte, hogy a Böngészés „Előfizetéseim” gombja nem reagál. Ok: a gomb a kikapcsolt szolgáltatókat kapcsolta vissza (a Böngészés feladat 6. nyitott pontja), és ha egyik sem volt kikapcsolva, semmi látható nem történt. A felhasználó választása alapján a gomb mostantól a Beállítások „Szolgáltatók szerkesztése” képernyőjét (`/onboarding`) nyitja; a logók koppintása továbbra is be/ki kapcsolja a szűrőt. D-058.
@@ -1018,5 +1026,12 @@ Sablon:
 **Miért:** a korábbi funkció (minden kikapcsolt szolgáltató visszakapcsolása) saját feltevésem volt, a design nem írja le; ha semmi nem volt kikapcsolva, a gomb látható hatás nélkül maradt, a felhasználó ezt „nem reagál”-nak látta. A felirat és az ikon a saját szolgáltatók kezelésére utal.
 **Alternatíva:** a „mind visszakapcsol” megtartása látható visszajelzéssel; mind be / mind ki váltó. A felhasználó a szerkesztés megnyitását választotta.
 **Visszavonható?** igen: a `ProviderFilter` `onEdit` propját a `browse.tsx`-ben vissza lehet kötni `setExcluded([])`-ra.
+
+## D-059 – Főoldal: népszerű filmek és sorozatok külön railen
+**Dátum:** 2026-10-18
+**Döntés:** A D-035 vegyes „Népszerű Magyarországon” railét két rail váltja: filmek és sorozatok, külön-külön `discover` (`popularity.desc`, `watch_region=HU`, minden monetizációs típus), mindkettő top 9, sorszámos kártyákkal. A D-035 többi része (sorszám körvonal, kártyaméretek, top 9 oka) érvényes marad.
+**Miért:** a felhasználó kérése: a vegyes lista kényelmetlen, mert a film és a sorozat népszerűsége (`popularity`) különböző skálán mozog, és az egyik típus kiszoríthatja a másikat. Külön listánál nincs szükség összehasonlításra.
+**Alternatíva:** egy rail Filmek / Sorozatok váltóval – új UI elem, a designban nincs; a vegyes lista megtartása típusonkénti kvótával – továbbra is vegyes.
+**Visszavonható?** igen: a hook `type` paramétere és a két `trendingRail` hívás a `index.tsx`-ben.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

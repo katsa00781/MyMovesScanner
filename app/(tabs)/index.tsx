@@ -24,10 +24,32 @@ export default function HomeScreen() {
   const router = useRouter();
   const newOn = useNewOnMyServices();
   const bluray = useBlurayReleases();
-  const trending = useTrendingInHungary();
+  const trendingMovies = useTrendingInHungary('movie');
+  const trendingSeries = useTrendingInHungary('tv');
   const kidsPicks = useKidsPicks();
   const heroItems = useHeroItems(newOn.titles);
   const toggleWatchlist = useWatchlistStore((state) => state.toggle);
+
+  const trendingRail = (title: string, trending: ReturnType<typeof useTrendingInHungary>) => (
+    <PosterRail
+      variant="trending"
+      title={title}
+      data={trending.titles}
+      loading={trending.loading}
+      error={trending.error}
+      onRetry={trending.retry}
+      keyExtractor={(item) => item.key}
+      renderCard={(item, width, index) => (
+        <TrendingCard
+          rank={index + 1}
+          title={item.title}
+          posterPath={item.posterPath}
+          width={width}
+          onPress={() => router.push(titleHref(item.type, item.id))}
+        />
+      )}
+    />
+  );
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingBottom: 32 }}>
@@ -92,24 +114,8 @@ export default function HomeScreen() {
             />
           )}
         />
-        <PosterRail
-          variant="trending"
-          title={strings.home.trending}
-          data={trending.titles}
-          loading={trending.loading}
-          error={trending.error}
-          onRetry={trending.retry}
-          keyExtractor={(title) => title.key}
-          renderCard={(title, width, index) => (
-            <TrendingCard
-              rank={index + 1}
-              title={title.title}
-              posterPath={title.posterPath}
-              width={width}
-              onPress={() => router.push(titleHref(title.type, title.id))}
-            />
-          )}
-        />
+        {trendingRail(strings.home.trendingMovies, trendingMovies)}
+        {trendingRail(strings.home.trendingSeries, trendingSeries)}
         <PosterRail
           variant="wide"
           title={strings.home.kidsPicks}
