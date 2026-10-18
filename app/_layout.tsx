@@ -4,7 +4,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import { DevResetButton } from '@/components/DevResetButton';
 import { colors } from '@/constants/theme';
 import { useAccountSync } from '@/hooks/useAccountSync';
 import { startAuthListener } from '@/lib/auth';
@@ -41,7 +40,6 @@ export default function RootLayout() {
         <Stack.Screen name="account" />
         <Stack.Screen name="title/[type]/[id]" />
       </Stack>
-      {__DEV__ ? <DevResetButton /> : null}
     </ThemeProvider>
   );
 }

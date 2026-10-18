@@ -58,9 +58,9 @@
 - [ ] Fiók törlése az appból (App Store 5.1.1(v) előírás, ha az app fiókot hoz létre; a közös user-pool miatt külön döntés kell, D-051)
 - [ ] Teljes flow tesztelése iPhone-on és iPaden
 - [x] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
-- [ ] Lint + typecheck hibák nélkül
+- [x] Lint + typecheck hibák nélkül
 - [ ] CodeRabbit code review az AI által írt feature-ökhöz
-- [ ] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
+- [x] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
 - [x] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
 - [x] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
 - [ ] EAS Build + TestFlight a családi eszközökre
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-18 – Ship előtt: dev utilities eltávolítása (chore)
+
+**Mit:** A felhasználó jóváhagyásával törölve a `components/DevResetButton.tsx` és a sora az `app/_layout.tsx`-ben (D-029 visszavonva, a fájl a git historyban megvan). Átnéztem a forrást `console.log`, `__DEV__`, mock / minta adat, TODO után: más fejlesztői maradvány nincs; a `console.error` hívások csak az Edge Function-ökben vannak (hiba-logok, kulcs nélkül), ezeket meghagytam.
+**Fájlok:** app/_layout.tsx, components/DevResetButton.tsx (törölve), docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`: hibamentes (a „Lint + typecheck” sor ezzel pipálva).
+**Nyitva maradt:** Fejlesztés közben az onboarding újrapróbálásához a Beállítások → Szolgáltatók szerkesztése vagy az app újratelepítése marad.
+**Commit:** `chore: dev reset gomb eltávolítása`
 
 ## 2026-10-18 – Ship előtt: edge case-ek 2/2, átvizsgálás és keresőmező hosszkorlát (fix)
 
