@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Keresés: 34 új kategória (feature)
+
+**Mit:** A felhasználó kérésére a Keresés kategóriái 23-ról 57-re bővültek (D-048 mintája, az Edge Function nem változott). **13 műfaj:** vígjáték, romantikus, thriller, sci-fi, dráma, fantasy, animáció, dokumentum, rejtély, történelmi, családi, kaland, akció (a TV-ben a sci-fi / fantasy a 10765, a kaland / akció a 10759 összevont műfaj; romantikus, thriller, történelmi csak filmre). **21 téma kulcsszóval:** kalózok, harcművészet, maffia, sorozatgyilkosok, börtön, ókori Róma, második világháború, szellemek, robotok, disztópia / cyberpunk, igaz történetek, bírósági drámák, box, gimis filmek, esküvők, musicalek, sárkányok, mesék, vikingek, összeesküvések, túlélés. A kulcsszó-azonosítókat 30 mintafilm `keywords` listájából vettem, és mind a 34 kategória `discover` lekérdezését élő függvényen futtattam (film és sorozat, népszerűség szerint, találatszám + első 5 cím átnézve). A szótő-illesztést 45 begépelt szóra teszteltem Node-dal (nincs duplikált kulcs).
+**Fájlok:** data/searchCategories.ts, constants/strings.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`; élő `discover` a 34 kategóriára; illesztés-teszt (lásd fent). **Képernyőn / eszközön nem néztem** (a chip-sor vízszintes görgetése sok találatnál, pl. „dráma” + „dram” stb.).
+**Nyitva maradt:** (1) **Szövegek jóváhagyásra:** a 34 felirat a `strings.search.categories` alatt. (2) **Találati minőség:** a széles műfajoknál (vígjáték, dráma) a TV-lista a TMDB népszerűsége szerint rendez, ezért talk show-k és ázsiai sorozatok is előkerülnek (pl. „vígjáték” sorozatok: Late Night, The Tonight Show); ha zavaró, a `tvGenres` kivehető, és a kategória film-only lesz. A „szellemek” között Harry Potter helyett a Démonok között / Megszállottság jön (a 162846 „ghost” kulcsszót kihagytam). (3) **„Sorozatgyilkos” szóra** csak a „gyilkos” szótő illeszt: a „sorozatgyilkos” szótő a „sorozat” begépelésekor is előhozná a chipet. (4) A „róma” a Romantikus és az Ókori Róma chipet is hozza (közös „roma” előtag). (5) A rövid „kém” (3 betű) továbbra sem illeszkedik a Kémfilmek-re (a meglévő szótövek 5+ betűsek). (6) Első oldal (20 találat) kategóriánként, mint eddig.
+**Commit:** `feat: keresés 34 új kategóriával` (D-048)
+
 ## 2026-10-18 – Fiók és szinkron kikapcsolása a v1-ben (config)
 
 **Mit:** A felhasználó döntése: auth nem kell a v1-ben, a regisztrációt zárja, a családi összekötés később. Új `constants/features.ts` (`accountEnabled = false`): a Beállítások „Fiók” szekciója rejtett, az auth-figyelő nem indul. A kód megmaradt. A CLAUDE.md Autentikáció szakasza jelzi a kikapcsolást. A „Fiók törlése” sor tárgytalan (nincs fiók-létrehozás), az „Éles bekapcsolás” elhalasztva. D-055.
