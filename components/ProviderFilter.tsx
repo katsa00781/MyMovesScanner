@@ -7,19 +7,19 @@ import { colors } from '@/constants/theme';
 import { logoUrl } from '@/lib/tmdbImage';
 import type { Provider } from '@/types/tmdb';
 
-// „Előfizetéseim” szűrő a Böngészéshez (03 design): a gomb az összes szolgáltatót visszakapcsolja,
+// „Előfizetéseim” szűrő a Böngészéshez (03 design): a gomb a szolgáltatók szerkesztését nyitja,
 // mellette a saját szolgáltatók logói; a bekapcsoltak narancs keretesek, a kikapcsoltak halványak.
 export function ProviderFilter({
   providers,
   activeIds,
   onToggle,
-  onReset,
+  onEdit,
   inset,
 }: {
   providers: Provider[];
   activeIds: number[];
   onToggle: (providerId: number) => void;
-  onReset: () => void;
+  onEdit: () => void;
   /** Oldalsó margó: a sor a képernyő széléig görgethető, a tartalom a margótól indul. */
   inset: number;
 }) {
@@ -30,7 +30,7 @@ export function ProviderFilter({
       contentContainerClassName="items-center gap-[3px]"
       contentContainerStyle={{ paddingHorizontal: inset }}>
       <Pressable
-        onPress={onReset}
+        onPress={onEdit}
         accessibilityRole="button"
         className="mr-[5px] h-[46px] flex-row items-center rounded-[14px] bg-chip px-[17px] active:opacity-70">
         <SymbolView name="slider.horizontal.3" size={16} weight="semibold" tintColor={colors.textPrimary} />

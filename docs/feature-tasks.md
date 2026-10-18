@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Böngészés: az „Előfizetéseim” gomb a szolgáltatók szerkesztését nyitja (fix)
+
+**Mit:** A felhasználó jelezte, hogy a Böngészés „Előfizetéseim” gombja nem reagál. Ok: a gomb a kikapcsolt szolgáltatókat kapcsolta vissza (a Böngészés feladat 6. nyitott pontja), és ha egyik sem volt kikapcsolva, semmi látható nem történt. A felhasználó választása alapján a gomb mostantól a Beállítások „Szolgáltatók szerkesztése” képernyőjét (`/onboarding`) nyitja; a logók koppintása továbbra is be/ki kapcsolja a szűrőt. D-058.
+**Fájlok:** components/ProviderFilter.tsx (`onReset` → `onEdit`), app/(tabs)/browse.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Képernyőn / eszközön NEM néztem (a gomb koppintása, a szerkesztő megnyitása és a visszatérés iPhone-on és iPaden).
+**Nyitva maradt:** (1) A szerkesztés végén az onboarding a Főoldalra lép (`dismissTo('/')`, ahogy a Beállításokból is), nem vissza a Böngészésre. (2) A „mind visszakapcsol” funkció megszűnt; a kikapcsolt logókat egyenként kell visszakapcsolni (a Böngészés szűrői nem perzisztálnak, újranyitáskor alaphelyzetbe állnak). (3) A telefon-design jobb felső csúszka gombja továbbra sincs kirakva.
+**Commit:** `fix: böngészés előfizetéseim gomb szolgáltatók szerkesztését nyitja` (D-058)
+
 ## 2026-10-18 – Keresés: találati lista szűrői, magyarországi elérhetőség (feature)
 
 **Mit:** A felhasználó észrevételei: a találatok között van, ami Magyarországon nem nézhető, és ami nincs a kiválasztott szolgáltatókon; kért szűrést értékelés, megjelenési dátum és szolgáltató szerint. A Keresés select sorában (Műfaj, Téma mellett) három új select: **Elérhetőség** (alapérték: Magyarországon), **Értékelés**, **Megjelenés**; a sor vízszintesen görgethető. Kategória-keresésnél a TMDB szűr, szöveges keresésnél az app (két oldal, 40 találat). A találati sor adata kapott `date` és `rating` mezőt. Az általános `FilterSelect` felváltja a `CategorySelect`-et, a sort a `SearchSelects` rakja össze. Üres találatnál „Nincs találat ezekkel a szűrőkkel.” D-057.
@@ -1003,5 +1011,12 @@ Sablon:
 **Alternatíva:** alapból „Minden találat” – az észrevétel szerint zavaró; csak kliens oldali szűrés a kategória-keresésben – az első 20 találatból kevés maradna; a szűrők perzisztálása – egyelőre minden keresés friss, a választás a képernyő életére él.
 **Ismert korlát:** a szolgáltatónként szűrés és a „A szolgáltatóimon” csak előfizetést (`flatrate`) számít, mint az app többi része; az ingyenes / reklámos (`free`, `ads`) kínálatot az app nem kezeli (D-012), ezért az „Magyarországon” sem számítja.
 **Visszavonható?** igen: `data/resultFilters.ts` alapértéke (`availability: 'all'`) kikapcsolja a szűrést; a select sor három gombja kivehető.
+
+## D-058 – Böngészés: az „Előfizetéseim” gomb a szolgáltatók szerkesztését nyitja
+**Dátum:** 2026-10-18
+**Döntés:** A Böngészés „Előfizetéseim” gombja (slider ikon + felirat) a `/onboarding` szolgáltató-szerkesztőt nyitja, ugyanazt, mint a Beállítások „Szolgáltatók szerkesztése” gombja. A mellette lévő logók koppintása változatlanul be/ki kapcsolja a szűrőt.
+**Miért:** a korábbi funkció (minden kikapcsolt szolgáltató visszakapcsolása) saját feltevésem volt, a design nem írja le; ha semmi nem volt kikapcsolva, a gomb látható hatás nélkül maradt, a felhasználó ezt „nem reagál”-nak látta. A felirat és az ikon a saját szolgáltatók kezelésére utal.
+**Alternatíva:** a „mind visszakapcsol” megtartása látható visszajelzéssel; mind be / mind ki váltó. A felhasználó a szerkesztés megnyitását választotta.
+**Visszavonható?** igen: a `ProviderFilter` `onEdit` propját a `browse.tsx`-ben vissza lehet kötni `setExcluded([])`-ra.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

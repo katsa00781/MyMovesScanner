@@ -164,7 +164,7 @@ export default function BrowseScreen() {
                 providers={myProviders.providers}
                 activeIds={activeIds}
                 onToggle={toggleProvider}
-                onReset={() => setExcluded([])}
+                onEdit={() => router.push('/onboarding')}
                 inset={inset}
               />
             </View>
