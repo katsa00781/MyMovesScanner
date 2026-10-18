@@ -62,8 +62,9 @@ export function useWatchlist() {
   );
 
   const answered = items.filter((item) => keyOf(item) in availability);
-  // Betöltés: a visszatöltés vagy az első válasz előtt; hiba: ha minden lekérés elbukott.
-  const loading = !hydrated || (items.length > 0 && answered.length === 0);
+  // Betöltés: csak a mentett lista visszatöltéséig; a helyi lista a státuszok nélkül, net nélkül
+  // is látszik. Hiba: ha minden státusz-lekérés elbukott (a lista ekkor is megmarad).
+  const loading = !hydrated;
   const error =
     hydrated &&
     items.length > 0 &&

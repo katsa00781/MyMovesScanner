@@ -184,6 +184,7 @@ export const strings = {
     buyOnly: 'Csak vásárlás',
     streaming: (year: string) => `Streaming ${year}`,
     empty: 'A watchlist még üres.',
+    statusError: 'A státuszok most nem tölthetők be.',
   },
 
   account: {

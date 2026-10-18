@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
-import { ErrorState } from '@/components/ErrorState';
 import { PosterCard } from '@/components/PosterCard';
 import { PosterGrid } from '@/components/PosterGrid';
 import { ScreenTitle } from '@/components/ScreenTitle';
@@ -42,8 +41,6 @@ export default function WatchlistScreen() {
   let body;
   if (loading) {
     body = <PosterGrid data={[]} loading keyExtractor={() => ''} renderCard={() => <View />} />;
-  } else if (error) {
-    body = <ErrorState onRetry={retry} />;
   } else if (isEmpty) {
     body = <EmptyState message={strings.watchlist.empty} />;
   } else if (visible.length === 0) {
@@ -76,7 +73,18 @@ export default function WatchlistScreen() {
           </View>
           {wide ? null : <View style={{ marginTop: watchlistLayout.phone.controlGap }}>{control}</View>}
         </View>
-        <View style={{ marginTop: watchlistLayout.gridTop }}>{body}</View>
+        {/* A státuszok nélkül is látszó lista fölött: a net hiánya nem viszi el a helyi címeket. */}
+        {error ? (
+          <View
+            className="flex-row items-center justify-between"
+            style={{ marginTop: watchlistLayout.gridTop, paddingHorizontal: inset }}>
+            <Text className="text-[14px] text-textSecondary">{strings.watchlist.statusError}</Text>
+            <Pressable onPress={retry} hitSlop={8} accessibilityRole="button" className="active:opacity-60">
+              <Text className="font-semibold text-[14px] text-accent">{strings.common.retry}</Text>
+            </Pressable>
+          </View>
+        ) : null}
+        <View style={{ marginTop: error ? 16 : watchlistLayout.gridTop }}>{body}</View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Watchlist net nélkül (fix)
+
+**Mit:** A Watchlist a visszatöltés után azonnal mutatja a helyi címeket, státusz nélkül; ha minden státusz-lekérés elbukik, a rács fölött egy hibasor + „Újra” áll a teljes képernyős hiba helyett. D-054.
+**Fájlok:** hooks/useWatchlist.ts, app/(tabs)/watchlist.tsx, constants/strings.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. **Képernyőn / repülőgép-móddal nem próbáltam.**
+**Nyitva maradt:** (1) Szöveg jóváhagyásra: „A státuszok most nem tölthetők be.” (2) A hibasor kinézete nincs a designban (a Beállítások hibasorának mintájára, tokenekkel). (3) A badge-ek a rács megjelenése után „beúsznak”, ahogy a válaszok érkeznek.
+**Commit:** `fix: watchlist a helyi listát net nélkül is mutatja` (D-054)
+
 ## 2026-10-18 – Ship előtt: dev utilities eltávolítása (chore)
 
 **Mit:** A felhasználó jóváhagyásával törölve a `components/DevResetButton.tsx` és a sora az `app/_layout.tsx`-ben (D-029 visszavonva, a fájl a git historyban megvan). Átnéztem a forrást `console.log`, `__DEV__`, mock / minta adat, TODO után: más fejlesztői maradvány nincs; a `console.error` hívások csak az Edge Function-ökben vannak (hiba-logok, kulcs nélkül), ezeket meghagytam.
@@ -924,5 +932,12 @@ Sablon:
 **Miért:** időkorlát nélkül lassú vagy félig megszakadt hálózaton a skeleton addig áll, amíg az iOS 60 mp-es alapértelmezett kérés-időkorlátja le nem jár; a 20 mp bőven elég a hideg függvényindításnak és a cache-hiányos TMDB hívásnak, de a felhasználó nem néz egy percig töltőképernyőt. Működését helyi, soha nem válaszoló szerverrel ellenőriztem (1,5 mp-es teszt-időkorláttal 1508 ms után `FunctionsFetchError`).
 **Alternatíva:** nincs saját korlát (iOS 60 mp) – túl hosszú; 8–10 mp – hideg indításnál a lassú, de működő hálózaton fölösleges hibát adna; Auth-hívások köré saját `AbortController` – a belépés ritka és a hiba azonnal látszik a gombon, nem éri meg a külön kód.
 **Visszavonható?** igen, egy konstans és két `timeout` sor.
+
+## D-054 – Watchlist: a helyi lista státusz nélkül is látszik, a státusz-hiba egy sor
+**Dátum:** 2026-10-18
+**Döntés:** A Watchlist a mentett visszatöltése után azonnal mutatja a címeket; a státusz-badge-ek (és a szegmens-számlálók) akkor jelennek meg, amikor a részletek megérkeznek. Ha minden státusz-lekérés elbukik, a rács fölött egy sor jelzi („A státuszok most nem tölthetők be.” + „Újra”, a Beállítások hibasorának stílusában), a lista marad. Korábban skeleton, majd teljes képernyős hiba állt a lista helyén.
+**Miért:** a lista helyi adat; net nélkül a felhasználó eddig a saját mentett címeit sem látta. A státusz csak kiegészítés. A felhasználó jóváhagyta (2026-10-18).
+**Alternatíva:** a skeleton + teljes hiba megtartása (tiszta design-egyezés, de offline használhatatlan); a státuszok helyi tárolása – új perzisztált adat, elavulhat, fölösleges.
+**Visszavonható?** igen, a `useWatchlist` `loading` sora és a hibasor a képernyőn.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
