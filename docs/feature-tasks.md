@@ -63,7 +63,9 @@
 - [x] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
 - [x] Secrets ellenőrzése (kliens bundle + git history: nincs TMDB kulcs, nincs service role)
 - [x] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
-- [ ] EAS Build + TestFlight a családi eszközökre
+- [x] iOS build konfig: bundle ID, buildNumber, exportálási nyilatkozat, `ios.icon` az `icon.png`-re (D-060)
+- [ ] Ikon javítása: az `icon.png`-be kockás háttér van beleégetve, alfa nélkül — **jóváhagyásra vár** (D-060)
+- [ ] Xcode Archive + TestFlight a családi eszközökre (`npx expo prebuild --platform ios`, Xcode-ból feltöltve; EAS nincs, D-060)
 
 ---
 ---
@@ -86,6 +88,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-18 – iOS build konfig az Xcode-os feltöltéshez (setup)
+
+**Mit:** A felhasználó Xcode-ból tölt fel TestFlightra (EAS nélkül, D-060). Az `app.json` `ios` blokkja: `bundleIdentifier` `com.kacsorzsolt.mymoviescanner`, `buildNumber` `"1"`, `config.usesNonExemptEncryption: false`, `icon` az `assets/images/icon.png`-re (a sablon `expo.icon` csomagról). Az ikon vizsgálatakor kiderült, hogy az `icon.png`-be kockás háttér van beleégetve (nincs alfa, a sarkok fehér / szürke pixelek). Egy javított jelölt a scratchpadben készült (sarkok feketére festve, 1024×1024, RGB), a repóba **nem** került.
+**Fájlok:** app.json, docs/feature-tasks.md
+**Tesztelve:** `npx expo config --type public`: a bundle ID, buildszám és ikon érvényesül; a `config.usesNonExemptEncryption` a nyilvános kimenetből szándékosan hiányzik. `prebuild` és Xcode build nem futott.
+**Nyitva maradt:** (1) **Ikon javítás jóváhagyásra** (lásd D-060): a jelölt `…/scratchpad/icon-fixed-1024.png`; jobb egy teljes felületű négyzet az eredeti forrásból. (2) A splash még az Expo sablon (kék `#208AEF` háttér, Expo logó), a design háttere fekete: jóváhagyásra. (3) Az Android ikonok szintén sablonok, a v1 csak iOS, nem nyúltam hozzá. (4) A `.env` meglétét az Archive-hoz a felhasználónak kell biztosítania (az `EXPO_PUBLIC_*` a build pillanatában kerül a bundle-be). (5) `prebuild`, Release build, Archive és feltöltés a felhasználó lépése.
+**Commit:** `setup: iOS bundle ID, buildszám és ikon az Xcode feltöltéshez` (D-060)
 
 ## 2026-10-18 – Ship előtti állapotfelmérés: flow rendben, `mms-tmdb` deploy megvan (docs)
 
@@ -1050,5 +1060,13 @@ Sablon:
 **Alternatíva:** egy rail Filmek / Sorozatok váltóval – új UI elem, a designban nincs; a vegyes lista megtartása típusonkénti kvótával – továbbra is vegyes.
 **Kiegészítés (2026-10-18):** a sorozatlista `without_genres=10763,10767`-tel kizárja a Talk és Hír műfajt.
 **Visszavonható?** igen: a hook `type` paramétere és a két `trendingRail` hívás a `index.tsx`-ben.
+
+## D-060 – iOS kiadás: Xcode Archive EAS helyett, `ios/` nem verziókövetett
+**Dátum:** 2026-10-18
+**Döntés:** A TestFlight feltöltés a felhasználó gépéről, Xcode-ból megy (`npx expo prebuild --platform ios`, majd Product → Archive → Distribute App). Nincs `eas.json`. A natív `ios/` mappa generált és a `.gitignore` szerint nem kerül commitba; az igazság forrása az `app.json`. Bundle ID: `com.kacsorzsolt.mymoviescanner`, `buildNumber: "1"`, `ios.config.usesNonExemptEncryption: false` (nincs saját titkosítás, az App Store Connect így nem kér exportnyilatkozatot minden feltöltésnél). Az `ios.icon` az `expo.icon` sablon-csomagról az `assets/images/icon.png`-re váltott, különben a sablonikon felülírta volna az appét.
+**Miért:** a felhasználó döntése; egy családi appnál az EAS fiók és a felhőbuild felesleges, a build helyben, ismert eszközökkel fut. Az `app.json` a konfiguráció egyetlen helye, a `prebuild` bármikor újragenerálja az `ios/`-t.
+**Ismert gond:** az `icon.png` (1254×1254, alfa nélkül) a lekerekített ikon mögött beleégetett kockás „átlátszó” hátteret tartalmaz (sarokpixelek 254 / 224 szürkék). Az iOS maga kerekít, így a sarkokban a kockás minta látszana. Javítási jelölt (a sarkok feketére festve, 1024×1024, RGB) elkészült, de **nincs becserélve**: jóváhagyásra vár. A jelölt belső lekerekített négyzete kicsit világosabb (#18) a fekete keretnél, ezért a tiszta megoldás egy teljes felületű (full-bleed) négyzet exportja az eredeti forrásból.
+**Alternatíva:** EAS Build (`eas.json`, felhőbuild, Expo fiók); a natív `ios/` verziókövetése (a prebuild utáni kézi Xcode-módosítások megmaradnának, de a konfiguráció két helyen élne).
+**Visszavonható?** igen: `eas.json` bármikor hozzáadható, a bundle ID viszont az App Store Connecttel egyezik, feltöltés után nem módosítható.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
