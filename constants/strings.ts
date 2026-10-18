@@ -120,6 +120,14 @@ export const strings = {
       Camera: 'Operatőr',
       Editing: 'Vágó',
     },
+    // Műfaj / Téma select (D-056).
+    select: {
+      genre: 'Műfaj',
+      genreHint: 'Több műfaj is választható, a találatok mindegyikre illeszkednek.',
+      theme: 'Téma',
+      themeHint: 'Egy téma választható.',
+      done: 'Kész',
+    },
     // Kategóriák (data/searchCategories.ts): a chip felirata és a „Találatok” fejléc.
     categories: {
       disaster: 'Katasztrófafilmek',

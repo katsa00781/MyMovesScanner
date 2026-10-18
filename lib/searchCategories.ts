@@ -23,18 +23,51 @@ export function matchCategories(query: string): SearchCategory[] {
   );
 }
 
-/** A kategória `discover` paraméterei az adott típusra; `undefined`, ha a típusra nincs szűrője. */
-export function categoryParams(
-  category: SearchCategory,
+/**
+ * A kiválasztott kategóriák (D-056): tetszőleges számú műfaj, amelyek „és” kapcsolatban vannak
+ * (a TMDB `with_genres` vesszővel), és legfeljebb egy téma (kulcsszó-csoport, a csoporton belül
+ * „vagy”). Több téma „és” kapcsolata egy `discover` hívásban nem fejezhető ki, ezért egy téma van.
+ */
+export type CategorySelection = { genres: readonly SearchCategory[]; theme?: SearchCategory };
+
+export const noSelection: CategorySelection = { genres: [] };
+
+/** Téma = kulcsszavas kategória; a többi műfaj. */
+export const isTheme = (category: SearchCategory) => category.keywords !== undefined;
+
+export const isEmptySelection = (selection: CategorySelection) =>
+  selection.genres.length === 0 && !selection.theme;
+
+/** Stabil azonosító a kiválasztáshoz (sorrendtől független); üres kiválasztásnál üres szöveg. */
+export function selectionKey(selection: CategorySelection): string {
+  const keys = selection.genres.map((genre) => genre.key).sort();
+  return selection.theme ? [...keys, selection.theme.key].join('+') : keys.join('+');
+}
+
+/**
+ * A kiválasztás `discover` paraméterei az adott típusra; `undefined`, ha nincs kiválasztás, vagy
+ * valamelyik műfajnak nincs megfelelője a típuson (pl. a romantikus műfaj a TV-ben): ekkor a
+ * típusra nincs találat, mert a találatnak mindegyik kategóriára illeszkednie kell.
+ */
+export function selectionParams(
+  selection: CategorySelection,
   type: MediaType,
 ): Record<string, string | number> | undefined {
-  const genres = type === 'movie' ? category.movieGenres : category.tvGenres;
-  if (!category.keywords && !genres) return undefined;
+  if (isEmptySelection(selection)) return undefined;
+  const genreIds = new Set<number>();
+  for (const genre of selection.genres) {
+    const ids = type === 'movie' ? genre.movieGenres : genre.tvGenres;
+    if (!ids) return undefined;
+    ids.forEach((id) => genreIds.add(id));
+  }
   return {
     sort_by: 'popularity.desc',
     // A kevés szavazatú, ismeretlen címek kiszűrésére.
     'vote_count.gte': 30,
-    ...(category.keywords ? { with_keywords: category.keywords.join('|') } : {}),
-    ...(genres ? { with_genres: genres.join('|') } : {}),
+    ...(selection.theme?.keywords ? { with_keywords: selection.theme.keywords.join('|') } : {}),
+    ...(genreIds.size > 0 ? { with_genres: [...genreIds].join(',') } : {}),
+    // A sorozatok között a talk show-k és a hírműsorok (Hír 10763, Talk 10767) népszerűségük miatt
+    // elöl lennének pl. a „vígjáték” kategóriában; kategóriára nem ezeket keresi senki.
+    ...(type === 'tv' ? { without_genres: '10763,10767' } : {}),
   };
 }

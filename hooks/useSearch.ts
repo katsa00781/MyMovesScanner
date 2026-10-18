@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { SearchCategory } from '@/data/searchCategories';
 import { searchFilters, type SearchFilter } from '@/data/searchFilters';
 import { discover, getDetails, REGION, search } from '@/lib/api';
-import { categoryParams } from '@/lib/searchCategories';
+import { type CategorySelection, isEmptySelection, selectionKey, selectionParams } from '@/lib/searchCategories';
 import { isOnMyServices, pickSearchChips, toSearchResults } from '@/lib/searchResults';
 import { pickRegionOffers } from '@/lib/titleInfo';
 import { useProvidersStore } from '@/store/useProvidersStore';
@@ -27,12 +26,13 @@ type SearchState = {
 
 const NO_RESULTS: SearchResult[] = [];
 
-// A kategória találatai: film és/vagy sorozat `discover` (a szűrő szerint), népszerűség szerint
-// egyesítve. Ha az egyik elbukik, a másik eredménye megmarad; ha mind, a hiba tovább megy.
-async function fetchCategory(category: SearchCategory, filter: SearchFilter): Promise<SearchResult[]> {
+// A kiválasztott kategóriák találatai: film és/vagy sorozat `discover` (a szűrő szerint), népszerűség
+// szerint egyesítve. Csak azokra a típusokra kérdez, ahol mindegyik kategóriának van szűrője. Ha az
+// egyik elbukik, a másik eredménye megmarad; ha mind, a hiba tovább megy.
+async function fetchCategory(selection: CategorySelection, filter: SearchFilter): Promise<SearchResult[]> {
   const types: MediaType[] = filter === 'films' ? ['movie'] : filter === 'series' ? ['tv'] : ['movie', 'tv'];
   const requests = types.flatMap((type) => {
-    const params = categoryParams(category, type);
+    const params = selectionParams(selection, type);
     return params ? [discover(type, params).then((page) => ({ type, hits: page.results }))] : [];
   });
   const settled = await Promise.allSettled(requests);
@@ -60,14 +60,17 @@ function useDebounced(value: string): string {
 // végponton, oldalanként az első oldal. A műfajhoz és a „hol nézhető” chipekhez címenként egy
 // `getDetails` kell (az Edge Function 7 napra cache-eli): a sorok ezek előtt is látszanak, a
 // részletek a képernyő élete alatt megmaradnak. A `null` a sikertelen lekérést jelzi.
-// A kiválasztott kategória (D-048) a szöveges keresést helyettesíti: `discover` találatok.
-export function useSearch(query: string, filter: SearchFilter, category?: SearchCategory) {
+// A kiválasztott kategóriák (D-048, D-056) a szöveges keresést helyettesítik: `discover` találatok.
+// A `selection` azonosságát a hívó memoizálja.
+export function useSearch(query: string, filter: SearchFilter, selection: CategorySelection) {
   const selectedProviderIds = useProvidersStore((state) => state.selectedProviderIds);
   const typed = query.trim();
   const term = useDebounced(typed);
-  // A találatok kulcsa: a kategória, vagy a keresett szöveg; ezzel dől el, hogy az érkezett lista a mostanihoz tartozik-e.
-  const requestKey = category ? `category:${category.key}` : typed;
-  const active = category !== undefined || typed.length >= MIN_LENGTH;
+  // A találatok kulcsa: a kategóriák, vagy a keresett szöveg; ezzel dől el, hogy az érkezett lista a mostanihoz tartozik-e.
+  const categories = !isEmptySelection(selection);
+  const categoryKey = selectionKey(selection);
+  const requestKey = categories ? `category:${categoryKey}` : typed;
+  const active = categories || typed.length >= MIN_LENGTH;
 
   const [state, setState] = useState<SearchState>({ filter, term: '', results: [], error: false });
   const [attempt, setAttempt] = useState(0);
@@ -75,12 +78,12 @@ export function useSearch(query: string, filter: SearchFilter, category?: Search
   const requested = useRef(new Set<string>());
 
   useEffect(() => {
-    if (!category && term.length < MIN_LENGTH) return;
+    if (!categories && term.length < MIN_LENGTH) return;
     const endpoint = searchFilters.find((item) => item.key === filter)?.endpoint ?? 'multi';
-    const key = category ? `category:${category.key}` : term;
+    const key = categories ? `category:${categoryKey}` : term;
     let cancelled = false;
-    const request = category
-      ? fetchCategory(category, filter)
+    const request = categories
+      ? fetchCategory(selection, filter)
       : search(endpoint, term).then((page) => toSearchResults(page.results, filter));
     request
       .then((results) => {
@@ -92,7 +95,7 @@ export function useSearch(query: string, filter: SearchFilter, category?: Search
     return () => {
       cancelled = true;
     };
-  }, [term, filter, category, attempt]);
+  }, [term, filter, selection, categories, categoryKey, attempt]);
 
   // A szűrőváltás előtti találatok nem látszanak; a gépelés közbeniek igen, az új találatokig.
   const results = state.filter === filter ? state.results : NO_RESULTS;

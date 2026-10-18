@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { RecentChips, RecentList } from '@/components/RecentSearches';
+import { CategorySelect } from '@/components/CategorySelect';
 import { SearchCategoryChips } from '@/components/SearchCategoryChips';
 import { SearchField } from '@/components/SearchField';
 import { ScreenTitle } from '@/components/ScreenTitle';
@@ -13,11 +14,11 @@ import { SearchFilterChips } from '@/components/SearchFilterChips';
 import { SearchResultRow, SearchResultSkeleton } from '@/components/SearchResultRow';
 import { strings } from '@/constants/strings';
 import { browseLayout, layout, searchLayout, TABLET_MIN_WIDTH } from '@/constants/theme';
-import type { SearchCategory } from '@/data/searchCategories';
+import { searchCategories, type SearchCategory } from '@/data/searchCategories';
 import type { SearchFilter } from '@/data/searchFilters';
 import { useSearch } from '@/hooks/useSearch';
 import { titleHref } from '@/lib/routes';
-import { matchCategories } from '@/lib/searchCategories';
+import { isTheme, matchCategories, noSelection, type CategorySelection } from '@/lib/searchCategories';
 import { useSearchStore } from '@/store/useSearchStore';
 import type { SearchResult } from '@/types/app';
 
@@ -35,21 +36,42 @@ export default function SearchScreen() {
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SearchFilter>('all');
-  // A begépelt szóra illeszkedő kategóriák (D-048) és a kiválasztott; a Személyek szűrőnél nincs kategória.
-  const [category, setCategory] = useState<SearchCategory>();
+  // A begépelt szóra illeszkedő kategóriák (D-048) és a kiválasztottak (D-056): műfajok („és”
+  // kapcsolattal) és egy téma. A Személyek szűrőnél nincs kategória.
+  const [genres, setGenres] = useState<SearchCategory[]>([]);
+  const [theme, setTheme] = useState<SearchCategory>();
   const matches = useMemo(() => (filter === 'people' ? [] : matchCategories(query)), [query, filter]);
-  const activeCategory = filter === 'people' ? undefined : category;
-  const search = useSearch(query, filter, activeCategory);
+  const selection = useMemo<CategorySelection>(
+    () => (filter === 'people' ? noSelection : { genres, theme }),
+    [filter, genres, theme],
+  );
+  const search = useSearch(query, filter, selection);
   const { recentSearches, add, remove, clear } = useSearchStore();
+  const selectedKeys = [...selection.genres, ...(selection.theme ? [selection.theme] : [])].map(
+    (category) => category.key,
+  );
+  const selectionLabel = [...selection.genres, ...(selection.theme ? [selection.theme] : [])]
+    .map((category) => strings.search.categories[category.key as keyof typeof strings.search.categories])
+    .join(' · ');
 
-  // A szöveg módosítása (törlés is) kikapcsolja a kategóriát: újra a szöveges keresés érvényes.
+  // A szöveg módosítása (törlés is) kiüríti a kategóriákat: újra a szöveges keresés érvényes.
   const changeQuery = (text: string) => {
     setQuery(text);
-    setCategory(undefined);
+    setGenres([]);
+    setTheme(undefined);
   };
-  const pickCategory = (picked: SearchCategory | undefined) => {
-    setCategory(picked);
-    if (picked) add(query);
+  // A begépelt szóra illeszkedő chip: ugyanazt a kiválasztást kapcsolja, mint a select.
+  const toggleCategory = (picked: SearchCategory) => {
+    if (isTheme(picked)) {
+      setTheme(theme?.key === picked.key ? undefined : picked);
+    } else {
+      setGenres(
+        genres.some((genre) => genre.key === picked.key)
+          ? genres.filter((genre) => genre.key !== picked.key)
+          : [...genres, picked],
+      );
+    }
+    if (!selectedKeys.includes(picked.key)) add(query);
   };
   const pickRecent = (text: string) => {
     changeQuery(text);
@@ -90,6 +112,31 @@ export default function SearchScreen() {
   }
 
   const hasRecent = recentSearches.length > 0;
+
+  // Műfaj / Téma select (D-056): a Személyek szűrőnél nincs kategória, ezért rejtett.
+  const selects =
+    filter === 'people' ? null : (
+      <View className="flex-row gap-2">
+        <CategorySelect
+          title={strings.search.select.genre}
+          hint={strings.search.select.genreHint}
+          options={searchCategories.filter((category) => !isTheme(category))}
+          selected={genres}
+          multiple
+          onChange={setGenres}
+          isTablet={isTablet}
+        />
+        <CategorySelect
+          title={strings.search.select.theme}
+          hint={strings.search.select.themeHint}
+          options={searchCategories.filter(isTheme)}
+          selected={theme ? [theme] : []}
+          multiple={false}
+          onChange={(next) => setTheme(next[0])}
+          isTablet={isTablet}
+        />
+      </View>
+    );
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
@@ -136,23 +183,22 @@ export default function SearchScreen() {
                   <Text
                     numberOfLines={1}
                     className="max-w-full shrink font-bold text-section text-textPrimary">
-                    {strings.search.resultsFor(
-                      activeCategory
-                        ? strings.search.categories[activeCategory.key as keyof typeof strings.search.categories]
-                        : search.term,
-                    )}
+                    {strings.search.resultsFor(selectionLabel || search.term)}
                   </Text>
                 ) : null}
                 <View className="ml-auto">
                   <SearchFilterChips value={filter} onChange={setFilter} isTablet={isTablet} />
                 </View>
               </View>
+              {selects ? (
+                <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>{selects}</View>
+              ) : null}
               {matches.length > 0 ? (
                 <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>
                   <SearchCategoryChips
                     categories={matches}
-                    selectedKey={activeCategory?.key}
-                    onSelect={pickCategory}
+                    selectedKeys={selectedKeys}
+                    onToggle={toggleCategory}
                     inset={0}
                   />
                 </View>
@@ -166,8 +212,8 @@ export default function SearchScreen() {
               <View style={{ marginTop: spec.recentGap }}>
                 <SearchCategoryChips
                   categories={matches}
-                  selectedKey={activeCategory?.key}
-                  onSelect={pickCategory}
+                  selectedKeys={selectedKeys}
+                  onToggle={toggleCategory}
                   inset={spec.inset}
                 />
               </View>
@@ -190,6 +236,9 @@ export default function SearchScreen() {
               contentContainerStyle={{ paddingHorizontal: spec.inset }}>
               <SearchFilterChips value={filter} onChange={setFilter} isTablet={isTablet} />
             </ScrollView>
+            {selects ? (
+              <View style={{ marginTop: spec.selectTop, paddingHorizontal: spec.inset }}>{selects}</View>
+            ) : null}
             <View style={{ marginTop: spec.resultsTop, paddingHorizontal: spec.inset }}>{results}</View>
           </>
         )}

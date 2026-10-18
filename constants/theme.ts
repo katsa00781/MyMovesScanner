@@ -135,11 +135,11 @@ export const kidsLayout = {
 export const searchLayout = {
   phone: {
     inset: 21, fieldGap: 19, fieldHeight: 46, fieldRadius: 12,
-    recentGap: 23, chipsGap: 17, filterGap: 16, resultsTop: 17,
+    recentGap: 23, chipsGap: 17, filterGap: 16, resultsTop: 17, selectTop: 12,
   },
   tablet: {
     inset: 34, fieldGap: 29, fieldHeight: 51, fieldRadius: 14,
-    recentGap: 23, chipsGap: 17, filterGap: 16, resultsTop: 17,
+    recentGap: 23, chipsGap: 17, filterGap: 16, resultsTop: 17, selectTop: 12,
     twoColumnsMin: 830, columnsTop: 22, recentWidth: 282, columnGap: 38, recentListTop: 8,
     columnResultsTop: 11,
   },
