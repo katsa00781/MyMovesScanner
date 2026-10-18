@@ -14,7 +14,9 @@ async function fetchTrending(type: MediaType): Promise<TrendingTitle[]> {
     sort_by: 'popularity.desc',
     watch_region: REGION,
     with_watch_monetization_types: 'flatrate|free|ads|rent|buy',
-    ...(type === 'movie' ? { region: REGION } : {}),
+    // A sorozatok között a talk show-k és a hírműsorok (Hír 10763, Talk 10767) népszerűségük miatt
+    // kiszorítanák a tényleges sorozatokat (mint a Keresésben, D-056).
+    ...(type === 'movie' ? { region: REGION } : { without_genres: '10763,10767' }),
   });
   return results
     .flatMap((item) => {

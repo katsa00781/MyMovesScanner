@@ -87,6 +87,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-18 – Főoldal: talk show-k kiszűrése a népszerű sorozatok közül (fix)
+
+**Mit:** A felhasználó kérésére a „Népszerű sorozatok Magyarországon” rail `discover/tv` hívása `without_genres=10763,10767` paramétert kap (Hír és Talk műfaj, mint a Keresésben, D-056). A hírműsorokat is kiszűri, mert ugyanazért kerülnének elő (népszerűség), és nem „sorozat” a család számára.
+**Fájlok:** hooks/useTrendingInHungary.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`; élő `mms-tmdb` hívás: szűrő nélkül a lista élén a Watch What Happens Live (Talk), szűrővel a helyére a 9. helyen A hivatal került, a többi sorrendje változatlan. A képernyőn nem néztem.
+**Nyitva maradt:** a „Népszerű filmek” rail nem kapott műfaj-szűrést (filmeknél nincs Talk / Hír műfaj). A D-059 „Nyitva maradt (2)” pontja ezzel megoldott.
+**Commit:** `fix: főoldal népszerű sorozatok talk show nélkül` (D-059)
+
 ## 2026-10-18 – Főoldal: népszerű filmek és népszerű sorozatok külön (feature)
 
 **Mit:** A felhasználó kérésére a vegyes „Népszerű Magyarországon” rail kettévált: **Népszerű filmek Magyarországon** és **Népszerű sorozatok Magyarországon**, mindkettő a sorszámos kártyákkal, top 9. A `useTrendingInHungary` típust kap (`'movie' | 'tv'`), egy `discover` hívással, népszerűség szerint; a film- és sorozatlista egyesítése és a közös rendezés megszűnt. A Főoldalon egy helyi `trendingRail` függvény rakja ki a két railt. D-059.
@@ -1032,6 +1040,7 @@ Sablon:
 **Döntés:** A D-035 vegyes „Népszerű Magyarországon” railét két rail váltja: filmek és sorozatok, külön-külön `discover` (`popularity.desc`, `watch_region=HU`, minden monetizációs típus), mindkettő top 9, sorszámos kártyákkal. A D-035 többi része (sorszám körvonal, kártyaméretek, top 9 oka) érvényes marad.
 **Miért:** a felhasználó kérése: a vegyes lista kényelmetlen, mert a film és a sorozat népszerűsége (`popularity`) különböző skálán mozog, és az egyik típus kiszoríthatja a másikat. Külön listánál nincs szükség összehasonlításra.
 **Alternatíva:** egy rail Filmek / Sorozatok váltóval – új UI elem, a designban nincs; a vegyes lista megtartása típusonkénti kvótával – továbbra is vegyes.
+**Kiegészítés (2026-10-18):** a sorozatlista `without_genres=10763,10767`-tel kizárja a Talk és Hír műfajt.
 **Visszavonható?** igen: a hook `type` paramétere és a két `trendingRail` hívás a `index.tsx`-ben.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
