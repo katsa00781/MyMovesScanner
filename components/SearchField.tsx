@@ -4,6 +4,9 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { strings } from '@/constants/strings';
 import { colors, searchLayout } from '@/constants/theme';
 
+// Az Edge Function 300 karakternél hosszabb paramétert elutasít (hiba állapot lenne a találat helyett).
+const MAX_QUERY_LENGTH = 100;
+
 // Keresőmező + „Mégse” (05, 13 design): lekerekített mező nagyítóval és törlés-gombbal. A „Mégse”
 // és a szöveg-gombok a designban 6 px-szel beljebb végződnek a margónál (ez a gomb belső kitöltése).
 export function SearchField({
@@ -34,6 +37,7 @@ export function SearchField({
           placeholderTextColor={colors.textSecondary}
           selectionColor={colors.accent}
           returnKeyType="search"
+          maxLength={MAX_QUERY_LENGTH}
           autoCorrect={false}
           autoCapitalize="none"
           clearButtonMode="never"

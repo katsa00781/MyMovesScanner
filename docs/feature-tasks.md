@@ -57,7 +57,7 @@
 ### Ship előtt
 - [ ] Fiók törlése az appból (App Store 5.1.1(v) előírás, ha az app fiókot hoz létre; a közös user-pool miatt külön döntés kell, D-051)
 - [ ] Teljes flow tesztelése iPhone-on és iPaden
-- [ ] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
+- [x] Edge case-ek: üres szolgáltatólista, nincs találat, hosszú cím, nincs net, lassú net
 - [ ] Lint + typecheck hibák nélkül
 - [ ] CodeRabbit code review az AI által írt feature-ökhöz
 - [ ] Dev utilities eltávolítása (test gombok, console.log-ok, mock data; `components/DevResetButton.tsx` + a sora az `app/_layout.tsx`-ben, D-029)
@@ -86,6 +86,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-18 – Ship előtt: edge case-ek 2/2, átvizsgálás és keresőmező hosszkorlát (fix)
+
+**Mit:** Kódszintű átvizsgálás a megadott öt esetre (app/, hooks/, a listakomponensek). **Már jól kezelt:** (1) *Üres szolgáltatólista:* a Főoldal „nincs szolgáltató” üzenetet, a Böngészés ugyanazt mutatja, az onboarding Tovább gombja letiltott 0 választásnál, a Kihagyom működik; a szolgáltatólista hibája / üressége külön hiba + „Újra” állapot. (2) *Nincs találat:* minden lista (rail, rács, Keresés, Watchlist szűrő) `EmptyState`-et mutat; részleges hibánál (egy szolgáltató / típus elbukik) a többi eredmény megmarad (`allSettled`). (3) *Hosszú cím:* a kártyák, találati sorok, hero és a cím `numberOfLines`-szal csonkolnak, a hosszabb szövegek (leírás, szolgáltatónevek, adatok) törnek. (4) *Nincs net:* minden adatlekérő hook hiba állapotot + „Újra” gombot ad, a kijelentkezett működés AsyncStorage-ból megy. (5) *Lassú net:* lásd az előző bejegyzés (D-053). **Javítva itt:** a Keresőmező `maxLength` 100 (az Edge Function a 300 karakternél hosszabb paramétert 400-zal elutasítja, ami „Hiba” állapotot adott volna találat helyett).
+**Fájlok:** components/SearchField.tsx, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`. Az átvizsgálás kód olvasás, **eszközön / szimulátoron repülőgép-móddal nem próbáltam**.
+**Nyitva maradt:** (1) **Watchlist net nélkül:** a lista a státuszokhoz címenként kér adatot, és amíg az első válasz nem érkezik, skeleton, ha mind elbukik, hiba áll a saját (helyi) lista helyett; a felhasználó offline nem látja a mentett címeit. Javítás (a lista mutatása státusz nélkül) UI-változás, jóváhagyásra. (2) **`mms.tmdb_cache` nem takarít:** a lejárt sorokat csak ugyanaz a kulcs írja felül; a 453 sorból 166 lejárt (5,6 MB), és a keresés bármilyen szövege új sort hoz. Lejárt sorok törlése az Edge Functionben vagy ütemezett törlés kell; mindkettő éles változtatás, csak kérésre. (3) Az onboarding „Tovább N szolgáltatóval” számlálója beleszámolja a már nem létező, mentett azonosítókat (szerkesztéskor, ha a TMDB listából kikerült egy szolgáltató): ritka, nem javítottam. (4) A Supabase Auth hívásokon nincs saját időkorlát (D-053).
+**Commit:** `fix: keresőmező hosszkorlát`
 
 ## 2026-10-18 – Ship előtt: edge case-ek 1/2, függvényhívások időkorlátja (fix)
 
