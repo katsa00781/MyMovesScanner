@@ -89,6 +89,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-24 – `ios` / `android` script natív buildre (config)
+
+**Mit:** A felhasználó helyi módosítása commitolva: a `package.json` `ios` és `android` scriptje `expo start --ios|--android` helyett `expo run:ios|android` (natív build és futtatás, az Xcode-os feltöltéshez illeszkedik, D-060). Az `expo start` továbbra is a `start` scriptben.
+**Fájlok:** package.json, docs/feature-tasks.md
+**Tesztelve:** nem futtattam (natív buildet indít).
+**Nyitva maradt:** –
+**Commit:** `setup: ios és android script natív buildre`
+
 ## 2026-10-18 – Splash screen: fekete háttér, az app ikonja (setup)
 
 **Mit:** A felhasználó kérésére a splash a sablon helyett az app arculatát kapja: háttér `#000000`, kép az ikon átlátszó sarkokkal (a javított ikonból, a sarkok `#0A0A0B` területéből elárasztással átlátszóvá téve, 1024×1024 RGBA), `imageWidth` 200. D-060 kiegészítése.
