@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
+import { HiddenResults } from '@/components/HiddenResults';
 import { RecentChips, RecentList } from '@/components/RecentSearches';
 import { SearchCategoryChips } from '@/components/SearchCategoryChips';
 import { SearchField } from '@/components/SearchField';
@@ -108,7 +109,7 @@ export default function SearchScreen() {
     results = Array.from({ length: SKELETON_ROWS }, (_, i) => (
       <SearchResultSkeleton key={i} isTablet={isTablet} />
     ));
-  } else if (search.empty) {
+  } else if (search.empty && search.hidden === 0) {
     results = <EmptyState message={isNarrowed(filters) ? strings.search.filters.noResults : undefined} />;
   } else {
     results = search.rows.map((row, index) => (
@@ -121,6 +122,15 @@ export default function SearchScreen() {
       />
     ));
   }
+  // Szöveges keresésnél az elérhetőség miatt rejtett címek (pl. friss, még nem nézhető film) egy
+  // koppintással előhozhatók.
+  const hiddenNote =
+    search.active && !search.error && !search.loading && search.hidden > 0 ? (
+      <HiddenResults
+        count={search.hidden}
+        onShowAll={() => setPickedFilters({ ...filters, availability: noResultFilters.availability })}
+      />
+    ) : null;
 
   const hasRecent = recentSearches.length > 0;
 
@@ -204,7 +214,10 @@ export default function SearchScreen() {
                   />
                 </View>
               ) : null}
-              <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>{results}</View>
+              <View style={{ marginTop: searchLayout.tablet.columnResultsTop }}>
+                {results}
+                {hiddenNote}
+              </View>
             </View>
           </View>
         ) : (
@@ -240,7 +253,10 @@ export default function SearchScreen() {
             {filter === 'people' ? null : (
               <View style={{ marginTop: spec.selectTop }}>{selects(spec.inset)}</View>
             )}
-            <View style={{ marginTop: spec.resultsTop, paddingHorizontal: spec.inset }}>{results}</View>
+            <View style={{ marginTop: spec.resultsTop, paddingHorizontal: spec.inset }}>
+              {results}
+              {hiddenNote}
+            </View>
           </>
         )}
       </ScrollView>

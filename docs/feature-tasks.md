@@ -89,6 +89,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-24 – Keresés: az elérhetőség miatt rejtett címek jelzése és előhozása (fix)
+
+**Mit:** A felhasználó jelezte, hogy a kereső nem találja az „Első jel” című filmet (és felvetette a Mafab adatbázist). Ok: a TMDB megtalálja („Az első jel”, *Signal One*, 2026, id 1083884), de magyar „hol nézhető” adata üres (a JustWatch 12 országban ismer ajánlatot, HU-ban egyet sem), ezért a D-057 „Magyarországon” alapszűrője elrejtette. A felhasználó választása: az alapérték marad, de szöveges keresésnél a lista alatt (üres listánál a helyén) egy sor jelzi a rejtett címek számát, a „Minden találat mutatása” gomb az Elérhetőséget „Minden találat”-ra állítja. A Mafab elvetve (D-061). D-057 kiegészítése.
+**Fájlok:** hooks/useSearch.ts (`hidden`), components/HiddenResults.tsx (új), app/(tabs)/search.tsx, constants/strings.ts, docs/feature-tasks.md
+**Tesztelve:** `npm run lint`, `npm run typecheck`; élő `mms-tmdb`: az „Első jel” / „elso jel” `search/multi` 2 találat, a szűrő logikája szerint „Az első jel” rejtett, az „Első kézből: A jellopási botrány” látszik, tehát 1 sor + „További 1 cím rejtve” jelenne meg. **Képernyőn / eszközön NEM néztem** (a sor elhelyezése iPhone-on és iPaden, a gomb koppintása).
+**Nyitva maradt:** (1) **Nincs design** a jelzéshez: az ErrorState stílusa (szürke szöveg + chip gomb); szövegek jóváhagyásra (`strings.search.filters.hidden`, `showAll`). (2) Kategória-keresésnél a TMDB `discover` szűr, ott a rejtett címek száma nem ismert, nincs jelzés. (3) Az Értékelés és Megjelenés szűrő miatt kiesett címeket nem számolja, csak az Elérhetőségét. (4) A szám a „hol nézhető” adatok érkezésével nőhet, amíg minden cím be nem töltődik.
+**Commit:** `fix: keresés jelzi és előhozza az elérhetőség miatt rejtett címeket` (D-061)
+
 ## 2026-10-24 – `ios` / `android` script natív buildre (config)
 
 **Mit:** A felhasználó helyi módosítása commitolva: a `package.json` `ios` és `android` scriptje `expo start --ios|--android` helyett `expo run:ios|android` (natív build és futtatás, az Xcode-os feltöltéshez illeszkedik, D-060). Az `expo start` továbbra is a `start` scriptben.
@@ -1093,5 +1101,12 @@ Sablon:
 **Kiegészítés – splash (2026-10-18):** a splash háttere `#000000` (a design háttere) a sablon kék `#208AEF` helyett, a kép az app ikonja átlátszó sarkokkal (`assets/images/splash-icon.png`, 1024×1024, RGBA), `imageWidth` 200 (a sablon 76-ja az ikonnál aprónak hatott volna). A designban nincs splash, ezért ez eltérés / új elem, a felhasználó kérésére.
 **Alternatíva:** EAS Build (`eas.json`, felhőbuild, Expo fiók); a natív `ios/` verziókövetése (a prebuild utáni kézi Xcode-módosítások megmaradnának, de a konfiguráció két helyen élne).
 **Visszavonható?** igen: `eas.json` bármikor hozzáadható, a bundle ID viszont az App Store Connecttel egyezik, feltöltés után nem módosítható.
+
+## D-061 – Keresés: rejtett címek jelzése; Mafab nem adatforrás
+**Dátum:** 2026-10-24
+**Döntés:** (1) A D-057 „Magyarországon” alapértéke marad, de szöveges keresésnél az Elérhetőség miatt rejtett címek számát a lista alja jelzi, és egy gomb „Minden találat”-ra vált. (2) A Mafab nem lesz adatforrás.
+**Miért:** (1) Pontos címre keresve a friss, mozis vagy JustWatch-adat nélküli címek (pl. „Az első jel”) eltűntek, és a felhasználó azt hitte, nincs meg; a jelzéssel a szűrő haszna megmarad, de semmi nem tűnik el nyom nélkül. (2) Tudomásom szerint a Mafabnak nincs nyilvános API-ja: a lekaparás ToS-kockázat és törékeny (mint a JustWatch, D-005), második külső forrás lenne az `mms-tmdb` whitelisten kívül, és a hibát nem okozta: a cím a TMDB-ben megvan, csak a magyar ajánlat hiányzik.
+**Alternatíva:** szöveges keresésnél alapból „Minden találat” (visszahozza a nem nézhető címeket, a D-057 észrevétel ellen); mindenhol „Minden találat” (a kategóriákban kb. 70% zaj); Mafab lekaparás (lásd fent).
+**Visszavonható?** igen: a `HiddenResults` sor kivehető a `app/(tabs)/search.tsx`-ből.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

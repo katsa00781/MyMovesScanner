@@ -198,9 +198,11 @@ export function useSearch(
   // Elérhetőség szerinti szűrés csak szöveges keresésnél: addig, amíg egy cím magyar „hol nézhető”
   // adata nem érkezett meg, a sora rejtett (`pending`), hogy ne tűnjön el utólag.
   const needsRegion = !categories && filters.availability !== 'all';
-  const { rows, pending } = useMemo(() => {
+  // A `hidden` az elérhetőség miatt rejtett címek száma: a képernyő jelzi, és egy koppintással mutatja.
+  const { rows, pending, hidden } = useMemo(() => {
     const list: SearchRow[] = [];
     let waiting = false;
+    let skipped = 0;
     for (const result of candidates) {
       const found = info[result.key];
       if (result.type === 'person') {
@@ -219,9 +221,11 @@ export function useSearch(
           onMyServices: isOnMyServices(offers),
           chips: pickSearchChips(offers),
         });
+      } else {
+        skipped += 1;
       }
     }
-    return { rows: list, pending: waiting };
+    return { rows: list, pending: waiting, hidden: skipped };
   }, [candidates, info, needsRegion, filters, selectedProviderIds]);
 
   return {
@@ -230,6 +234,8 @@ export function useSearch(
     /** A késleltetett keresett szöveg (a „Találatok” fejléchez). */
     term,
     rows,
+    /** Szöveges keresésnél az Elérhetőség szűrő miatt rejtett címek száma. */
+    hidden,
     /** Az első találatokra (vagy a szűréshez kellő adatra) vár: nincs mit mutatni. */
     loading: active && ((!settled && results.length === 0) || (settled && rows.length === 0 && pending)),
     error: active && settled && state.error,

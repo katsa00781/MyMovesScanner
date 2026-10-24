@@ -150,6 +150,8 @@ export const strings = {
         years: (n: number) => `Elmúlt ${n} év`,
       },
       noResults: 'Nincs találat ezekkel a szűrőkkel.',
+      hidden: (n: number) => `További ${n} cím rejtve: az Elérhetőség szűrőnek nem felel meg.`,
+      showAll: 'Minden találat mutatása',
     },
     // Kategóriák (data/searchCategories.ts): a chip felirata és a „Találatok” fejléc.
     categories: {
