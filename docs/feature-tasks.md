@@ -90,6 +90,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-30 – Expo SDK 57 patch frissítések (config)
+
+**Mit:** `expo` 57.0.29 → 57.0.31, `expo-router` 57.0.27 → 57.0.29, `@expo/ui` 57.0.24 → 57.0.26 (`npx expo install`, az `expo-doctor` által jelzett eltérések).
+**Fájlok:** package.json, package-lock.json, docs/feature-tasks.md
+**Tesztelve:** `expo-doctor` 21/21; `npm run lint`, `npm run typecheck` hibamentes; `prebuild` + `pod install` + Release `xcodebuild` (generic iOS, aláírás nélkül): BUILD SUCCEEDED, a `withSceneLifecycle` plugin (D-062) az új verzióval is érvényesül. Eszközön / szimulátoron az appot nem futtattam.
+**Nyitva maradt:** az `npm audit` 12 sérülékenységet jelez (5 low, 1 moderate, 6 high); nem nyúltam hozzá, a tranzitív függőségeket az Expo SDK kezeli. A build szám már 3, ez az első feltöltés vele.
+**Commit:** `setup: expo, expo-router és @expo/ui patch frissítés`
+
 ## 2026-10-30 – Build szám 3-ra (config)
 
 **Mit:** Az `ios.buildNumber` 2 → 3, mert az iOS 27 javítás (D-062) új TestFlight buildet igényel, és az App Store Connect azonos verzióhoz nem fogad el azonos build számot.
