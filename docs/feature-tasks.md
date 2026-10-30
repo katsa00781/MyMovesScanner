@@ -90,6 +90,14 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-10-30 – Build szám 3-ra (config)
+
+**Mit:** Az `ios.buildNumber` 2 → 3, mert az iOS 27 javítás (D-062) új TestFlight buildet igényel, és az App Store Connect azonos verzióhoz nem fogad el azonos build számot.
+**Fájlok:** app.json, docs/feature-tasks.md
+**Tesztelve:** nem futtattam (csak szám).
+**Nyitva maradt:** a `prebuild` újragenerálja az `ios/`-t az új számmal; Archive + feltöltés a felhasználó lépése.
+**Commit:** `setup: build szám 3-ra az iOS 27 javításhoz`
+
 ## 2026-10-30 – iOS 27: az app indításkor bezárul (fix)
 
 **Mit:** A felhasználó jelezte: iOS 27-re frissített iPaden a TestFlight build megnyitás után azonnal bezárul. Crash log nem volt. Ok: az iOS 27 indításkor elhasal, ha az app nem a scene-alapú életciklust használja; az SDK 57 prebuild sablon (`expo-template-bare-minimum@57.0.33`) még a régi, ablak-alapú `AppDelegate`-et generálja (nincs `UIApplicationSceneManifest`, nincs `SceneDelegate`). Az SDK 57 `expo` csomagja viszont már tartalmazza az `ExpoAppSceneDelegate`-et („Required by the iOS 27, which asserts at launch unless the app adopts the scene-based life cycle”), az SDK 58 sablon pedig használja. Új helyi config plugin (`plugins/withSceneLifecycle.js`, az `app.json` `plugins` listájában) az SDK 58 sablon szerint illeszt: `SceneDelegate.swift` (+ Xcode projekt), `UIApplicationSceneManifest` az Info.plist-be, az `AppDelegate` `ExpoReactNativeFactoryProvider`-t valósít meg, és nem hoz létre ablakot. D-062.
