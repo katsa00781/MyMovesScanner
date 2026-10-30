@@ -65,6 +65,7 @@
 - [x] Ellenőrzés: familyBudget táblák érintetlenek, csak `mms` séma változott
 - [x] iOS build konfig: bundle ID, buildNumber, exportálási nyilatkozat, `ios.icon` az `icon.png`-re (D-060)
 - [x] Ikon javítása: az `icon.png`-be kockás háttér volt beleégetve; a sarkok feketére festve, 1024×1024, alfa nélkül (D-060)
+- [x] iOS 27: scene-alapú életciklus (az app TestFlightról indításkor bezárult), helyi config plugin (D-062)
 - [ ] Xcode Archive + TestFlight a családi eszközökre (`npx expo prebuild --platform ios`, Xcode-ból feltöltve; EAS nincs, D-060)
 
 ---
@@ -88,6 +89,14 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-10-30 – iOS 27: az app indításkor bezárul (fix)
+
+**Mit:** A felhasználó jelezte: iOS 27-re frissített iPaden a TestFlight build megnyitás után azonnal bezárul. Crash log nem volt. Ok: az iOS 27 indításkor elhasal, ha az app nem a scene-alapú életciklust használja; az SDK 57 prebuild sablon (`expo-template-bare-minimum@57.0.33`) még a régi, ablak-alapú `AppDelegate`-et generálja (nincs `UIApplicationSceneManifest`, nincs `SceneDelegate`). Az SDK 57 `expo` csomagja viszont már tartalmazza az `ExpoAppSceneDelegate`-et („Required by the iOS 27, which asserts at launch unless the app adopts the scene-based life cycle”), az SDK 58 sablon pedig használja. Új helyi config plugin (`plugins/withSceneLifecycle.js`, az `app.json` `plugins` listájában) az SDK 58 sablon szerint illeszt: `SceneDelegate.swift` (+ Xcode projekt), `UIApplicationSceneManifest` az Info.plist-be, az `AppDelegate` `ExpoReactNativeFactoryProvider`-t valósít meg, és nem hoz létre ablakot. D-062.
+**Fájlok:** plugins/withSceneLifecycle.js (új), app.json, docs/feature-tasks.md
+**Tesztelve:** `npx expo prebuild --platform ios --no-install`: a SceneDelegate.swift, az Info.plist manifest és a pbxproj bejegyzés létrejött, az AppDelegate módosítva; `pod install` + Release `xcodebuild` (generic iOS, aláírás nélkül): BUILD SUCCEEDED; `npm run lint`, `npm run typecheck` hibamentes. iOS 27-es eszközön NEM próbáltam (nincs iOS 27 szimulátor, az iPad nem volt rákötve): **az igazi próba az új TestFlight build az iPaden.**
+**Nyitva maradt:** (1) Az okot a crash log hiányában a forrás („asserts at launch”) alapján állapítottam meg, nem a felhasználó eszközének logjából; ha az új build is bezárul, kell a crash log. (2) Új TestFlight build szükséges (a `prebuild` az `ios/`-t újragenerálta, `pod install` kell, ha újra prebuildelsz). (3) Az `expo` 57.0.29 → 57.0.31, `expo-router` 57.0.27 → 57.0.29, `@expo/ui` 57.0.24 → 57.0.26 patch frissítés elérhető (`expo-doctor`), nem nyúltam hozzá.
+**Commit:** `fix: scene-alapú életciklus iOS 27-hez (helyi config plugin)` (D-062)
 
 ## 2026-10-24 – Keresés: az elérhetőség miatt rejtett címek jelzése és előhozása (fix)
 
@@ -1108,5 +1117,12 @@ Sablon:
 **Miért:** (1) Pontos címre keresve a friss, mozis vagy JustWatch-adat nélküli címek (pl. „Az első jel”) eltűntek, és a felhasználó azt hitte, nincs meg; a jelzéssel a szűrő haszna megmarad, de semmi nem tűnik el nyom nélkül. (2) Tudomásom szerint a Mafabnak nincs nyilvános API-ja: a lekaparás ToS-kockázat és törékeny (mint a JustWatch, D-005), második külső forrás lenne az `mms-tmdb` whitelisten kívül, és a hibát nem okozta: a cím a TMDB-ben megvan, csak a magyar ajánlat hiányzik.
 **Alternatíva:** szöveges keresésnél alapból „Minden találat” (visszahozza a nem nézhető címeket, a D-057 észrevétel ellen); mindenhol „Minden találat” (a kategóriákban kb. 70% zaj); Mafab lekaparás (lásd fent).
 **Visszavonható?** igen: a `HiddenResults` sor kivehető a `app/(tabs)/search.tsx`-ből.
+
+## D-062 – iOS 27: scene-alapú életciklus helyi config pluginnal
+**Dátum:** 2026-10-30
+**Döntés:** Az `ios/` natív kód az SDK 58 `expo-template-bare-minimum` mintájára scene-alapú életciklust kap, egy helyi config pluginnal (`plugins/withSceneLifecycle.js`): `SceneDelegate` osztály, `UIApplicationSceneManifest`, az `AppDelegate` `ExpoReactNativeFactoryProvider`-t valósít meg és nem hoz létre ablakot. Az `AppDelegate` linking (`open url`, `continue userActivity`) felülírásai maradnak: az `expo` `SceneEventForwarder`-e az SDK 57-es AppDelegate-eket felismeri, és nem értesíti kétszer az `RCTLinkingManager`-t.
+**Miért:** az iOS 27 a scene-életciklus nélküli appot indításkor leállítja (TestFlightról megnyitva azonnal bezárul), az SDK 57 prebuild sablon pedig még nem generálja. Mivel az `ios/` nem verziókövetett (D-060), a kézi szerkesztés a következő `prebuild`-nél elveszne; a plugin az `app.json`-nal együtt verziókövetett, így a konfiguráció egy helyen marad. A plugin hibát dob, ha az `AppDelegate` szerkezete eltér a várttól, hogy ne maradjon csendben javítatlan.
+**Alternatíva:** (1) SDK 58-ra frissítés (a sablon már tartalmazza), de nagyobb, kockázatosabb lépés egy hibajavításért, külön döntés; (2) kézi szerkesztés az `ios/`-ban (nem verziókövetett, elveszik).
+**Visszavonható?** igen: a plugin kivehető az `app.json`-ból és a `plugins/` mappa törölhető; SDK 58-ra váltáskor kötelezően (a sablon már generálja, a plugin duplázná).
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
